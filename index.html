@@ -75,7 +75,7 @@
     <div class="flex flex-col items-center">
         <div class="paper-pad flex flex-col h-[380px]">
             
-            <!-- 깔끔한 상단 헤더 (그라데이션 및 설정 버튼 제거) -->
+            <!-- 깔끔한 상단 헤더 -->
             <div class="px-3 py-2 border-b border-gray-300 flex justify-between items-center bg-[#f5f2e6]">
                 <h1 class="text-xs font-bold text-gray-800 tracking-wider">TODO</h1>
             </div>
@@ -96,7 +96,7 @@
                 <!-- 동적 렌더링 -->
             </div>
 
-            <!-- 하단 입력폼 (+ 버튼 없음, 엔터키 입력) -->
+            <!-- 하단 입력폼 -->
             <form id="todo-form" onsubmit="addTask(event)" class="px-2 py-2 border-t border-gray-300 bg-[#f5f2e6]">
                 <input type="text" id="task-input" placeholder="할 일 입력 후 엔터..." required
                     class="w-full bg-transparent text-xs text-gray-800 placeholder-gray-400 focus:outline-none border-b border-dashed border-gray-400 pb-1">
@@ -106,9 +106,7 @@
     </div>
 
     <script>
-        // ==========================================
-        // 수파베이스 설정 (여기에 직접 입력하세요)
-        // ==========================================
+        // 수파베이스 설정 정보 입력
         const SUPABASE_URL = 'https://euunswnlwnhscnklnevh.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1dW5zd25sd25oc2Nua2xuZXZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2MzcyMDcsImV4cCI6MjEwNzIxMzIwN30.x_V-Wb3aQWc2ZwSvb8r3Ge_24pYbJU4olClDp59pNII
 ';
@@ -117,7 +115,6 @@
         let tasks = [];
         let pendingDeleteId = null;
 
-        // 초기화
         window.onload = function() {
             try {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -127,7 +124,6 @@
             }
         };
 
-        // 오늘 날짜 구하기 (YYYY-MM-DD, 시간은 데이터에만 저장하고 UI에 미표시)
         function getTodayDateString() {
             const now = new Date();
             const year = now.getFullYear();
@@ -136,7 +132,6 @@
             return `${year}-${month}-${day}`;
         }
 
-        // 데이터 불러오기 (나중에 기록한 게 아래로 오게)
         async function fetchTasks() {
             if (!supabaseClient) return;
             try {
@@ -153,7 +148,6 @@
             }
         }
 
-        // 엔터 입력 시 추가 (+ 버튼 없음)
         async function addTask(e) {
             e.preventDefault();
             const inputEl = document.getElementById('task-input');
@@ -163,7 +157,7 @@
             const today = getTodayDateString();
             const newTodo = {
                 text: textContent,
-                check: false,
+                is_checked: false,
                 inputdate: today,
                 checkdate: null
             };
@@ -183,17 +177,16 @@
                     renderTasks();
                 } catch (err) {
                     console.error('Insert error:', err);
-                    alert('저장 실패. Supabase RLS 정책 또는 테이블 설정을 확인하세요.');
+                    alert('저장 실패: ' + err.message);
                 }
             }
         }
 
-        // 체크 상태 변경 (완료 전: 기록일 / 완료 후: 완료일)
         async function toggleTask(id) {
             const task = tasks.find(t => t.id == id);
             if (!task) return;
 
-            const newCheck = !task.check;
+            const newCheck = !task.is_checked;
             const today = getTodayDateString();
             const newCheckDate = newCheck ? today : null;
 
@@ -202,13 +195,13 @@
                     const { error } = await supabaseClient
                         .from('todos')
                         .update({ 
-                            check: newCheck, 
+                            is_checked: newCheck, 
                             checkdate: newCheckDate 
                         })
                         .eq('id', id);
 
                     if (error) throw error;
-                    task.check = newCheck;
+                    task.is_checked = newCheck;
                     task.checkdate = newCheckDate;
                     renderTasks();
                 } catch (err) {
@@ -217,7 +210,6 @@
             }
         }
 
-        // 삭제 확인 모달 호출
         function promptDelete(id, event) {
             event.stopPropagation();
             pendingDeleteId = id;
@@ -232,7 +224,6 @@
             document.getElementById('delete-modal').classList.add('hidden');
         }
 
-        // 삭제 실행
         async function executeDelete(id) {
             closeDeleteModal();
             if (supabaseClient) {
@@ -251,7 +242,6 @@
             }
         }
 
-        // 화면 렌더링 (한 줄 표시, 긴 글자 ..., x 버튼)
         function renderTasks() {
             const listEl = document.getElementById('todo-list');
             listEl.innerHTML = '';
@@ -263,16 +253,15 @@
 
             tasks.forEach(task => {
                 const itemDiv = document.createElement('div');
-                itemDiv.className = `flex items-center justify-between py-1 border-b border-gray-200/60 group ${task.check ? 'opacity-60' : ''}`;
+                itemDiv.className = `flex items-center justify-between py-1 border-b border-gray-200/60 group ${task.is_checked ? 'opacity-60' : ''}`;
                 
-                // 완료 전엔 기록일, 완료 후엔 완료일 노출
-                const displayDate = task.check ? (task.checkdate || task.inputdate) : task.inputdate;
+                const displayDate = task.is_checked ? (task.checkdate || task.inputdate) : task.inputdate;
 
                 itemDiv.innerHTML = `
                     <div class="flex items-center space-x-1.5 overflow-hidden pr-1 flex-1">
-                        <input type="checkbox" class="paper-checkbox" ${task.check ? 'checked' : ''} onchange="toggleTask('${task.id}')">
+                        <input type="checkbox" class="paper-checkbox" ${task.is_checked ? 'checked' : ''} onchange="toggleTask('${task.id}')">
                         <div class="flex items-center justify-between overflow-hidden flex-1 text-[11px]">
-                            <span class="truncate text-gray-800 ${task.check ? 'line-through text-gray-500' : ''}" title="${escapeHtml(task.text)}">
+                            <span class="truncate text-gray-800 ${task.is_checked ? 'line-through text-gray-500' : ''}" title="${escapeHtml(task.text)}">
                                 ${escapeHtml(task.text)}
                             </span>
                             <span class="text-[9px] text-gray-400 ml-1 whitespace-nowrap">
