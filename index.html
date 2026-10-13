@@ -1,586 +1,249 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIDI</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase JS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: #1e293b;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        .paper-pad {
-            width: 100vw;
-            height: 100vh;
-            max-width: 720px;
-            max-height: 480px;
-            background-color: #fbf9f1;
-            background-image: repeating-linear-gradient(#fbf9f1, #fbf9f1 27px, #e8e3d5 28px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            border-radius: 0;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid #dcd6c5;
-        }
-
-        @media (min-width: 720px) {
-            .paper-pad {
-                border-radius: 8px;
-            }
-        }
-
-        .paper-checkbox {
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border: 1.5px solid #334155;
-            border-radius: 3px;
-            background: white;
-            cursor: pointer;
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .paper-checkbox:checked {
-            background-color: #334155;
-            border-color: #1e293b;
-        }
-
-        .paper-checkbox:checked::after {
-            content: '✓';
-            position: absolute;
-            font-size: 11px;
-            color: white;
-            top: -1px;
-            left: 2px;
-        }
-
-        ::-webkit-scrollbar {
-            width: 5px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #d4cfc4;
-            border-radius: 2px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>디디 다이어리</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{--ink:#111;--bg:#fff;--yel:#FFD60A;--pink:#FF4D8D;--blue:#2D6BFF;--gray:#E4E4E4}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;font-size:16px}
+body{min-width:340px;max-width:960px;margin:0 auto;padding:12px}
+button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{border:2px solid var(--ink);border-radius:6px;padding:8px;background:#fff;min-width:0;width:100%}
+textarea{min-height:80px;max-height:200px;resize:vertical}
+button{cursor:pointer;border:2px solid var(--ink);border-radius:6px;background:var(--yel);padding:8px 14px;font-weight:700}
+button.plain{background:#fff}
+button.red{background:var(--pink)}
+.hide{display:none!important}
+.row{display:flex;gap:8px;align-items:center}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tabs button{flex:1;background:#fff;padding:12px}
+.tabs button.on{background:var(--blue);color:#fff}
+.wrap{max-width:640px;margin:0 auto}
+.add{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.add .full{grid-column:1/-1}
+h3{margin:18px 0 6px;font-size:15px}
+.todo{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:2px solid var(--gray);cursor:pointer}
+.todo input[type=checkbox]{width:24px;height:24px;flex:none;accent-color:var(--blue)}
+.todo .t{flex:1;min-width:0;word-break:break-word}
+.todo.done .t{text-decoration:line-through;color:#888}
+.dt{font-size:13px;flex:none}.dt.late{color:var(--pink);font-weight:700}
+.tag{font-size:12px;padding:1px 8px;border-radius:99px;flex:none;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{color:#888;padding:14px 0}
+.cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cal-head b{font-size:20px}
+.scroll{overflow-x:auto}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(44px,1fr));gap:4px;min-width:340px}
+.wd{text-align:center;font-weight:700;font-size:13px}
+.cell{min-height:88px;max-height:170px;overflow-y:auto;border:2px solid var(--ink);border-radius:6px;padding:3px;cursor:pointer}
+.cell.today{background:#FFF6B8;border-width:3px}
+.cell.blank{border:0;cursor:default}
+.dn{font-size:12px;font-weight:700}
+.st{margin-top:3px;padding:2px 5px;min-height:20px;font-size:12px;line-height:16px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st.done{opacity:.45;text-decoration:line-through}
+dialog{width:min(92vw,420px);min-width:280px;border:3px solid var(--ink);border-radius:10px;padding:16px}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog label{display:block;font-size:13px;font-weight:700;margin:10px 0 4px}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:6px;font-size:14px}
+</style>
 </head>
-<body class="antialiased">
+<body>
 
-    <div class="paper-pad flex flex-col w-full h-full">
-        
-        <!-- 상단 헤더 (탭 및 로그아웃) -->
-        <div class="px-5 py-3 border-b border-gray-300 flex justify-between items-center bg-[#f5f2e6]">
-            <div class="flex items-center space-x-4">
-                <h1 class="text-sm font-bold text-gray-800 tracking-wider">DIDI</h1>
-                <div id="tab-nav" class="space-x-3 text-xs hidden">
-                    <button onclick="switchTab('todo')" id="btn-tab-todo" class="font-bold text-gray-900 border-b-2 border-gray-800 pb-0.5">TODO</button>
-                    <button onclick="switchTab('index')" id="btn-tab-index" class="text-gray-400 hover:text-gray-700 pb-0.5">INDEX</button>
-                    <button onclick="switchTab('calendar')" id="btn-tab-calendar" class="text-gray-400 hover:text-gray-700 pb-0.5">CALENDAR</button>
-                </div>
-            </div>
-            <div id="header-actions"></div>
-        </div>
+<script>
+const SUPABASE_URL = 'https://rtvvajhsnwkkrmncyfbs.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0dnZhamhzbndra3JtbmN5ZmJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0NjkwMTEsImV4cCI6MjEwNzA0NTAxMX0.O2aLLeazv_FhUhbVAkp4vz3pw8GPb_683dUu7Et1Cwk';
+</script>
 
-        <!-- 로그인 / 회원가입 뷰 -->
-        <div id="auth-view" class="flex-1 flex flex-col justify-center px-8 py-4 text-sm">
-            <div class="text-center font-bold text-gray-800 mb-4" id="auth-mode-title">로그인</div>
-            <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-3 max-w-sm mx-auto w-full">
-                <input type="email" id="auth-email" placeholder="이메일" required
-                    class="w-full bg-white/80 border border-gray-300 rounded px-3 py-2 text-xs text-gray-800 focus:outline-none focus:border-gray-500">
-                <input type="password" id="auth-password" placeholder="비밀번호 (6자 이상)" required minlength="6"
-                    class="w-full bg-white/80 border border-gray-300 rounded px-3 py-2 text-xs text-gray-800 focus:outline-none focus:border-gray-500">
-                <button type="submit" id="auth-submit-btn" class="w-full bg-gray-800 text-white rounded py-2 font-medium hover:bg-gray-700 transition text-xs">로그인</button>
-            </form>
-            <div class="text-center mt-4">
-                <button type="button" onclick="toggleAuthMode()" class="text-xs text-gray-500 hover:underline" id="auth-switch-text">
-                    계정이 없으신가요? 회원가입
-                </button>
-            </div>
-            <div id="auth-error" class="text-red-600 text-xs text-center mt-3 hidden"></div>
-        </div>
+<section id="auth" class="wrap hide">
+  <h2>디디 다이어리</h2>
+  <div style="display:grid;gap:8px">
+    <input id="em" type="email" placeholder="이메일" autocomplete="email">
+    <input id="pw" type="password" placeholder="비밀번호 (6자 이상)" autocomplete="current-password">
+    <div class="row"><button id="login" style="flex:1">로그인</button><button id="signup" class="plain" style="flex:1">가입</button></div>
+  </div>
+</section>
 
-        <!-- 메인 앱 컨테이너 (로그인 후 표시) -->
-        <div id="app-main-view" class="flex-1 flex flex-col overflow-hidden hidden">
-            
-            <!-- 1. TODO (오늘의 기록) 탭 -->
-            <div id="view-todo" class="flex-1 flex flex-col overflow-hidden">
-                <div id="todo-list" class="flex-1 overflow-y-auto px-4 py-2 space-y-2 text-xs">
-                    <!-- 동적 렌더링 -->
-                </div>
+<main id="app" class="hide">
+  <div class="tabs">
+    <button data-t="todo" class="on">할 일</button>
+    <button data-t="cal">캘린더</button>
+    <button id="logout" class="plain" style="flex:none;padding:12px 10px" title="로그아웃">나가기</button>
+  </div>
 
-                <form id="todo-form" onsubmit="addTodoLog(event)" class="px-4 py-3 border-t border-gray-300 bg-[#f5f2e6] flex space-x-2 items-center">
-                    <select id="log-index-select" required class="bg-white border border-gray-300 rounded px-2 py-1 text-xs text-gray-700 focus:outline-none">
-                        <!-- 카테고리 옵션 동적 생성 -->
-                    </select>
-                    <input type="text" id="log-text-input" placeholder="오늘의 기록/할 일 입력..." required
-                        class="flex-1 bg-transparent text-xs text-gray-800 placeholder-gray-400 focus:outline-none border-b border-dashed border-gray-400 pb-1">
-                </form>
-            </div>
-
-            <!-- 2. INDEX (카테고리 관리) 탭 -->
-            <div id="view-index" class="flex-1 flex flex-col overflow-hidden hidden">
-                <div id="index-list" class="flex-1 overflow-y-auto px-4 py-3 space-y-2 text-xs">
-                    <!-- 카테고리 목록 동적 생성 -->
-                </div>
-                <form id="index-form" onsubmit="addIndexCategory(event)" class="px-4 py-3 border-t border-gray-300 bg-[#f5f2e6]">
-                    <input type="text" id="index-name-input" placeholder="새로운 카테고리 (예: 운동, 공부)..." required
-                        class="w-full bg-transparent text-xs text-gray-800 placeholder-gray-400 focus:outline-none border-b border-dashed border-gray-400 pb-1">
-                </form>
-            </div>
-
-            <!-- 3. CALENDAR 탭 -->
-            <div id="view-calendar" class="flex-1 flex flex-col overflow-y-auto p-4 hidden">
-                <div class="flex justify-between items-center mb-3">
-                    <button onclick="changeMonth(-1)" class="text-xs px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"><i class="fa-solid fa-chevron-left"></i></button>
-                    <h2 id="calendar-title" class="text-xs font-bold text-gray-800">2026년 6월</h2>
-                    <button onclick="changeMonth(1)" class="text-xs px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"><i class="fa-solid fa-chevron-right"></i></button>
-                </div>
-                <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-gray-600 mb-1 sticky top-0 bg-[#fbf9f1] py-1 z-10">
-                    <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
-                </div>
-                <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-xs">
-                    <!-- 달력 날짜 및 스티커 생성 -->
-                </div>
-            </div>
-
-        </div>
-
+  <section id="tab-todo" class="wrap">
+    <div class="add">
+      <input id="nt" class="full" placeholder="할 일을 적고 Enter">
+      <input id="nd" type="date">
+      <select id="ni"></select>
     </div>
+    <h3>할 일</h3><div id="open"></div>
+    <h3>완료</h3><div id="closed"></div>
+  </section>
 
-    <script>
-        const SUPABASE_URL = 'https://rtvvajhsnwkkrmncyfbs.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0dnZhamhzbndra3JtbmN5ZmJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0NjkwMTEsImV4cCI6MjEwNzA0NTAxMX0.O2aLLeazv_FhUhbVAkp4vz3pw8GPb_683dUu7Et1Cwk';
+  <section id="tab-cal" class="hide">
+    <div class="cal-head">
+      <button id="mp" class="plain" aria-label="이전 달">‹</button>
+      <div class="row"><b id="ml"></b><button id="mt" class="plain">오늘</button></div>
+      <button id="mn" class="plain" aria-label="다음 달">›</button>
+    </div>
+    <div class="scroll"><div class="cal" id="cal"></div></div>
+  </section>
+</main>
 
-        let supabaseClient = null;
-        let currentUser = null;
-        let indexCategories = []; // 카테고리 목록
-        let todayLogs = [];       // 오늘의 기록 목록
-        let monthLogs = [];       // 월별 기록 목록
-        let isSignUpMode = false;
-        let currentCalendarDate = new Date();
+<dialog id="dlg">
+  <div id="dtitle" style="font-weight:700;font-size:18px"></div>
+  <label for="f-t">내용</label><input id="f-t">
+  <label for="f-d">날짜</label><input id="f-d" type="date">
+  <label for="f-i">폴더</label><select id="f-i"></select>
+  <label for="f-m">메모</label><textarea id="f-m" placeholder="장소, 시간, 생각 등 자유롭게"></textarea>
+  <label id="f-cw" class="row" style="margin-top:12px"><input id="f-c" type="checkbox" style="width:22px;height:22px"> 완료</label>
+  <div class="row" style="margin-top:16px;justify-content:flex-end">
+    <button id="f-del" class="red">삭제</button>
+    <button id="f-x" class="plain">닫기</button>
+    <button id="f-ok">저장</button>
+  </div>
+</dialog>
+<div id="toast" class="hide"></div>
 
-        window.onload = async function() {
-            try {
-                if (!window.supabase) throw new Error('Supabase SDK 로드 실패');
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                
-                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-                if (sessionError) throw sessionError;
+<script>
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+const PALETTE = ['#FFD60A','#FF4D8D','#2D6BFF','#19C37D','#FF7A1A','#8B5CF6','#00C2E0'];
+const S = {user:null, logs:[], idx:[], month:new Date(), edit:null};
+const z = n => String(n).padStart(2,'0');
+const ymd = d => d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(m){const t=$('toast');t.textContent=m;t.classList.remove('hide');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.add('hide'),2400)}
+function fail(e){if(e){toast('오류: '+e.message);return true}return false}
+function fg(hex){const n=parseInt(hex.slice(1),16),l=(0.299*(n>>16)+0.587*((n>>8)&255)+0.114*(n&255))/255;return l>0.6?'#111':'#fff'}
+const color = id => (S.idx.find(i=>i.id===id)||{}).color || '#E4E4E4';
+const folder = id => S.idx.find(i=>i.id===id);
 
-                if (session && session.user) {
-                    currentUser = session.user;
-                    showAppView();
-                } else {
-                    showAuthView();
-                }
+/* 인증 */
+async function boot(){
+  const {data:{session}} = await sb.auth.getSession();
+  S.user = session?.user || null;
+  $('auth').classList.toggle('hide', !!S.user);
+  $('app').classList.toggle('hide', !S.user);
+  if(S.user){ $('nd').value=ymd(new Date()); await loadAll(); }
+}
+$('login').onclick = async()=>{const {error}=await sb.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value}); if(!fail(error))boot()};
+$('signup').onclick = async()=>{const {error}=await sb.auth.signUp({email:$('em').value.trim(),password:$('pw').value}); if(!fail(error)){toast('가입 완료. 메일 인증을 켰다면 메일을 확인하세요');boot()}};
+$('logout').onclick = async()=>{await sb.auth.signOut(); boot()};
 
-                supabaseClient.auth.onAuthStateChange((event, session) => {
-                    if (session && session.user) {
-                        currentUser = session.user;
-                        showAppView();
-                    } else {
-                        currentUser = null;
-                        showAuthView();
-                    }
-                });
-            } catch (e) {
-                console.error('Supabase init error:', e);
-                showAuthView();
-            }
-        };
+/* 데이터 */
+async function loadAll(){
+  const [a,b] = await Promise.all([
+    sb.from('didi_index').select('*').eq('is_archived',false).order('sort_order').order('created_at'),
+    sb.from('didi_log').select('*').order('log_date').order('sort_order').order('created_at').limit(2000)
+  ]);
+  if(fail(a.error)||fail(b.error))return;
+  S.idx=a.data||[]; S.logs=b.data||[]; renderFolderSelects(); renderTodo(); renderCal();
+}
+function renderFolderSelects(){
+  const opts = '<option value="">폴더 없음</option>'+S.idx.map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('')+'<option value="__new">+ 새 폴더 만들기</option>';
+  for(const id of ['ni','f-i']){const v=$(id).value; $(id).innerHTML=opts; $(id).value=S.idx.some(i=>i.id===v)?v:'';}
+}
+async function newFolder(sel){
+  const name=(prompt('새 폴더 이름')||'').trim();
+  if(!name){sel.value='';return}
+  const {data,error}=await sb.from('didi_index').insert({user_id:S.user.id,name,color:PALETTE[S.idx.length%PALETTE.length],sort_order:S.idx.length}).select().single();
+  if(fail(error)){sel.value='';return}
+  S.idx.push(data); renderFolderSelects(); sel.value=data.id;
+}
+$('ni').onchange=e=>{if(e.target.value==='__new')newFolder(e.target)};
+$('f-i').onchange=e=>{if(e.target.value==='__new')newFolder(e.target)};
 
-        function showAuthView() {
-            document.getElementById('auth-view').classList.remove('hidden');
-            document.getElementById('app-main-view').classList.add('hidden');
-            document.getElementById('tab-nav').classList.add('hidden');
-            document.getElementById('header-actions').innerHTML = '';
-        }
+/* 탭 */
+document.querySelectorAll('.tabs [data-t]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tabs [data-t]').forEach(x=>x.classList.toggle('on',x===b));
+  $('tab-todo').classList.toggle('hide',b.dataset.t!=='todo');
+  $('tab-cal').classList.toggle('hide',b.dataset.t!=='cal');
+});
 
-        function showAppView() {
-            document.getElementById('auth-view').classList.add('hidden');
-            document.getElementById('app-main-view').classList.remove('hidden');
-            document.getElementById('tab-nav').classList.remove('hidden');
-            document.getElementById('header-actions').innerHTML = `
-                <button onclick="logout()" class="text-gray-500 hover:text-red-600 text-xs" title="로그아웃">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
-            `;
-            loadAppData();
-        }
+/* 할 일 */
+function todoRow(l){
+  const f=folder(l.index_id), late=!l.is_checked && l.log_date<ymd(new Date());
+  return `<div class="todo ${l.is_checked?'done':''}" data-id="${l.id}">
+    <input type="checkbox" data-c="${l.id}" ${l.is_checked?'checked':''} aria-label="완료">
+    <span class="t">${esc(l.text)}</span>
+    ${f?`<span class="tag" style="background:${f.color};color:${fg(f.color)}">${esc(f.name)}</span>`:''}
+    <span class="dt ${late?'late':''}">${l.log_date.slice(5).replace('-','/')}</span></div>`;
+}
+function renderTodo(){
+  const todos=S.logs.filter(l=>l.is_checked!==null);
+  const open=todos.filter(l=>!l.is_checked), done=todos.filter(l=>l.is_checked).sort((a,b)=>(b.done_at||'').localeCompare(a.done_at||'')).slice(0,40);
+  $('open').innerHTML=open.length?open.map(todoRow).join(''):'<div class="empty">할 일이 없어요. 위에서 추가해보세요.</div>';
+  $('closed').innerHTML=done.length?done.map(todoRow).join(''):'<div class="empty">아직 완료한 일이 없어요.</div>';
+  document.querySelectorAll('.todo').forEach(r=>r.onclick=e=>{ if(e.target.matches('input'))return; openDlg(S.logs.find(l=>l.id===r.dataset.id)); });
+  document.querySelectorAll('[data-c]').forEach(c=>c.onchange=async()=>{
+    const {error}=await sb.from('didi_log').update({is_checked:c.checked,done_at:c.checked?new Date().toISOString():null}).eq('id',c.dataset.c);
+    if(!fail(error))loadAll();
+  });
+}
+async function addTodo(){
+  const text=$('nt').value.trim(); if(!text)return;
+  const {error}=await sb.from('didi_log').insert({user_id:S.user.id,text,log_date:$('nd').value||ymd(new Date()),index_id:$('ni').value||null,is_checked:false});
+  if(!fail(error)){$('nt').value='';loadAll()}
+}
+$('nt').onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)addTodo()};
 
-        function toggleAuthMode() {
-            isSignUpMode = !isSignUpMode;
-            document.getElementById('auth-mode-title').innerText = isSignUpMode ? '회원가입' : '로그인';
-            document.getElementById('auth-submit-btn').innerText = isSignUpMode ? '가입하기' : '로그인';
-            document.getElementById('auth-switch-text').innerText = isSignUpMode ? '이미 계정이 있으신가요? 로그인' : '계정이 없으신가요? 회원가입';
-            document.getElementById('auth-error').classList.add('hidden');
-        }
+/* 캘린더 */
+function renderCal(){
+  const y=S.month.getFullYear(), m=S.month.getMonth(), first=new Date(y,m,1), days=new Date(y,m+1,0).getDate(), today=ymd(new Date());
+  $('ml').textContent=y+'년 '+(m+1)+'월';
+  let h='日月火水木金土'.split('').map((_,i)=>`<div class="wd">${'일월화수목금토'[i]}</div>`).join('')+'<div class="cell blank"></div>'.repeat(first.getDay());
+  for(let d=1;d<=days;d++){
+    const key=y+'-'+z(m+1)+'-'+z(d);
+    const items=S.logs.filter(l=>l.log_date===key).map(l=>{const c=color(l.index_id);
+      return `<div class="st ${l.is_checked?'done':''}" data-id="${l.id}" style="background:${c};color:${fg(c)}">${esc(l.text)}</div>`}).join('');
+    h+=`<div class="cell ${key===today?'today':''}" data-d="${key}"><div class="dn">${d}</div>${items}</div>`;
+  }
+  $('cal').innerHTML=h;
+  $('cal').querySelectorAll('.cell[data-d]').forEach(c=>c.onclick=e=>{
+    const st=e.target.closest('.st');
+    openDlg(st?S.logs.find(l=>l.id===st.dataset.id):null, c.dataset.d);
+  });
+}
+const mv=n=>{S.month=new Date(S.month.getFullYear(),S.month.getMonth()+n,1);renderCal()};
+$('mp').onclick=()=>mv(-1); $('mn').onclick=()=>mv(1); $('mt').onclick=()=>{S.month=new Date();renderCal()};
 
-        async function handleAuth(e) {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value;
-            const errorEl = document.getElementById('auth-error');
-            errorEl.classList.add('hidden');
+/* 팝업 */
+function openDlg(log,date){
+  S.edit=log||null;
+  $('dtitle').textContent=log?'기록 보기':'새 기록';
+  $('f-t').value=log?log.text:'';
+  $('f-d').value=log?log.log_date:(date||ymd(new Date()));
+  $('f-i').value=log?(log.index_id||''):'';
+  $('f-m').value=log?(log.meta?.memo||''):'';
+  $('f-c').checked=!!(log&&log.is_checked);
+  $('f-cw').classList.toggle('hide',!log);
+  $('f-del').classList.toggle('hide',!log);
+  $('dlg').showModal();
+  if(!log)$('f-t').focus();
+}
+$('f-x').onclick=()=>$('dlg').close();
+$('f-ok').onclick=async()=>{
+  const text=$('f-t').value.trim(); if(!text){toast('내용을 입력하세요');return}
+  const base={text,log_date:$('f-d').value||ymd(new Date()),index_id:$('f-i').value&&$('f-i').value!=='__new'?$('f-i').value:null};
+  let r;
+  if(S.edit){
+    const c=$('f-c').checked;
+    r=await sb.from('didi_log').update({...base,meta:{...(S.edit.meta||{}),memo:$('f-m').value},is_checked:c,done_at:c?(S.edit.done_at||new Date().toISOString()):null}).eq('id',S.edit.id);
+  }else{
+    r=await sb.from('didi_log').insert({...base,user_id:S.user.id,is_checked:false,meta:{memo:$('f-m').value}});
+  }
+  if(!fail(r.error)){$('dlg').close();loadAll()}
+};
+$('f-del').onclick=async()=>{
+  if(!confirm('삭제할까요?'))return;
+  const {error}=await sb.from('didi_log').delete().eq('id',S.edit.id);
+  if(!fail(error)){$('dlg').close();loadAll()}
+};
 
-            try {
-                if (isSignUpMode) {
-                    const { error } = await supabaseClient.auth.signUp({ email, password });
-                    if (error) throw error;
-                    alert('회원가입 완료!');
-                } else {
-                    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-                }
-            } catch (err) {
-                errorEl.innerText = err.message;
-                errorEl.classList.remove('hidden');
-            }
-        }
-
-        async function logout() {
-            if (supabaseClient) await supabaseClient.auth.signOut();
-        }
-
-        function getTodayDateString() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        function switchTab(tabName) {
-            const todoView = document.getElementById('view-todo');
-            const indexView = document.getElementById('view-index');
-            const calendarView = document.getElementById('view-calendar');
-            
-            const btnTodo = document.getElementById('btn-tab-todo');
-            const btnIndex = document.getElementById('btn-tab-index');
-            const btnCalendar = document.getElementById('btn-tab-calendar');
-
-            todoView.classList.add('hidden');
-            indexView.classList.add('hidden');
-            calendarView.classList.add('hidden');
-            btnTodo.className = "text-gray-400 hover:text-gray-700 pb-0.5";
-            btnIndex.className = "text-gray-400 hover:text-gray-700 pb-0.5";
-            btnCalendar.className = "text-gray-400 hover:text-gray-700 pb-0.5";
-
-            if (tabName === 'todo') {
-                todoView.classList.remove('hidden');
-                btnTodo.className = "font-bold text-gray-900 border-b-2 border-gray-800 pb-0.5";
-                loadTodayData();
-            } else if (tabName === 'index') {
-                indexView.classList.remove('hidden');
-                btnIndex.className = "font-bold text-gray-900 border-b-2 border-gray-800 pb-0.5";
-                loadIndexData();
-            } else if (tabName === 'calendar') {
-                calendarView.classList.remove('hidden');
-                btnCalendar.className = "font-bold text-gray-900 border-b-2 border-gray-800 pb-0.5";
-                loadCalendarData();
-            }
-        }
-
-        async function loadAppData() {
-            await loadIndexCategoriesCache();
-            loadTodayData();
-        }
-
-        async function loadIndexCategoriesCache() {
-            if (!supabaseClient || !currentUser) return;
-            const { data, error } = await supabaseClient
-                .from('didi_index')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .order('id', { ascending: true });
-
-            if (!error) {
-                indexCategories = data || [];
-                updateIndexSelectOptions();
-            }
-        }
-
-        function updateIndexSelectOptions() {
-            const selectEl = document.getElementById('log-index-select');
-            selectEl.innerHTML = '';
-            if (indexCategories.length === 0) {
-                selectEl.innerHTML = `<option value="">카테고리 없음</option>`;
-                return;
-            }
-            indexCategories.forEach(cat => {
-                const opt = document.createElement('option');
-                opt.value = cat.id;
-                opt.innerText = cat.name;
-                selectEl.appendChild(opt);
-            });
-        }
-
-        // --- TODO (오늘의 기록) 기능 ---
-        async function loadTodayData() {
-            await loadIndexCategoriesCache();
-            if (!supabaseClient || !currentUser) return;
-            const today = getTodayDateString();
-
-            try {
-                const { data, error } = await supabaseClient
-                    .from('didi_log')
-                    .select('*, didi_index(name)')
-                    .eq('user_id', currentUser.id)
-                    .eq('log_date', today)
-                    .order('id', { ascending: true });
-
-                if (error) throw error;
-                todayLogs = data || [];
-                renderTodoList();
-            } catch (err) {
-                console.error('Load today logs error:', err);
-            }
-        }
-
-        async function addTodoLog(e) {
-            e.preventDefault();
-            const indexId = document.getElementById('log-index-select').value;
-            const textInput = document.getElementById('log-text-input');
-            const textContent = textInput.value.trim();
-
-            if (!indexId || !textContent || !currentUser) {
-                alert('카테고리를 먼저 생성하거나 내용을 입력해주세요.');
-                return;
-            }
-
-            const newLog = {
-                user_id: currentUser.id,
-                index_id: indexId,
-                log_date: getTodayDateString(),
-                text: textContent,
-                is_checked: false
-            };
-
-            try {
-                const { error } = await supabaseClient.from('didi_log').insert([newLog]);
-                if (error) throw error;
-                textInput.value = '';
-                loadTodayData();
-            } catch (err) {
-                console.error('Add log error:', err);
-            }
-        }
-
-        async function toggleLogCheck(logId, currentStatus) {
-            try {
-                const { error } = await supabaseClient
-                    .from('didi_log')
-                    .update({ is_checked: !currentStatus })
-                    .eq('id', logId);
-
-                if (error) throw error;
-                loadTodayData();
-            } catch (err) {
-                console.error('Toggle log error:', err);
-            }
-        }
-
-        async function deleteLog(logId) {
-            try {
-                const { error } = await supabaseClient
-                    .from('didi_log')
-                    .delete()
-                    .eq('id', logId);
-
-                if (error) throw error;
-                loadTodayData();
-            } catch (err) {
-                console.error('Delete log error:', err);
-            }
-        }
-
-        function renderTodoList() {
-            const listEl = document.getElementById('todo-list');
-            listEl.innerHTML = '';
-
-            if (todayLogs.length === 0) {
-                listEl.innerHTML = `<div class="text-center text-gray-400 py-8 text-xs italic">오늘 작성된 기록이 없습니다.</div>`;
-                return;
-            }
-
-            todayLogs.forEach(log => {
-                const categoryName = log.didi_index ? log.didi_index.name : '기타';
-                const itemDiv = document.createElement('div');
-                itemDiv.className = `flex items-center justify-between py-1.5 border-b border-gray-200/60 group ${log.is_checked ? 'opacity-60' : ''}`;
-                
-                itemDiv.innerHTML = `
-                    <div class="flex items-center space-x-2 overflow-hidden pr-1 flex-1 text-xs">
-                        <input type="checkbox" class="paper-checkbox" ${log.is_checked ? 'checked' : ''} onchange="toggleLogCheck('${log.id}', ${log.is_checked})">
-                        <span class="bg-[#f3ecd8] border border-[#d6cfbe] rounded px-1.5 py-0.5 text-[10px] text-gray-700 font-medium whitespace-nowrap">${escapeHtml(categoryName)}</span>
-                        <span class="truncate text-gray-800 flex-1 ${log.is_checked ? 'line-through text-gray-500' : ''}" title="${escapeHtml(log.text)}">
-                            ${escapeHtml(log.text)}
-                        </span>
-                    </div>
-                    <button onclick="deleteLog('${log.id}')" class="text-gray-300 hover:text-red-600 text-xs opacity-0 group-hover:opacity-100 transition px-1">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                `;
-                listEl.appendChild(itemDiv);
-            });
-        }
-
-        // --- INDEX (카테고리) 관리 기능 ---
-        async function loadIndexData() {
-            await loadIndexCategoriesCache();
-            renderIndexList();
-        }
-
-        async function addIndexCategory(e) {
-            e.preventDefault();
-            const inputEl = document.getElementById('index-name-input');
-            const name = inputEl.value.trim();
-            if (!name || !currentUser) return;
-
-            try {
-                const { error } = await supabaseClient
-                    .from('didi_index')
-                    .insert([{ user_id: currentUser.id, name }]);
-
-                if (error) throw error;
-                inputEl.value = '';
-                loadIndexData();
-            } catch (err) {
-                console.error('Add index error:', err);
-            }
-        }
-
-        async function deleteIndexCategory(id) {
-            if (!confirm('이 카테고리를 삭제하시겠습니까? 연결된 기록들도 함께 삭제될 수 있습니다.')) return;
-            try {
-                const { error } = await supabaseClient
-                    .from('didi_index')
-                    .delete()
-                    .eq('id', id);
-
-                if (error) throw error;
-                loadIndexData();
-            } catch (err) {
-                console.error('Delete index error:', err);
-            }
-        }
-
-        function renderIndexList() {
-            const listEl = document.getElementById('index-list');
-            listEl.innerHTML = '';
-
-            if (indexCategories.length === 0) {
-                listEl.innerHTML = `<div class="text-center text-gray-400 py-8 text-xs italic">등록된 카테고리가 없습니다. 아래에서 추가해주세요.</div>`;
-                return;
-            }
-
-            indexCategories.forEach(cat => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = `flex items-center justify-between py-2 border-b border-gray-200/60 group`;
-                itemDiv.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <span class="w-2 h-2 rounded-full bg-slate-700"></span>
-                        <span class="font-bold text-gray-800 text-xs">${escapeHtml(cat.name)}</span>
-                    </div>
-                    <button onclick="deleteIndexCategory('${cat.id}')" class="text-gray-300 hover:text-red-600 text-xs opacity-0 group-hover:opacity-100 transition px-1">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                `;
-                listEl.appendChild(itemDiv);
-            });
-        }
-
-        // --- CALENDAR 기능 ---
-        async function loadCalendarData() {
-            if (!supabaseClient || !currentUser) return;
-
-            const year = currentCalendarDate.getFullYear();
-            const month = currentCalendarDate.getMonth();
-
-            const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-            const lastDay = new Date(year, month + 1, 0).getDate();
-            const endDate = `${year}-${String(month + 1).padStart(2, '0')}-${lastDay}`;
-
-            document.getElementById('calendar-title').innerText = `${year}년 ${month + 1}월`;
-
-            try {
-                const { data, error } = await supabaseClient
-                    .from('didi_log')
-                    .select('*, didi_index(name)')
-                    .eq('user_id', currentUser.id)
-                    .gte('log_date', startDate)
-                    .lte('log_date', endDate);
-
-                if (error) throw error;
-                monthLogs = data || [];
-                renderCalendarGrid(year, month);
-            } catch (err) {
-                console.error('Load calendar error:', err);
-            }
-        }
-
-        function changeMonth(direction) {
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
-            loadCalendarData();
-        }
-
-        function renderCalendarGrid(year, month) {
-            const gridEl = document.getElementById('calendar-grid');
-            gridEl.innerHTML = '';
-
-            const firstDayIndex = new Date(year, month, 1).getDay();
-            const totalDays = new Date(year, month + 1, 0).getDate();
-
-            for (let i = 0; i < firstDayIndex; i++) {
-                gridEl.appendChild(document.createElement('div'));
-            }
-
-            for (let day = 1; day <= totalDays; day++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const dayLogs = monthLogs.filter(l => l.log_date === dateStr);
-
-                const cellDiv = document.createElement('div');
-                cellDiv.className = `border border-gray-300/60 rounded p-1 flex flex-col items-start bg-white/40 min-h-[75px] overflow-hidden`;
-                
-                let stickersHtml = '';
-                if (dayLogs.length > 0) {
-                    dayLogs.forEach(log => {
-                        const catName = log.didi_index ? log.didi_index.name : '기타';
-                        const opacityClass = log.is_checked ? 'opacity-90' : 'opacity-40';
-                        const checkMark = log.is_checked ? '✓ ' : '';
-                        stickersHtml += `<div class="w-full bg-[#f3ecd8] border border-[#d6cfbe] rounded px-1 py-0.5 text-[9px] text-gray-800 truncate mt-0.5 ${opacityClass}" title="[${catName}] ${escapeHtml(log.text)}">${checkMark}[${catName}] ${escapeHtml(log.text)}</div>`;
-                    });
-                }
-
-                cellDiv.innerHTML = `
-                    <span class="text-[11px] font-bold text-gray-700">${day}</span>
-                    <div class="w-full mt-0.5 flex flex-col space-y-0.5">
-                        ${stickersHtml}
-                    </div>
-                `;
-
-                gridEl.appendChild(cellDiv);
-            }
-        }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
-        }
-    </script>
+boot();
+</script>
 </body>
 </html>
