@@ -94,8 +94,8 @@
             <div id="header-actions"></div>
         </div>
 
-        <!-- 로그인 / 회원가입 뷰 -->
-        <div id="auth-view" class="flex-1 flex flex-col justify-center px-8 py-4 text-sm hidden">
+        <!-- 로그인 / 회원가입 뷰 (기본 표시) -->
+        <div id="auth-view" class="flex-1 flex flex-col justify-center px-8 py-4 text-sm">
             <div class="text-center font-bold text-gray-800 mb-4" id="auth-mode-title">로그인</div>
             <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-3 max-w-sm mx-auto w-full">
                 <input type="email" id="auth-email" placeholder="이메일" required
@@ -164,20 +164,24 @@
 
         let supabaseClient = null;
         let currentUser = null;
-        let indexTasks = [];      // didi_index 목록
-        let todayLogs = [];       // 오늘 날짜의 didi_log 목록
-        let monthLogs = [];       // 현재 조회 중인 월의 전체 didi_log 목록
+        let indexTasks = [];      
+        let todayLogs = [];       
+        let monthLogs = [];       
         let pendingDeleteId = null;
         let isSignUpMode = false;
 
-        // 캘린더 상태 관리용 날짜 객체
         let currentCalendarDate = new Date();
 
         window.onload = async function() {
             try {
+                if (!window.supabase) {
+                    throw new Error('Supabase SDK 로드 실패');
+                }
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 
-                const { data: { session } } = await supabaseClient.auth.getSession();
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError) throw sessionError;
+
                 if (session && session.user) {
                     currentUser = session.user;
                     showAppView();
@@ -196,6 +200,8 @@
                 });
             } catch (e) {
                 console.error('Supabase init error:', e);
+                // 에러가 나더라도 백지가 되지 않고 로그인 화면을 띄움
+                showAuthView();
             }
         };
 
@@ -265,7 +271,6 @@
             return dateStr.toString().substring(0, 10);
         }
 
-        // 탭 전환 함수
         function switchTab(tabName) {
             const todoView = document.getElementById('view-todo');
             const calendarView = document.getElementById('view-calendar');
@@ -287,13 +292,11 @@
             }
         }
 
-        // --- TODO 탭 로직 ---
         async function loadTodoData() {
             if (!supabaseClient || !currentUser) return;
             const today = getTodayDateString();
 
             try {
-                // 1. 마스터 인덱스 불러오기
                 const { data: indexData, error: indexErr } = await supabaseClient
                     .from('didi_index')
                     .select('*')
@@ -303,7 +306,6 @@
                 if (indexErr) throw indexErr;
                 indexTasks = indexData || [];
 
-                // 2. 오늘의 로그 불러오기
                 const { data: logData, error: logErr } = await supabaseClient
                     .from('didi_log')
                     .select('*')
@@ -354,7 +356,6 @@
 
             try {
                 if (existingLog) {
-                    // 이미 로그가 있으면 체크 상태 반전 후 업데이트
                     const newCheck = !existingLog.is_checked;
                     const { error } = await supabaseClient
                         .from('didi_log')
@@ -364,7 +365,6 @@
                     if (error) throw error;
                     existingLog.is_checked = newCheck;
                 } else {
-                    // 로그가 없으면 새로 생성 (체크됨 상태로)
                     const newLog = {
                         user_id: currentUser.id,
                         index_id: indexId,
@@ -455,23 +455,19 @@
             }
         }
 
-
-        // --- CALENDAR 탭 로직 ---
         async function loadCalendarData() {
             if (!supabaseClient || !currentUser) return;
 
             const year = currentCalendarDate.getFullYear();
-            const month = currentCalendarDate.getMonth(); // 0~11
+            const month = currentCalendarDate.getMonth();
 
             const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-            // 해당 월의 마지막 날 계산
             const lastDay = new Date(year, month + 1, 0).getDate();
             const endDate = `${year}-${String(month + 1).padStart(2, '0')}-${lastDay}`;
 
             document.getElementById('calendar-title').innerText = `${year}년 ${month + 1}월`;
 
             try {
-                // 해당 월의 로그 데이터 전체 가져오기
                 const { data, error } = await supabaseClient
                     .from('didi_log')
                     .select('*, didi_index(text)')
@@ -496,20 +492,16 @@
             const gridEl = document.getElementById('calendar-grid');
             gridEl.innerHTML = '';
 
-            const firstDayIndex = new Date(year, month, 1).getDay(); // 요일 (0: 일요일)
+            const firstDayIndex = new Date(year, month, 1).getDay();
             const totalDays = new Date(year, month + 1, 0).getDate();
 
-            // 빈 칸 채우기 (월 시작 요일 맞춤)
             for (let i = 0; i < firstDayIndex; i++) {
                 const emptyCell = document.createElement('div');
                 gridEl.appendChild(emptyCell);
             }
 
-            // 날짜 칸 채우기
             for (let day = 1; day <= totalDays; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                
-                // 해당 날짜에 체크된 로그들 필터링
                 const dayLogs = monthLogs.filter(l => l.log_date === dateStr && l.is_checked);
 
                 const cellDiv = document.createElement('div');
@@ -517,7 +509,7 @@
                 
                 let dotHtml = '';
                 if (dayLogs.length > 0) {
-                    dotHtml = `<div class="w-1.5 h-1.5 bg-slate-700 rounded-full mt-1" title="${dayLogs.length개 완료}"></div>`;
+                    dotHtml = `<div class="w-1.5 h-1.5 bg-slate-700 rounded-full mt-1" title="${dayLogs.length}개 완료"></div>`;
                 }
 
                 cellDiv.innerHTML = `
