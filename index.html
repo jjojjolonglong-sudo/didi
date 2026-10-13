@@ -9,7 +9,7 @@
 :root{--ink:#111;--bg:#fff;--yel:#FFD60A;--pink:#FF4D8D;--blue:#2D6BFF;--gray:#E4E4E4}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;font-size:16px}
-body{min-width:340px;max-width:960px;margin:0 auto;padding:12px}
+body{min-width:340px;max-width:640px;margin:0 auto;padding:12px}
 button,input,select,textarea{font:inherit;color:inherit}
 input,select,textarea{border:2px solid var(--ink);border-radius:6px;padding:8px;background:#fff;min-width:0;width:100%}
 textarea{min-height:80px;max-height:200px;resize:vertical}
@@ -24,6 +24,7 @@ button.red{background:var(--pink)}
 .wrap{max-width:640px;margin:0 auto}
 .add{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .add .full{grid-column:1/-1}
+.lb{display:block;font-size:12px;font-weight:700}.lb input,.lb select{margin-top:3px;font-weight:400}
 h3{margin:18px 0 6px;font-size:15px}
 .todo{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:2px solid var(--gray);cursor:pointer}
 .todo input[type=checkbox]{width:24px;height:24px;flex:none;accent-color:var(--blue)}
@@ -75,8 +76,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   <section id="tab-todo" class="wrap">
     <div class="add">
       <input id="nt" class="full" placeholder="할 일을 적고 Enter">
-      <input id="nd" type="date">
-      <select id="ni"></select>
+      <label class="lb">예정일<input id="nd" type="date"></label>
+      <label class="lb">분류<select id="ni"></select></label>
     </div>
     <h3>할 일</h3><div id="open"></div>
     <h3>완료</h3><div id="closed"></div>
@@ -95,8 +96,10 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 <dialog id="dlg">
   <div id="dtitle" style="font-weight:700;font-size:18px"></div>
   <label for="f-t">내용</label><input id="f-t">
-  <label for="f-d">날짜</label><input id="f-d" type="date">
-  <label for="f-i">폴더</label><select id="f-i"></select>
+  <label for="f-d">예정일</label><input id="f-d" type="date">
+  <div id="f-ext"><label for="f-cr">입력일</label><input id="f-cr" type="date">
+  <label for="f-dn">완료일</label><input id="f-dn" type="date"></div>
+  <label for="f-i">분류</label><select id="f-i"></select>
   <label for="f-m">메모</label><textarea id="f-m" placeholder="장소, 시간, 생각 등 자유롭게"></textarea>
   <label id="f-cw" class="row" style="margin-top:12px"><input id="f-c" type="checkbox" style="width:22px;height:22px"> 완료</label>
   <div class="row" style="margin-top:16px;justify-content:flex-end">
@@ -115,6 +118,14 @@ const S = {user:null, logs:[], idx:[], month:new Date(), edit:null};
 const z = n => String(n).padStart(2,'0');
 const ymd = d => d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());
 const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const noon=d=>new Date(d+'T12:00:00').toISOString();
+const doneDay=l=>l.done_at?ymd(new Date(l.done_at)):'';
+const dd=s=>s?s.slice(5,10).replace('-','/'):'';
+function onDay(l,key,today){
+  if(l.is_checked) return (doneDay(l)||l.log_date)===key;   // 완료: 완료일에 표시
+  if(l.is_checked===null) return l.log_date===key;           // 노트
+  return l.log_date===key && key>=today;                     // 미완료: 오늘 이후 예정일만
+}
 function toast(m){const t=$('toast');t.textContent=m;t.classList.remove('hide');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.add('hide'),2400)}
 function fail(e){if(e){toast('오류: '+e.message);return true}return false}
 function fg(hex){const n=parseInt(hex.slice(1),16),l=(0.299*(n>>16)+0.587*((n>>8)&255)+0.114*(n&255))/255;return l>0.6?'#111':'#fff'}
@@ -143,11 +154,11 @@ async function loadAll(){
   S.idx=a.data||[]; S.logs=b.data||[]; renderFolderSelects(); renderTodo(); renderCal();
 }
 function renderFolderSelects(){
-  const opts = '<option value="">폴더 없음</option>'+S.idx.map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('')+'<option value="__new">+ 새 폴더 만들기</option>';
+  const opts = '<option value="">분류 없음</option>'+S.idx.map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('')+'<option value="__new">+ 새 분류 만들기</option>';
   for(const id of ['ni','f-i']){const v=$(id).value; $(id).innerHTML=opts; $(id).value=S.idx.some(i=>i.id===v)?v:'';}
 }
 async function newFolder(sel){
-  const name=(prompt('새 폴더 이름')||'').trim();
+  const name=(prompt('새 분류 이름')||'').trim();
   if(!name){sel.value='';return}
   const {data,error}=await sb.from('didi_index').insert({user_id:S.user.id,name,color:PALETTE[S.idx.length%PALETTE.length],sort_order:S.idx.length}).select().single();
   if(fail(error)){sel.value='';return}
@@ -165,16 +176,17 @@ document.querySelectorAll('.tabs [data-t]').forEach(b=>b.onclick=()=>{
 
 /* 할 일 */
 function todoRow(l){
-  const f=folder(l.index_id), late=!l.is_checked && l.log_date<ymd(new Date());
+  const f=folder(l.index_id), late=!l.is_checked && l.log_date && l.log_date<ymd(new Date());
+  const dtxt=l.is_checked?('완료 '+dd(doneDay(l)||l.log_date)):(l.log_date?('예정 '+dd(l.log_date)):'');
   return `<div class="todo ${l.is_checked?'done':''}" data-id="${l.id}">
     <input type="checkbox" data-c="${l.id}" ${l.is_checked?'checked':''} aria-label="완료">
     <span class="t">${esc(l.text)}</span>
     ${f?`<span class="tag" style="background:${f.color};color:${fg(f.color)}">${esc(f.name)}</span>`:''}
-    <span class="dt ${late?'late':''}">${l.log_date.slice(5).replace('-','/')}</span></div>`;
+    <span class="dt ${late?'late':''}">${dtxt}</span></div>`;
 }
 function renderTodo(){
   const todos=S.logs.filter(l=>l.is_checked!==null);
-  const open=todos.filter(l=>!l.is_checked), done=todos.filter(l=>l.is_checked).sort((a,b)=>(b.done_at||'').localeCompare(a.done_at||'')).slice(0,40);
+  const open=todos.filter(l=>!l.is_checked).sort((a,b)=>(a.log_date||'9999').localeCompare(b.log_date||'9999')), done=todos.filter(l=>l.is_checked).sort((a,b)=>(b.done_at||'').localeCompare(a.done_at||'')).slice(0,40);
   $('open').innerHTML=open.length?open.map(todoRow).join(''):'<div class="empty">할 일이 없어요. 위에서 추가해보세요.</div>';
   $('closed').innerHTML=done.length?done.map(todoRow).join(''):'<div class="empty">아직 완료한 일이 없어요.</div>';
   document.querySelectorAll('.todo').forEach(r=>r.onclick=e=>{ if(e.target.matches('input'))return; openDlg(S.logs.find(l=>l.id===r.dataset.id)); });
@@ -185,7 +197,7 @@ function renderTodo(){
 }
 async function addTodo(){
   const text=$('nt').value.trim(); if(!text)return;
-  const {error}=await sb.from('didi_log').insert({user_id:S.user.id,text,log_date:$('nd').value||ymd(new Date()),index_id:$('ni').value||null,is_checked:false});
+  const {error}=await sb.from('didi_log').insert({user_id:S.user.id,text,log_date:$('nd').value||null,index_id:$('ni').value||null,is_checked:false});
   if(!fail(error)){$('nt').value='';loadAll()}
 }
 $('nt').onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)addTodo()};
@@ -197,7 +209,7 @@ function renderCal(){
   let h='日月火水木金土'.split('').map((_,i)=>`<div class="wd">${'일월화수목금토'[i]}</div>`).join('')+'<div class="cell blank"></div>'.repeat(first.getDay());
   for(let d=1;d<=days;d++){
     const key=y+'-'+z(m+1)+'-'+z(d);
-    const items=S.logs.filter(l=>l.log_date===key).map(l=>{const c=color(l.index_id);
+    const items=S.logs.filter(l=>onDay(l,key,today)).map(l=>{const c=color(l.index_id);
       return `<div class="st ${l.is_checked?'done':''}" data-id="${l.id}" style="background:${c};color:${fg(c)}">${esc(l.text)}</div>`}).join('');
     h+=`<div class="cell ${key===today?'today':''}" data-d="${key}"><div class="dn">${d}</div>${items}</div>`;
   }
@@ -215,7 +227,10 @@ function openDlg(log,date){
   S.edit=log||null;
   $('dtitle').textContent=log?'기록 보기':'새 기록';
   $('f-t').value=log?log.text:'';
-  $('f-d').value=log?log.log_date:(date||ymd(new Date()));
+  $('f-d').value=log?(log.log_date||''):(date||ymd(new Date()));
+  $('f-cr').value=log?ymd(new Date(log.created_at)):'';
+  $('f-dn').value=log?doneDay(log):'';
+  $('f-ext').classList.toggle('hide',!log);
   $('f-i').value=log?(log.index_id||''):'';
   $('f-m').value=log?(log.meta?.memo||''):'';
   $('f-c').checked=!!(log&&log.is_checked);
@@ -224,14 +239,20 @@ function openDlg(log,date){
   $('dlg').showModal();
   if(!log)$('f-t').focus();
 }
+$('f-c').onchange=()=>{$('f-dn').value=$('f-c').checked?($('f-dn').value||ymd(new Date())):''};
+$('f-dn').onchange=()=>{$('f-c').checked=!!$('f-dn').value};
 $('f-x').onclick=()=>$('dlg').close();
 $('f-ok').onclick=async()=>{
   const text=$('f-t').value.trim(); if(!text){toast('내용을 입력하세요');return}
-  const base={text,log_date:$('f-d').value||ymd(new Date()),index_id:$('f-i').value&&$('f-i').value!=='__new'?$('f-i').value:null};
+  const base={text,log_date:$('f-d').value||null,index_id:$('f-i').value&&$('f-i').value!=='__new'?$('f-i').value:null};
   let r;
   if(S.edit){
     const c=$('f-c').checked;
-    r=await sb.from('didi_log').update({...base,meta:{...(S.edit.meta||{}),memo:$('f-m').value},is_checked:c,done_at:c?(S.edit.done_at||new Date().toISOString()):null}).eq('id',S.edit.id);
+    const dn=$('f-dn').value, cr=$('f-cr').value;
+    const upd={...base,meta:{...(S.edit.meta||{}),memo:$('f-m').value},is_checked:c,done_at:null};
+    if(c) upd.done_at=(dn&&dn===doneDay(S.edit))?S.edit.done_at:(dn?noon(dn):new Date().toISOString());
+    if(cr&&cr!==ymd(new Date(S.edit.created_at))) upd.created_at=noon(cr);
+    r=await sb.from('didi_log').update(upd).eq('id',S.edit.id);
   }else{
     r=await sb.from('didi_log').insert({...base,user_id:S.user.id,is_checked:false,meta:{memo:$('f-m').value}});
   }
