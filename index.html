@@ -14,27 +14,34 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: #1e293b;
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0;
-            padding: 16px;
+            padding: 0;
+            overflow: hidden;
         }
 
-        /* 창 크기에 맞춰 유연하게 늘어나되 최대 500px로 제한하는 아날로그 종이 패드 디자인 */
+        /* 여백 없이 창에 맞추고 최대 크기를 720px x 480px로 설정한 아날로그 종이 패드 디자인 */
         .paper-pad {
-            width: 100%;
-            max-width: 500px;
-            height: 100%;
-            max-height: 500px;
+            width: 100vw;
+            height: 100vh;
+            max-width: 720px;
+            max-height: 480px;
             background-color: #fbf9f1;
             background-image: repeating-linear-gradient(#fbf9f1, #fbf9f1 27px, #e8e3d5 28px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            border-radius: 6px;
+            border-radius: 0;
             position: relative;
             overflow: hidden;
             border: 1px solid #dcd6c5;
+        }
+
+        @media (min-width: 720px) {
+            .paper-pad {
+                border-radius: 8px;
+            }
         }
 
         /* 커스텀 체크박스 */
@@ -75,61 +82,59 @@
 </head>
 <body class="antialiased">
 
-    <div class="w-full h-screen flex flex-col items-center justify-center p-4">
-        <div class="paper-pad flex flex-col w-full h-full">
-            
-            <!-- 상단 헤더 -->
-            <div class="px-4 py-3 border-b border-gray-300 flex justify-between items-center bg-[#f5f2e6]">
-                <h1 class="text-sm font-bold text-gray-800 tracking-wider">DIDI</h1>
-                <div id="header-actions">
-                    <!-- 로그인 상태에 따른 로그아웃 버튼 표시 -->
-                </div>
+    <div class="paper-pad flex flex-col w-full h-full">
+        
+        <!-- 상단 헤더 -->
+        <div class="px-5 py-3 border-b border-gray-300 flex justify-between items-center bg-[#f5f2e6]">
+            <h1 class="text-sm font-bold text-gray-800 tracking-wider">DIDI</h1>
+            <div id="header-actions">
+                <!-- 로그인 상태에 따른 로그아웃 버튼 표시 -->
             </div>
+        </div>
 
-            <!-- 로그인 / 회원가입 뷰 -->
-            <div id="auth-view" class="flex-1 flex flex-col justify-center px-6 py-4 text-sm hidden">
-                <div class="text-center font-bold text-gray-800 mb-4" id="auth-mode-title">로그인</div>
-                <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-3">
-                    <input type="email" id="auth-email" placeholder="이메일" required
-                        class="w-full bg-white/80 border border-gray-300 rounded px-3 py-2 text-xs text-gray-800 focus:outline-none focus:border-gray-500">
-                    <input type="password" id="auth-password" placeholder="비밀번호 (6자 이상)" required minlength="6"
-                        class="w-full bg-white/80 border border-gray-300 rounded px-3 py-2 text-xs text-gray-800 focus:outline-none focus:border-gray-500">
-                    <button type="submit" id="auth-submit-btn" class="w-full bg-gray-800 text-white rounded py-2 font-medium hover:bg-gray-700 transition text-xs">로그인</button>
-                </form>
-                <div class="text-center mt-4">
-                    <button type="button" onclick="toggleAuthMode()" class="text-xs text-gray-500 hover:underline" id="auth-switch-text">
-                        계정이 없으신가요? 회원가입
-                    </button>
-                </div>
-                <div id="auth-error" class="text-red-600 text-xs text-center mt-3 hidden"></div>
+        <!-- 로그인 / 회원가입 뷰 -->
+        <div id="auth-view" class="flex-1 flex flex-col justify-center px-8 py-4 text-sm hidden">
+            <div class="text-center font-bold text-gray-800 mb-4" id="auth-mode-title">로그인</div>
+            <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-3 max-w-sm mx-auto w-full">
+                <input type="email" id="auth-email" placeholder="이메일" required
+                    class="w-full bg-white/80 border border-gray-300 rounded px-3 py-2 text-xs text-gray-800 focus:outline-none focus:border-gray-500">
+                <input type="password" id="auth-password" placeholder="비밀번호 (6자 이상)" required minlength="6"
+                    class="w-full bg-white/80 border border-gray-300 rounded px-3 py-2 text-xs text-gray-800 focus:outline-none focus:border-gray-500">
+                <button type="submit" id="auth-submit-btn" class="w-full bg-gray-800 text-white rounded py-2 font-medium hover:bg-gray-700 transition text-xs">로그인</button>
+            </form>
+            <div class="text-center mt-4">
+                <button type="button" onclick="toggleAuthMode()" class="text-xs text-gray-500 hover:underline" id="auth-switch-text">
+                    계정이 없으신가요? 회원가입
+                </button>
             </div>
+            <div id="auth-error" class="text-red-600 text-xs text-center mt-3 hidden"></div>
+        </div>
 
-            <!-- 투두 메인 뷰 -->
-            <div id="todo-main-view" class="flex-1 flex flex-col overflow-hidden hidden">
-                <!-- 삭제 확인 모달 -->
-                <div id="delete-modal" class="absolute inset-0 bg-black/30 z-40 flex items-center justify-center hidden p-4">
-                    <div class="bg-[#fbf9f1] border border-gray-400 rounded p-4 w-64 shadow-lg text-center">
-                        <p class="text-xs text-gray-800 mb-3">이 항목을 삭제하시겠습니까?</p>
-                        <div class="flex justify-center space-x-2">
-                            <button id="confirm-delete-btn" class="bg-red-600 text-white px-3 py-1.5 rounded text-xs hover:bg-red-700">삭제</button>
-                            <button onclick="closeDeleteModal()" class="bg-gray-300 text-gray-700 px-3 py-1.5 rounded text-xs hover:bg-gray-400">취소</button>
-                        </div>
+        <!-- 투두 메인 뷰 -->
+        <div id="todo-main-view" class="flex-1 flex flex-col overflow-hidden hidden">
+            <!-- 삭제 확인 모달 -->
+            <div id="delete-modal" class="absolute inset-0 bg-black/30 z-40 flex items-center justify-center hidden p-4">
+                <div class="bg-[#fbf9f1] border border-gray-400 rounded p-4 w-64 shadow-lg text-center">
+                    <p class="text-xs text-gray-800 mb-3">이 항목을 삭제하시겠습니까?</p>
+                    <div class="flex justify-center space-x-2">
+                        <button id="confirm-delete-btn" class="bg-red-600 text-white px-3 py-1.5 rounded text-xs hover:bg-red-700">삭제</button>
+                        <button onclick="closeDeleteModal()" class="bg-gray-300 text-gray-700 px-3 py-1.5 rounded text-xs hover:bg-gray-400">취소</button>
                     </div>
                 </div>
-
-                <!-- 할 일 목록 영역 -->
-                <div id="todo-list" class="flex-1 overflow-y-auto px-3 py-2 space-y-2 text-xs">
-                    <!-- 동적 렌더링 -->
-                </div>
-
-                <!-- 하단 입력폼 -->
-                <form id="todo-form" onsubmit="addTask(event)" class="px-3 py-3 border-t border-gray-300 bg-[#f5f2e6]">
-                    <input type="text" id="task-input" placeholder="내용 입력 후 엔터..." required
-                        class="w-full bg-transparent text-xs text-gray-800 placeholder-gray-400 focus:outline-none border-b border-dashed border-gray-400 pb-1">
-                </form>
             </div>
 
+            <!-- 할 일 목록 영역 -->
+            <div id="todo-list" class="flex-1 overflow-y-auto px-4 py-2 space-y-2 text-xs">
+                <!-- 동적 렌더링 -->
+            </div>
+
+            <!-- 하단 입력폼 -->
+            <form id="todo-form" onsubmit="addTask(event)" class="px-4 py-3 border-t border-gray-300 bg-[#f5f2e6]">
+                <input type="text" id="task-input" placeholder="내용 입력 후 엔터..." required
+                    class="w-full bg-transparent text-xs text-gray-800 placeholder-gray-400 focus:outline-none border-b border-dashed border-gray-400 pb-1">
+            </form>
         </div>
+
     </div>
 
     <script>
@@ -229,7 +234,6 @@
             return `${year}-${month}-${day}`;
         }
 
-        // 날짜 문자열에서 시간값(타임스탬프)을 깔끔하게 제거하고 YYYY-MM-DD만 추출하는 함수
         function formatDate(dateStr) {
             if (!dateStr) return '';
             return dateStr.toString().substring(0, 10);
@@ -356,7 +360,6 @@
                 const itemDiv = document.createElement('div');
                 itemDiv.className = `flex items-center justify-between py-1.5 border-b border-gray-200/60 group ${task.is_checked ? 'opacity-60' : ''}`;
                 
-                // 체크 전에는 입력일(inputdate), 체크 후에는 완료일(checkdate, 없으면 inputdate)
                 const rawDate = task.is_checked ? (task.checkdate || task.inputdate) : task.inputdate;
                 const displayDate = formatDate(rawDate);
 
