@@ -146,7 +146,6 @@
             try {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 
-                // 현재 세션 확인
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session && session.user) {
                     currentUser = session.user;
@@ -155,7 +154,6 @@
                     showAuthView();
                 }
 
-                // 로그인 상태 변화 감지
                 supabaseClient.auth.onAuthStateChange((event, session) => {
                     if (session && session.user) {
                         currentUser = session.user;
@@ -231,11 +229,17 @@
             return `${year}-${month}-${day}`;
         }
 
+        // 날짜 문자열에서 시간값(타임스탬프)을 깔끔하게 제거하고 YYYY-MM-DD만 추출하는 함수
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            return dateStr.toString().substring(0, 10);
+        }
+
         async function fetchTasks() {
             if (!supabaseClient || !currentUser) return;
             try {
                 const { data, error } = await supabaseClient
-                    .from('didi_index') // 테이블 이름 반영
+                    .from('didi_index')
                     .select('*')
                     .eq('user_id', currentUser.id)
                     .order('id', { ascending: true });
@@ -265,7 +269,7 @@
 
             try {
                 const { data, error } = await supabaseClient
-                    .from('didi_index') // 테이블 이름 반영
+                    .from('didi_index')
                     .insert([newTodo])
                     .select();
 
@@ -291,7 +295,7 @@
 
             try {
                 const { error } = await supabaseClient
-                    .from('didi_index') // 테이블 이름 반영
+                    .from('didi_index')
                     .update({ 
                         is_checked: newCheck, 
                         checkdate: newCheckDate 
@@ -326,7 +330,7 @@
             closeDeleteModal();
             try {
                 const { error } = await supabaseClient
-                    .from('didi_index') // 테이블 이름 반영
+                    .from('didi_index')
                     .delete()
                     .eq('id', id)
                     .eq('user_id', currentUser.id);
@@ -352,7 +356,9 @@
                 const itemDiv = document.createElement('div');
                 itemDiv.className = `flex items-center justify-between py-1.5 border-b border-gray-200/60 group ${task.is_checked ? 'opacity-60' : ''}`;
                 
-                const displayDate = task.is_checked ? (task.checkdate || task.inputdate) : task.inputdate;
+                // 체크 전에는 입력일(inputdate), 체크 후에는 완료일(checkdate, 없으면 inputdate)
+                const rawDate = task.is_checked ? (task.checkdate || task.inputdate) : task.inputdate;
+                const displayDate = formatDate(rawDate);
 
                 itemDiv.innerHTML = `
                     <div class="flex items-center space-x-2 overflow-hidden pr-1 flex-1">
@@ -362,7 +368,7 @@
                                 ${escapeHtml(task.text)}
                             </span>
                             <span class="text-[10px] text-gray-400 ml-2 whitespace-nowrap">
-                                ${displayDate || ''}
+                                ${displayDate}
                             </span>
                         </div>
                     </div>
