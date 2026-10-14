@@ -13,7 +13,9 @@
 <meta name="apple-mobile-web-app-title" content="디디">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <style>
-:root{--ink:#111;--yel:#FFD60A;--pink:#FF4D8D;--blue:#2D6BFF;--gray:#E4E4E4}
+:root{--ink:#111;--yel:#FFD60A;--pink:#FF4D8D;--blue:#2D6BFF;--gray:#E4E4E4;
+/* 우표 그림자: drop-shadow(가로 세로 번짐 색) 두 겹. 앞=붙어 있는 얇은 그림자, 뒤=살짝 퍼지는 그림자 */
+--shadow:drop-shadow(-1px 1px .5px rgba(90,60,0,.22)) drop-shadow(-2px 3px 3px rgba(90,60,0,.2))}
 *{box-sizing:border-box}
 html{background-color:#FFF2A8;background-image:linear-gradient(#F3E58F 1px,transparent 1px),linear-gradient(90deg,#F3E58F 1px,transparent 1px);background-size:22px 22px;min-height:100%}
 html,body{margin:0;color:var(--ink);font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;font-size:16px;line-height:1.3}
@@ -58,8 +60,8 @@ button.plain{background:#fff}button.red{background:var(--pink)}
 .dayrow{display:flex;gap:12px;padding:8px 0}
 .dl{width:48px;flex:none;font-weight:700}.dl small{font-weight:400;color:#666}
 .stamps{display:flex;flex-wrap:wrap;gap:8px}
-.stamp,.pv{width:58px;height:70px;padding:9px;background:var(--yel);cursor:pointer;flex:none;clip-path:var(--stamp)}
-.sw{filter:drop-shadow(-1px 1px 1px rgba(0,0,0,.4));flex:none}
+.stamp,.pv{width:58px;height:70px;padding:7px;background:var(--yel);cursor:pointer;flex:none;clip-path:var(--stamp)}
+.sw{filter:var(--shadow);flex:none}
 .pv{cursor:default}
 .ph{width:100%;height:100%;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13px;line-height:1.1}
 .mr{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 0}
@@ -140,7 +142,7 @@ const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 
 <script>
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const $=id=>document.getElementById(id);
-function stampPath(W=58,H=70,s=6,d=5,k=8){
+function stampPath(W=58,H=70,s=6,d=3,k=8){
   const ns=L=>{const r=[];for(let x=k;x+s<=L-k+1e-6;x+=2*s)r.push([x,x+s]);return r},X=ns(W),Y=ns(H),P=[[0,0]];
   X.forEach(([a,b])=>P.push([a,0],[a,d],[b,d],[b,0]));P.push([W,0]);
   Y.forEach(([a,b])=>P.push([W,a],[W-d,a],[W-d,b],[W,b]));P.push([W,H]);
