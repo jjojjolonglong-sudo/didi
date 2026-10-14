@@ -142,10 +142,15 @@ const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 
 <script>
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const $=id=>document.getElementById(id);
-function stampPath(W=60,H=72,p=6,d=3){ // p=톱니 간격, d=톱니 깊이 (W,H는 p의 배수)
-  const E=n=>{const r=[];for(let i=1;i<n;i++){r.push([i*p,0]);if(i<n-1)r.push([i*p+p/2,d])}return r},
-    X=E(Math.round(W/p)),Y=E(Math.round(H/p)),P=[[0,0],...X,[W,0],...Y.map(([t,o])=>[W-o,t]),[W,H],...X.map(([t,o])=>[W-t,H-o]),[0,H],...Y.map(([t,o])=>[o,H-t])];
-  return 'polygon('+P.map(([x,y])=>x+'px '+y+'px').join(',')+')';
+function stampPath(W=60,H=72,k=5,d=3,mx=7,my=9,ra=1.45,rr=.7){ // k=모서리 블록, d=톱니 깊이, mx/my=가로/세로 톱니 수, ra=톱니:홈 폭 비율, rr=모서리 둥글기
+  const N=(L,m)=>{const n=(L-2*k)/((m+1)+ra*m),t=ra*n,a=[];let x=k;for(let i=0;i<=m;i++){a.push([x,x+n]);x+=n+t}return a},
+    X=N(W,mx),Y=N(H,my),P=[[0,0]];
+  X.forEach(([a,b])=>P.push([a,0],[a,d],[b,d],[b,0]));P.push([W,0]);
+  Y.forEach(([a,b])=>P.push([W,a],[W-d,a],[W-d,b],[W,b]));P.push([W,H]);
+  [...X].reverse().forEach(([a,b])=>P.push([b,H],[b,H-d],[a,H-d],[a,H]));P.push([0,H]);
+  [...Y].reverse().forEach(([a,b])=>P.push([0,b],[d,b],[d,a],[0,a]));
+  const R=P.flatMap((V,i)=>{const A=P[(i+P.length-1)%P.length],B=P[(i+1)%P.length],u=Q=>{const dx=Q[0]-V[0],dy=Q[1]-V[1],l=Math.hypot(dx,dy);return [V[0]+dx/l*rr,V[1]+dy/l*rr]};return [u(A),u(B)]});
+  return 'polygon('+R.map(([x,y])=>x.toFixed(2)+'px '+y.toFixed(2)+'px').join(',')+')';
 }
 document.documentElement.style.setProperty('--stamp',stampPath());
 const PALETTE=['#FFD60A','#FF4D8D','#2D6BFF','#19C37D','#FF7A1A','#8B5CF6','#00C2E0'];
