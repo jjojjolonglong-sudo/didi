@@ -60,7 +60,7 @@ button.plain{background:#fff}button.red{background:var(--pink)}
 .dayrow{display:flex;gap:12px;padding:8px 0}
 .dl{width:48px;flex:none;font-weight:700}.dl small{font-weight:400;color:#666}
 .stamps{display:flex;flex-wrap:wrap;gap:8px}
-.stamp,.pv{width:58px;height:70px;padding:7px;background:var(--yel);cursor:pointer;flex:none;clip-path:var(--stamp)}
+.stamp,.pv{width:60px;height:72px;padding:7px;background:var(--yel);cursor:pointer;flex:none;clip-path:var(--stamp)}
 .sw{filter:var(--shadow);flex:none}
 .pv{cursor:default}
 .ph{width:100%;height:100%;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13px;line-height:1.1}
@@ -142,12 +142,9 @@ const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 
 <script>
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const $=id=>document.getElementById(id);
-function stampPath(W=58,H=70,s=6,d=3,k=8){
-  const ns=L=>{const r=[];for(let x=k;x+s<=L-k+1e-6;x+=2*s)r.push([x,x+s]);return r},X=ns(W),Y=ns(H),P=[[0,0]];
-  X.forEach(([a,b])=>P.push([a,0],[a,d],[b,d],[b,0]));P.push([W,0]);
-  Y.forEach(([a,b])=>P.push([W,a],[W-d,a],[W-d,b],[W,b]));P.push([W,H]);
-  [...X].reverse().forEach(([a,b])=>P.push([b,H],[b,H-d],[a,H-d],[a,H]));P.push([0,H]);
-  [...Y].reverse().forEach(([a,b])=>P.push([0,b],[d,b],[d,a],[0,a]));
+function stampPath(W=60,H=72,p=6,d=3){ // p=톱니 간격, d=톱니 깊이 (W,H는 p의 배수)
+  const E=n=>{const r=[];for(let i=1;i<n;i++){r.push([i*p,0]);if(i<n-1)r.push([i*p+p/2,d])}return r},
+    X=E(Math.round(W/p)),Y=E(Math.round(H/p)),P=[[0,0],...X,[W,0],...Y.map(([t,o])=>[W-o,t]),[W,H],...X.map(([t,o])=>[W-t,H-o]),[0,H],...Y.map(([t,o])=>[o,H-t])];
   return 'polygon('+P.map(([x,y])=>x+'px '+y+'px').join(',')+')';
 }
 document.documentElement.style.setProperty('--stamp',stampPath());
