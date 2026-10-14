@@ -142,7 +142,7 @@ const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 
 <script>
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const $=id=>document.getElementById(id);
-function stampPath(W=60,H=72,k=5,d=3,mx=7,my=9,ra=1.45,rr=.7){ // k=모서리 블록, d=톱니 깊이, mx/my=가로/세로 톱니 수, ra=톱니:홈 폭 비율, rr=모서리 둥글기
+function stampPath(W=60,H=72,k=5,d=3,mx=6,my=8,ra=1.45,rr=.7){ // k=모서리 블록, d=톱니 깊이, mx/my=가로/세로 톱니 수, ra=톱니:홈 폭 비율, rr=모서리 둥글기
   const N=(L,m)=>{const n=(L-2*k)/((m+1)+ra*m),t=ra*n,a=[];let x=k;for(let i=0;i<=m;i++){a.push([x,x+n]);x+=n+t}return a},
     X=N(W,mx),Y=N(H,my),P=[[0,0]];
   X.forEach(([a,b])=>P.push([a,0],[a,d],[b,d],[b,0]));P.push([W,0]);
