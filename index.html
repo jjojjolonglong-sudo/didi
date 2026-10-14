@@ -27,7 +27,7 @@ dialog.view input:not([type=checkbox]),dialog.view select,dialog.view textarea{b
 dialog.view textarea{min-height:0;field-sizing:content}
 dialog.view input[type=date]::-webkit-calendar-picker-indicator{display:none}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.g2>div{min-width:0}
-.ph.t3{background:#fff;color:var(--ink);font-size:14px;line-height:1.1}
+.ph.t3{font-size:16px;line-height:1.1}
 #busy{width:auto;min-width:0;padding:16px 24px;font-weight:700}
 #busy::backdrop{background:rgba(0,0,0,.35)}
 .spin{display:inline-block;width:18px;height:18px;border:3px solid var(--gray);border-top-color:var(--blue);border-radius:50%;animation:sp .8s linear infinite;vertical-align:-3px;margin-right:8px}
@@ -60,7 +60,7 @@ button.plain{background:#fff}button.red{background:var(--pink)}
 .dayrow{display:flex;gap:12px;padding:8px 0}
 .dl{width:48px;flex:none;font-weight:700}.dl small{font-weight:400;color:#666}
 .stamps{display:flex;flex-wrap:wrap;gap:8px}
-.stamp,.pv{width:60px;height:72px;padding:7px;background:var(--yel);cursor:pointer;flex:none;clip-path:var(--stamp)}
+.stamp,.pv{width:60px;height:72px;padding:0;background:var(--yel);cursor:pointer;flex:none;clip-path:var(--stamp)}
 .sw{filter:var(--shadow);flex:none}
 .pv{cursor:default}
 .ph{width:100%;height:100%;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13px;line-height:1.1}
@@ -168,7 +168,7 @@ function fg(h){const n=parseInt(h.slice(1),16),l=(0.299*(n>>16)+0.587*((n>>8)&25
 const cat=id=>S.cats.find(c=>c.id===id), ix=id=>S.idxs.find(i=>i.id===id), find=id=>S.logs.find(l=>l.id===id);
 const rep=l=>l.image_url||ix(l.index_id)?.image_url||cat(l.category_id)?.image_url||null;
 const col=l=>cat(l.category_id)?.color||'#E4E4E4';
-function ph(l,big){const u=rep(l);return u?`<div class="ph" data-img="${esc(big?u:th3(u))}" data-alt="${esc(u)}"></div>`:`<div class="ph t3"><b>${Array.from(l.text||'').filter(c=>c.trim()).slice(0,3).map(esc).join('<br>')}</b></div>`}
+function ph(l,big){const u=rep(l);return u?`<div class="ph" data-img="${esc(big?u:th3(u))}" data-alt="${esc(u)}"></div>`:`<div class="ph t3" style="color:${fg(col(l))}"><b>${Array.from(l.text||'').filter(c=>c.trim()).slice(0,3).map(esc).join('<br>')}</b></div>`}
 function onDay(l,key,t){
   if(l.is_checked)return (doneDay(l)||l.log_date)===key;
   if(l.is_checked===null)return l.log_date===key;
