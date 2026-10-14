@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>디디 다이어리</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#FFD60A">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="디디">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <style>
 :root{--ink:#111;--yel:#FFD60A;--pink:#FF4D8D;--blue:#2D6BFF;--gray:#E4E4E4}
@@ -18,7 +25,7 @@ dialog.view input:not([type=checkbox]),dialog.view select,dialog.view textarea{b
 dialog.view textarea{min-height:0;field-sizing:content}
 dialog.view input[type=date]::-webkit-calendar-picker-indicator{display:none}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.g2>div{min-width:0}
-.ph.t3{background:#fff;color:var(--ink);font-size:17px;line-height:1.15}
+.ph.t3{background:#fff;color:var(--ink);font-size:14px;line-height:1.1}
 #busy{width:auto;min-width:0;padding:16px 24px;font-weight:700}
 #busy::backdrop{background:rgba(0,0,0,.35)}
 .spin{display:inline-block;width:18px;height:18px;border:3px solid var(--gray);border-top-color:var(--blue);border-radius:50%;animation:sp .8s linear infinite;vertical-align:-3px;margin-right:8px}
@@ -31,8 +38,8 @@ button.plain{background:#fff}button.red{background:var(--pink)}
 .tabs{display:flex;gap:6px;margin-bottom:12px}
 .tabs button{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:#fff;padding:10px 2px}
 .tabs button.on{background:var(--blue);color:#fff}
-.todo{display:flex;gap:10px;align-items:center;padding:5px 0;border-bottom:1px solid var(--gray);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-.todo input{width:22px;height:22px;flex:none;accent-color:var(--blue)}
+.todo{display:flex;gap:10px;align-items:center;padding:2px 0;line-height:1.2;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.todo input{width:18px;height:18px;flex:none;accent-color:var(--blue)}
 .todo .t{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .todo.done .t{text-decoration:line-through;color:#888}
 .dt{font-size:13px;flex:0 1 auto;min-width:0;max-width:40%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#555}.todo.soon .t,.todo.soon .dt{color:#E5252A}
@@ -48,14 +55,14 @@ button.plain{background:#fff}button.red{background:var(--pink)}
 .dn{font-size:12px;font-weight:700}
 .st{margin-top:3px;padding:2px 5px;min-height:20px;font-size:12px;line-height:16px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .st.done{opacity:.45;text-decoration:line-through}
-.dayrow{display:flex;gap:12px;padding:10px 0;border-bottom:2px solid var(--gray)}
+.dayrow{display:flex;gap:12px;padding:8px 0}
 .dl{width:48px;flex:none;font-weight:700}.dl small{font-weight:400;color:#666}
 .stamps{display:flex;flex-wrap:wrap;gap:8px}
-.stamp,.pv{--d:8px;--n:3px;width:72px;height:86px;padding:7px;background:var(--yel);cursor:pointer;flex:none;-webkit-mask:linear-gradient(#000 0 0) var(--n) var(--n)/calc(100% - 2*var(--n)) calc(100% - 2*var(--n)) no-repeat,linear-gradient(90deg,#000 calc(50% - 2px),#0000 0 calc(50% + 2px),#000 0) 0 0/var(--d) var(--n) repeat-x,linear-gradient(90deg,#000 calc(50% - 2px),#0000 0 calc(50% + 2px),#000 0) 0 100%/var(--d) var(--n) repeat-x,linear-gradient(0deg,#000 calc(50% - 2px),#0000 0 calc(50% + 2px),#000 0) 0 0/var(--n) var(--d) repeat-y,linear-gradient(0deg,#000 calc(50% - 2px),#0000 0 calc(50% + 2px),#000 0) 100% 0/var(--n) var(--d) repeat-y;mask:linear-gradient(#000 0 0) var(--n) var(--n)/calc(100% - 2*var(--n)) calc(100% - 2*var(--n)) no-repeat,linear-gradient(90deg,#000 calc(50% - 2px),#0000 0 calc(50% + 2px),#000 0) 0 0/var(--d) var(--n) repeat-x,linear-gradient(90deg,#000 calc(50% - 2px),#0000 0 calc(50% + 2px),#000 0) 0 100%/var(--d) var(--n) repeat-x,linear-gradient(0deg,#000 calc(50% - 2px),#0000 0 calc(50% + 2px),#000 0) 0 0/var(--n) var(--d) repeat-y,linear-gradient(0deg,#000 calc(50% - 2px),#0000 0 calc(50% + 2px),#000 0) 100% 0/var(--n) var(--d) repeat-y}
-.sw{filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));flex:none}
+.stamp,.pv{width:58px;height:70px;padding:9px;background:var(--yel);cursor:pointer;flex:none;clip-path:var(--stamp)}
+.sw{filter:drop-shadow(-1px 1px 1px rgba(0,0,0,.4));flex:none}
 .pv{cursor:default}
 .ph{width:100%;height:100%;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13px;line-height:1.1}
-.mr{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--gray)}
+.mr{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 0}
 .mr.sub{margin-left:22px}.mr .t{flex:1;min-width:80px;word-break:break-word}
 .mr button{padding:3px 8px;font-size:13px}
 .thm{width:26px;height:26px;border-radius:5px;border:2px solid var(--ink);flex:none}
@@ -133,6 +140,15 @@ const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 
 <script>
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const $=id=>document.getElementById(id);
+function stampPath(W=58,H=70,s=6,d=5,k=8){
+  const ns=L=>{const r=[];for(let x=k;x+s<=L-k+1e-6;x+=2*s)r.push([x,x+s]);return r},X=ns(W),Y=ns(H),P=[[0,0]];
+  X.forEach(([a,b])=>P.push([a,0],[a,d],[b,d],[b,0]));P.push([W,0]);
+  Y.forEach(([a,b])=>P.push([W,a],[W-d,a],[W-d,b],[W,b]));P.push([W,H]);
+  [...X].reverse().forEach(([a,b])=>P.push([b,H],[b,H-d],[a,H-d],[a,H]));P.push([0,H]);
+  [...Y].reverse().forEach(([a,b])=>P.push([0,b],[d,b],[d,a],[0,a]));
+  return 'polygon('+P.map(([x,y])=>x+'px '+y+'px').join(',')+')';
+}
+document.documentElement.style.setProperty('--stamp',stampPath());
 const PALETTE=['#FFD60A','#FF4D8D','#2D6BFF','#19C37D','#FF7A1A','#8B5CF6','#00C2E0'];
 const S={user:null,logs:[],trash:[],cats:[],idxs:[],month:new Date(),edit:null,img:undefined};
 const z=n=>String(n).padStart(2,'0');
@@ -369,6 +385,7 @@ $('more').addEventListener('click',async e=>{
   if(r&&!fail(r.error))loadAll();
 });
 
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 boot();
 </script>
 </body>
