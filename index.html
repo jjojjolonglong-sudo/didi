@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>디디 다이어리</title>
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#FFD60A">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -117,6 +117,7 @@ const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 
 
   <section id="tab-more" class="hide">
     <div id="more"></div>
+    <h3>앱 설치</h3><div id="inst" style="font-size:14px;line-height:1.6"></div>
     <div style="margin-top:20px"><button id="logout" class="plain">로그아웃</button></div>
   </section>
 </main>
@@ -142,7 +143,7 @@ const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 
 <script>
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const $=id=>document.getElementById(id);
-function stampPath(W=60,H=72,k=5,d=3,mx=6,my=8,ra=1.45,rr=.7){ // k=모서리 블록, d=톱니 깊이, mx/my=가로/세로 톱니 수, ra=톱니:홈 폭 비율, rr=모서리 둥글기
+function stampPath(W=60,H=72,k=5,d=3,mx=7,my=9,ra=1.45,rr=.7){ // k=모서리 블록, d=톱니 깊이, mx/my=가로/세로 톱니 수, ra=톱니:홈 폭 비율, rr=모서리 둥글기
   const N=(L,m)=>{const n=(L-2*k)/((m+1)+ra*m),t=ra*n,a=[];let x=k;for(let i=0;i<=m;i++){a.push([x,x+n]);x+=n+t}return a},
     X=N(W,mx),Y=N(H,my),P=[[0,0]];
   X.forEach(([a,b])=>P.push([a,0],[a,d],[b,d],[b,0]));P.push([W,0]);
@@ -191,7 +192,7 @@ async function loadAll(){
   const [a,b,c,d]=await Promise.all([
     sb.from('didi_category').select('*').eq('is_archived',false).order('sort_order').order('created_at'),
     sb.from('didi_index').select('*').eq('is_archived',false).order('sort_order').order('created_at'),
-    sb.from('didi_log').select('*').is('discarded_at',null).order('created_at').limit(3000),
+    sb.from('didi_log').select('*').is('discarded_at',null).order('created_at').order('seq').limit(3000),
     sb.from('didi_log').select('*').not('discarded_at','is',null).order('discarded_at',{ascending:false}).limit(500)]);
   if(fail(a.error)||fail(b.error)||fail(c.error)||fail(d.error))return;
   S.cats=a.data||[];S.idxs=b.data||[];S.logs=c.data||[];S.trash=d.data||[];
@@ -389,7 +390,28 @@ $('more').addEventListener('click',async e=>{
   if(r&&!fail(r.error))loadAll();
 });
 
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+/* 앱 설치 안내 + 점검 */
+let dp=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;showInst()});
+async function pwaCheck(){
+  const out=[],ok=(t,v)=>out.push((v?'✅ ':'❌ ')+t);
+  ok('HTTPS 접속',location.protocol==='https:');
+  try{const r=await fetch('manifest.json');ok('manifest.json 파일',r.ok);const m=await r.json();
+    for(const i of m.icons||[]){try{ok('아이콘 '+i.sizes+(i.purpose==='maskable'?' (maskable)':''),(await fetch(i.src)).ok)}catch(e){ok('아이콘 '+i.sizes,false)}}
+  }catch(e){ok('manifest.json 파일',false)}
+  let reg=null;try{reg=await navigator.serviceWorker.getRegistration()}catch(e){}
+  ok('서비스 워커 등록',!!reg);
+  return out;
+}
+async function showInst(){
+  const ua=navigator.userAgent,sa=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+  let h=sa?'<b>설치된 앱으로 실행 중이에요.</b>':dp?'<button id="instbtn">앱 설치</button>':/iphone|ipad|ipod/i.test(ua)?'아이폰: 사파리에서 공유 버튼 → "홈 화면에 추가"':'크롬 메뉴(⋮) → "앱 설치" 또는 "홈 화면에 추가"';
+  if(/KAKAOTALK|NAVER|FBAN|FBAV|Instagram|Line\//i.test(ua))h+='<br>⚠️ 앱 안의 브라우저예요. 크롬이나 사파리로 열어 주세요.';
+  h+='<br>'+(await pwaCheck()).join('<br>');
+  $('inst').innerHTML=h;
+  const b=$('instbtn');if(b)b.onclick=async()=>{dp.prompt();await dp.userChoice;dp=null;showInst()};
+}
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').then(showInst).catch(showInst);else showInst();
 boot();
 </script>
 </body>
