@@ -12,6 +12,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="디디">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://jjojjolonglong-sudo.github.io/mnmn/media.js"></script>
 <style>
 :root{--ink:#111;--yel:#FFD60A;--pink:#FF4D8D;--blue:#2D6BFF;--gray:#E4E4E4;
 /* 우표 그림자: drop-shadow(가로 세로 번짐 색) 두 겹. 앞=붙어 있는 얇은 그림자, 뒤=살짝 퍼지는 그림자 */
@@ -118,6 +119,7 @@ const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 
   <section id="tab-more" class="hide">
     <div id="more"></div>
     <h3>앱 설치</h3><div id="inst" style="font-size:14px;line-height:1.6"></div>
+    <h3>원본 사진 폴더 (PC)</h3><div class="hint">일기 사진의 원본을 이 PC 폴더에 모아요. 폰에서 올린 원본은 서버에 잠시 보관되었다가, 여기서 받으면 폴더로 옮겨져요.</div><button id="dirbtn" class="plain">폴더 연결</button> <button id="syncbtn" class="plain">원본 받기</button><div id="syncmsg" class="hint"></div>
     <div style="margin-top:20px"><button id="logout" class="plain">로그아웃</button></div>
   </section>
 </main>
@@ -142,6 +144,8 @@ const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 
 
 <script>
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+if(!window.Media)window.Media={init(){},url:()=>'',img:()=>'',newId:()=>crypto.randomUUID(),folder:{supported:false,name:async()=>''},process:async()=>{throw new Error('media.js could not be loaded')},upload:async()=>{throw new Error('media.js could not be loaded')},save:async()=>{throw new Error('media.js could not be loaded')}};
+Media.init({worker:MEDIA_URL,getToken:async()=>(await sb.auth.getSession()).data.session?.access_token});
 const $=id=>document.getElementById(id);
 function stampPath(W=60,H=72,k=5,d=3,mx=7,my=9,ra=1.45,rr=.7){ // k=모서리 블록, d=톱니 깊이, mx/my=가로/세로 톱니 수, ra=톱니:홈 폭 비율, rr=모서리 둥글기
   const N=(L,m)=>{const n=(L-2*k)/((m+1)+ra*m),t=ra*n,a=[];let x=k;for(let i=0;i<=m;i++){a.push([x,x+n]);x+=n+t}return a},
@@ -169,7 +173,7 @@ function fg(h){const n=parseInt(h.slice(1),16),l=(0.299*(n>>16)+0.587*((n>>8)&25
 const cat=id=>S.cats.find(c=>c.id===id), ix=id=>S.idxs.find(i=>i.id===id), find=id=>S.logs.find(l=>l.id===id);
 const rep=l=>l.image_url||ix(l.index_id)?.image_url||cat(l.category_id)?.image_url||null;
 const col=l=>cat(l.category_id)?.color||'#E4E4E4';
-function ph(l,big){const u=rep(l);return u?`<div class="ph" data-img="${esc(big?u:th3(u))}" data-alt="${esc(u)}"></div>`:`<div class="ph t3" style="color:${fg(col(l))}"><b>${Array.from(l.text||'').filter(c=>c.trim()).slice(0,3).map(esc).join('<br>')}</b></div>`}
+function ph(l,big){const u=Media.url(rep(l));return u?`<div class="ph" data-img="${esc(u)}"></div>`:`<div class="ph t3" style="color:${fg(col(l))}"><b>${Array.from(l.text||'').filter(c=>c.trim()).slice(0,3).map(esc).join('<br>')}</b></div>`}
 function onDay(l,key,t){
   if(l.is_checked)return (doneDay(l)||l.log_date)===key;
   if(l.is_checked===null)return l.log_date===key;
@@ -186,6 +190,10 @@ async function boot(){
 $('login').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});if(!fail(error))boot()};
 $('signup').onclick=async()=>{const {error}=await sb.auth.signUp({email:$('em').value.trim(),password:$('pw').value});if(!fail(error)){toast('가입 완료. 메일 인증을 켰다면 확인하세요');boot()}};
 $('logout').onclick=async()=>{await sb.auth.signOut();boot()};
+const dirLabel=()=>Media.folder.name().then(n=>{$('dirbtn').textContent=n?'폴더: '+n+' (변경)':'폴더 연결'}).catch(()=>{});
+$('dirbtn').onclick=async()=>{try{await Media.folder.connect();dirLabel()}catch(e){if(e.name!=='AbortError')toast(e.message||'이 브라우저에서는 지원하지 않아요')}};
+$('syncbtn').onclick=async()=>{const m=$('syncmsg');try{m.textContent='받는 중…';const r=await Media.sync({onProgress:p=>m.textContent=p.done+'/'+p.total});m.textContent=r.total?`완료: ${r.done}/${r.total}`+(r.failed.length?` · 실패 ${r.failed.length}`:''):'받을 원본이 없어요'}catch(e){m.textContent=e.message}};
+dirLabel();
 
 /* 데이터 */
 async function loadAll(){
@@ -203,43 +211,24 @@ document.querySelectorAll('.tabs [data-t]').forEach(b=>b.onclick=()=>{
   ['todo','cal','day','more'].forEach(t=>$('tab-'+t).classList.toggle('hide',t!==b.dataset.t));
 });
 
-/* 이미지 (리사이즈 후 Worker로 업로드) */
+/* 이미지: 공용 모듈(media.js). image_url에는 해시 16자만 저장하고, 원본은 폴더가 연결된 PC면 폴더에, 아니면 서버 inbox에 보관 */
 $('busy').addEventListener('cancel',e=>e.preventDefault());
 function pick(){return new Promise(res=>{const i=$('pick');i.value='';i.onchange=()=>res(i.files[0]||null);i.click()})}
-async function uploadImg(file){
+async function uploadImg(file,id){
   $('busy').showModal();
   try{
-    const bmp=await createImageBitmap(file);
-    const jpg=(max,q)=>{const k=Math.min(1,max/Math.max(bmp.width,bmp.height)),c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);return new Promise(r=>c.toBlob(r,'image/jpeg',q))};
-    const fd=new FormData();fd.append('main',await jpg(1000,0.82),'main.jpg');fd.append('thumb',await jpg(240,0.75),'thumb.jpg');
-    const {data:{session}}=await sb.auth.getSession();
-    const r=await fetch(MEDIA_URL+'/upload',{method:'POST',headers:{Authorization:'Bearer '+session.access_token},body:fd})
-      .catch(()=>{throw new Error('미디어 Worker에 연결할 수 없어요 (주소/CORS 확인)')});
-    const j=await r.json().catch(()=>({}));
-    if(!r.ok||!j.ok)throw new Error('업로드 실패 ('+r.status+') '+(j.error||''));
-    return j.url;
+    const s=await Media.save(file,{id});
+    if(s.original==='failed')toast('원본 보관에 실패했어요: '+s.originalError);
+    s.close();return s.hash;
   }finally{$('busy').close()}
 }
-/* 비공개 이미지도 보이도록: 로그인 토큰으로 받아서 표시 (공개 폴더면 그냥 받아짐) */
-const BLOBS=new Map();
-function blobUrl(u){
-  if(!BLOBS.has(u))BLOBS.set(u,(async()=>{
-    const {data:{session}}=await sb.auth.getSession();
-    const r=await fetch(u,{headers:session?{Authorization:'Bearer '+session.access_token}:{}});
-    if(!r.ok)throw new Error(r.status);
-    return URL.createObjectURL(await r.blob());
-  })().catch(e=>{BLOBS.delete(u);throw e}));
-  return BLOBS.get(u);
-}
 function hydrate(){
-  document.querySelectorAll('[data-img]:not([data-ok])').forEach(async el=>{
-    el.dataset.ok='1';const set=u=>{el.style.backgroundImage=`url('${u}')`;el.style.backgroundSize='cover';el.style.backgroundPosition='center'};
-    for(const u of [el.dataset.img,el.dataset.alt]){if(!u)continue;try{set(await blobUrl(u));return}catch(e){}}
-    set(el.dataset.alt||el.dataset.img);
+  document.querySelectorAll('[data-img]:not([data-ok])').forEach(el=>{
+    el.dataset.ok='1';if(!el.dataset.img)return;
+    el.style.backgroundImage=`url('${el.dataset.img}')`;el.style.backgroundSize='cover';el.style.backgroundPosition='center';
   });
 }
 new MutationObserver(hydrate).observe(document.body,{childList:true,subtree:true});
-const th3=u=>u.replace(/\/(images\/[0-9a-f]{32})\.jpg$/,'/$1_s.jpg');
 
 /* 할 일 */
 function renderTodo(){
@@ -312,7 +301,7 @@ function setMode(edit){
   $('dtitle').textContent=!S.edit?'새 기록':edit?'수정':'상세 보기';
 }
 function openDlg(log,date,edit){
-  S.edit=log||null;S.img=undefined;const x=log&&ix(log.index_id);
+  S.edit=log||null;S.img=undefined;S.rid=log?log.id:Media.newId();const x=log&&ix(log.index_id);
   $('f-t').value=log?log.text:'';
   $('f-cr').value=log?ymd(new Date(log.created_at)):'';
   $('f-d').value=log?(log.log_date||''):(date||'');
@@ -323,12 +312,13 @@ function openDlg(log,date,edit){
   document.querySelectorAll('.ext').forEach(e=>e.classList.toggle('hide',!log));
   $('f-danger').classList.toggle('hide',!log);
   setMode(!log||edit);prev();$('dlg').showModal();
+  if(log&&Media.folder.supported)Media.folder.fileUrl(log.id).then(u=>{const e=$('f-prev').querySelector('.ph[data-img]');if(u&&e&&S.edit&&S.edit.id===log.id)e.style.backgroundImage=`url('${u}')`}).catch(()=>{});
 }
 $('f-edit').onclick=()=>setMode(true);
 $('f-x').onclick=()=>$('dlg').close();
 $('f-c').onchange=()=>{$('f-dn').value=$('f-c').checked?($('f-dn').value||today()):''};
 $('f-dn').onchange=()=>{$('f-c').checked=!!$('f-dn').value};
-$('f-pick').onclick=async()=>{const f=await pick();if(!f)return;try{S.img=await uploadImg(f);prev();toast('사진을 올렸어요')}catch(e){toast(e.message)}};
+$('f-pick').onclick=async()=>{const f=await pick();if(!f)return;try{S.img=await uploadImg(f,S.rid);prev();toast('사진을 올렸어요')}catch(e){toast(e.message)}};
 $('f-rm').onclick=()=>{S.img=null;prev()};
 $('f-t').oninput=prev;
 $('f-ok').onclick=async()=>{
@@ -342,7 +332,7 @@ $('f-ok').onclick=async()=>{
     if(c)upd.done_at=(dn&&dn===doneDay(S.edit))?S.edit.done_at:(dn?noon(dn):new Date().toISOString());
     if(cr&&cr!==ymd(new Date(S.edit.created_at)))upd.created_at=noon(cr);
     r=await sb.from('didi_log').update(upd).eq('id',S.edit.id);
-  }else r=await sb.from('didi_log').insert({...base,meta,user_id:S.user.id,is_checked:false});
+  }else r=await sb.from('didi_log').insert({...base,meta,id:S.rid,user_id:S.user.id,is_checked:false});
   if(!fail(r.error)){$('dlg').close();loadAll()}
 };
 $('f-disc').onclick=async()=>{
@@ -358,7 +348,7 @@ $('f-del').onclick=async()=>{
 
 /* 더보기: 분류/인덱스 관리 + 휴지통 */
 function renderMore(){
-  const th=(o,c)=>`<span class="thm" style="background:${c}" ${o.image_url?`data-img="${esc(th3(o.image_url))}" data-alt="${esc(o.image_url)}"`:''}></span>`;
+  const th=(o,c)=>`<span class="thm" style="background:${c}" ${Media.url(o.image_url)?`data-img="${esc(Media.url(o.image_url))}"`:''}></span>`;
   const btn='<button class="plain" data-a="img">사진</button><button class="plain" data-a="ren">이름</button>';
   const irow=(i,sub)=>`<div class="mr ${sub?'sub':''}" data-k="didi_index" data-id="${i.id}">${th(i,'#E4E4E4')}<span class="t">${esc(i.name)}</span>${btn}<button class="red" data-a="del">삭제</button></div>`;
   let h='<h3>분류 · 인덱스</h3>';
@@ -381,7 +371,7 @@ $('more').addEventListener('click',async e=>{
     const {error}=await sb.from('didi_category').insert({user_id:S.user.id,name:n,color:PALETTE[S.cats.length%PALETTE.length],sort_order:S.cats.length});if(!fail(error))loadAll();return}
   const a=e.target.dataset.a,row=e.target.closest('.mr');if(!a||!row)return;
   const tb=row.dataset.k,id=row.dataset.id;let r;
-  if(a==='img'){const f=await pick();if(!f)return;try{r=await sb.from(tb).update({image_url:await uploadImg(f)}).eq('id',id)}catch(err){toast(err.message);return}}
+  if(a==='img'){const f=await pick();if(!f)return;try{r=await sb.from(tb).update({image_url:await uploadImg(f,id)}).eq('id',id)}catch(err){toast(err.message);return}}
   else if(a==='ren'){const o=(tb==='didi_category'?cat(id):ix(id)),n=(prompt('이름',o.name)||'').trim();if(!n)return;r=await sb.from(tb).update({name:n}).eq('id',id)}
   else if(a==='add'){const d=await newIdx(id);if(d)loadAll();return}
   else if(a==='del'){if(!confirm('삭제할까요? 연결된 기록은 남고 분류/인덱스만 비워져요.'))return;r=await sb.from(tb).delete().eq('id',id)}
