@@ -64,7 +64,8 @@ button.plain{background:#fff}button.red{background:var(--pink)}
 .stamps{display:flex;flex-wrap:wrap;gap:8px}
 .stamp,.pv{width:60px;height:72px;padding:0;background:var(--yel);cursor:pointer;flex:none;clip-path:var(--stamp)}
 .sw{filter:var(--shadow);flex:none}
-.stamp.emo{display:grid;grid-template-columns:repeat(2,auto);justify-content:center;align-content:center;gap:2px 6px;background:#fff;font-size:20px;line-height:1.1;cursor:default}
+.emo4{width:60px;height:72px;flex:none;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;place-items:center;font-size:22px;line-height:1}
+.emo4 span{filter:var(--shadow)}
 .em{margin-left:2px;font-size:11px;font-weight:400}
 .dayrow.today .dl{color:var(--blue)}
 .eg{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}.eg button{padding:2px 6px;font-size:20px;background:#fff}
@@ -298,8 +299,8 @@ function renderDay(){
     const d=new Date(s0);d.setDate(s0.getDate()+i);const key=ymd(d);
     const it=S.logs.filter(l=>l.is_checked&&(doneDay(l)||l.log_date)===key),em=stampsOn(key).slice(0,4);
     h+=`<div class="dayrow ${key===t?'today':''}"><div class="dl">${d.getMonth()+1}/${d.getDate()}<br><small>${'일월화수목금토'[i]}</small></div><div class="stamps">`
-      +(em.length?`<div class="sw"><div class="stamp emo" title="${esc(em.map(x=>x.name).join(', '))}">${em.map(x=>`<span>${esc(x.emoji)}</span>`).join('')}</div></div>`:'')
       +it.map(l=>`<div class="sw"><div class="stamp" data-id="${l.id}" style="background:${col(l)}" title="${esc(l.text)}">${ph(l)}</div></div>`).join('')
+      +(em.length?`<div class="emo4" title="${esc(em.map(x=>x.name).join(', '))}">${em.map(x=>`<span>${esc(x.emoji)}</span>`).join('')}</div>`:'')
       +(em.length||it.length?'':'<span class="dt">–</span>')+'</div></div>';
   }
   $('days').innerHTML=h;
@@ -451,6 +452,9 @@ $('more').addEventListener('click',async e=>{
   else if(a==='rm'){if(!confirm('완전히 삭제할까요?'))return;r=await sb.from('didi_log').delete().eq('id',id)}
   if(r&&!fail(r.error))loadAll();
 });
+
+/* 날짜 입력: 연도는 4자리까지만 (20261010처럼 이어서 입력 가능) */
+document.querySelectorAll('input[type=date]').forEach(i=>{i.min='1000-01-01';i.max='9999-12-31'});
 
 /* 기간 도장(이모지) */
 function stampsOn(key){const t=today();return S.idxs.filter(i=>i.emoji&&i.started_on&&key>=i.started_on&&key<=t&&(!i.finished_on||key<=i.finished_on))}
