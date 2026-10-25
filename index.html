@@ -68,6 +68,15 @@ button.plain{background:#fff}button.red{background:var(--pink)}
 .emo4 span{filter:var(--shadow)}
 .em{margin-left:2px;font-size:11px;font-weight:400}
 .dayrow.today .dl{color:var(--blue)}
+.emo4 span,.em span{cursor:pointer}
+.seg{display:flex;gap:6px;margin-bottom:10px}.seg button{flex:1;min-width:0;background:#fff;padding:6px 2px;font-size:14px}.seg button.on{background:var(--yel)}
+.hd{display:flex;align-items:baseline;gap:8px}.jump{position:relative;cursor:pointer;display:inline-block}
+.jd{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;padding:0;border:0;cursor:pointer}
+.tl{font-size:12px;color:var(--blue);cursor:pointer;font-weight:700}
+.lg{display:flex;gap:8px;padding:3px 0 3px 48px;font-size:14px;cursor:pointer}.lg .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mr.ended{opacity:.55}.mr .t[data-tg]{cursor:pointer}
+.pvx{width:60px;height:72px;border:2px solid var(--ink);border-radius:6px;background:#E4E4E4;overflow:hidden;flex:none}
+dialog .dchk{display:inline-flex;align-items:center;gap:3px;margin:0;font-weight:400;font-size:13px}.dchk input{width:16px;height:16px;padding:0}
 .eg{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}.eg button{padding:2px 6px;font-size:20px;background:#fff}
 emoji-picker{width:100%;height:290px;margin-top:10px;--border-color:#ccc;--emoji-size:1.4rem;--num-columns:8}
 .pv{cursor:default}
@@ -114,20 +123,24 @@ const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 
   </section>
 
   <section id="tab-cal" class="hide">
-    <div class="cal-head"><button class="plain" data-mv="-1">‹</button><div class="row"><b class="ml"></b><button class="plain" data-mv="0">오늘</button></div><button class="plain" data-mv="1">›</button></div>
+    <div class="cal-head"><button class="plain" data-mv="-1">‹</button><div class="hd"><label class="jump"><b class="ml"></b><input type="date" class="jd" data-t="m" aria-label="날짜 이동"></label><span class="tl" data-today="m">오늘</span></div><button class="plain" data-mv="1">›</button></div>
     <div class="cal" id="cal"></div>
   </section>
 
   <section id="tab-day" class="hide">
-    <div class="cal-head"><button class="plain" data-wk="-1">‹</button><div class="row"><b class="wl"></b><button class="plain" data-wk="0">이번 주</button></div><button class="plain" data-wk="1">›</button></div>
+    <div class="cal-head"><button class="plain" data-wk="-1">‹</button><div class="hd"><label class="jump"><b class="wl"></b><input type="date" class="jd" data-t="w" aria-label="날짜 이동"></label><span class="tl" data-today="w">오늘</span></div><button class="plain" data-wk="1">›</button></div>
     <div id="days"></div>
   </section>
 
   <section id="tab-more" class="hide">
-    <div id="more"></div>
-    <h3>앱 설치</h3><div id="inst" style="font-size:14px;line-height:1.6"></div>
-    <h3>원본 사진 폴더 (PC)</h3><div class="hint">일기 사진의 원본을 이 PC 폴더에 모아요. 폰에서 올린 원본은 서버에 잠시 보관되었다가, 여기서 받으면 폴더로 옮겨져요.</div><button id="dirbtn" class="plain">폴더 연결</button> <button id="syncbtn" class="plain">원본 받기</button><div id="syncmsg" class="hint"></div>
-    <div style="margin-top:20px"><button id="logout" class="plain">로그아웃</button></div>
+    <div class="seg"><button data-mp="tree" class="on">계층</button><button data-mp="trash">휴지통</button><button data-mp="app">앱·계정</button></div>
+    <div id="mp-tree"><div id="more"></div></div>
+    <div id="mp-trash" class="hide"></div>
+    <div id="mp-app" class="hide">
+      <h3>앱 설치</h3><div id="inst" style="font-size:14px;line-height:1.6"></div>
+      <h3>원본 사진 폴더 (PC)</h3><div class="hint">일기 사진의 원본을 이 PC 폴더에 모아요. 폰에서 올린 원본은 서버에 잠시 보관되었다가, 여기서 받으면 폴더로 옮겨져요.</div><button id="dirbtn" class="plain">폴더 연결</button> <button id="syncbtn" class="plain">원본 받기</button><div id="syncmsg" class="hint"></div>
+      <div style="margin-top:20px"><button id="logout" class="plain">로그아웃</button></div>
+    </div>
   </section>
 </main>
 
@@ -147,13 +160,23 @@ const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 
   </div>
 </dialog>
 <dialog id="emo"><div id="emo-t" style="font-weight:700;font-size:18px"></div>
-  <div id="emo-nw"><label for="emo-n">이름</label><input id="emo-n"></div>
-  <div id="emo-wr" class="hide"><label>집필 작품</label><div class="row"><button id="emo-w" class="plain" type="button">작품 연결</button><button id="emo-wx" class="plain" type="button">연결 해제</button></div><div id="emo-wt" class="hint"></div></div>
+  <div class="row" style="align-items:flex-end;margin-top:8px"><div class="pvx" id="emo-pv"></div>
+    <div class="eo btns"><button id="emo-pick" class="plain" type="button">사진 선택</button><button id="emo-rm" class="plain" type="button">사진 제거</button></div></div>
+  <label for="emo-n">이름</label><input id="emo-n">
+  <label for="emo-c">분류</label><select id="emo-c"></select>
+  <div id="emo-wr" class="hide"><label>집필 작품</label><div class="row"><div id="emo-wt" style="flex:1;min-width:0"></div><button id="emo-w" class="plain eo" type="button">작품 연결</button><button id="emo-wx" class="plain eo" type="button">해제</button></div></div>
   <label for="emo-in">이모지 (선택)</label><input id="emo-in" maxlength="8" placeholder="아래에서 고르거나 직접 입력">
-  <div class="g2"><div><label for="emo-d">시작일</label><input id="emo-d" type="date"></div><div><label for="emo-e">종료일</label><input id="emo-e" type="date"></div></div>
-  <emoji-picker id="emo-p"></emoji-picker>
-  <div class="eg hide" id="emo-g"></div>
-  <div class="foot"><button id="emo-off" class="plain">도장 끄기</button><div class="row" style="margin-left:auto"><button id="emo-x" class="plain">닫기</button><button id="emo-ok">저장</button></div></div>
+  <label for="emo-r">반복 (도장이 찍히는 날)</label><select id="emo-r"><option value="">매일</option><option value="w">요일마다</option><option value="m">매월</option></select>
+  <div id="emo-rw" class="row hide" style="gap:8px;flex-wrap:wrap;margin-top:6px"></div>
+  <div id="emo-rmo" class="row hide" style="margin-top:6px"><input id="emo-rd" type="number" min="1" max="31" style="width:80px"><span>일</span></div>
+  <div class="g2"><div><label for="emo-d">시작일</label><input id="emo-d" type="date"></div><div><label for="emo-e">종료일</label><div class="row" style="gap:6px"><input id="emo-e" type="date"><button id="emo-end" class="plain eo" type="button" style="flex:none">종료</button></div></div></div>
+  <div id="emo-cnt" class="hint"></div>
+  <emoji-picker id="emo-p" class="eo"></emoji-picker>
+  <div class="eg eo hide" id="emo-g"></div>
+  <div class="foot">
+    <div class="row eo" id="emo-danger"><button id="emo-del" class="red">삭제</button></div>
+    <div class="row" style="margin-left:auto"><button id="emo-edit" class="vo">편집</button><button id="emo-x" class="plain">닫기</button><button id="emo-ok" class="eo">저장</button></div>
+  </div>
 </dialog>
 <dialog id="pk"><div class="row"><input id="pk-q" placeholder="검색"><button id="pk-x" class="plain">닫기</button></div><div id="pk-l" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;max-height:60vh;overflow:auto;margin-top:10px"></div></dialog>
 <dialog id="busy"><span class="spin"></span>사진 올리는 중…</dialog>
@@ -168,6 +191,8 @@ Media.init({worker:MEDIA_URL,getToken:async()=>(await sb.auth.getSession()).data
 const CAT_BOOK='eed2cf8c-8db6-42ba-b67f-cb18d51af4f0',CAT_MOVIE='89253f70-a97f-4747-b304-061a942866ed',CAT_WRITE='16edcf59-2231-4be4-b94e-39f5421424b3',LOCKED=new Set([CAT_BOOK,CAT_MOVIE,CAT_WRITE]);
 /* 집필 분류도 고정: 이 분류의 인덱스는 인덱스 설정 창에서 집필앱(wkwk_work)의 작품(name, cover)에 직접 연결할 수 있어요 */
 const isWrite=cid=>cid===CAT_WRITE,locked=id=>LOCKED.has(id);
+/* 집필·독서·영상은 분류 목록 맨 위 세 개로 고정 */
+const PIN=[CAT_WRITE,CAT_BOOK,CAT_MOVIE],pinCats=a=>[...PIN.map(id=>a.find(c=>c.id===id)).filter(Boolean),...a.filter(c=>!PIN.includes(c.id))];
 const $=id=>document.getElementById(id);
 function stampPath(W=60,H=72,k=5,d=3,mx=7,my=9,ra=1.45,rr=.7){ // k=모서리 블록, d=톱니 깊이, mx/my=가로/세로 톱니 수, ra=톱니:홈 폭 비율, rr=모서리 둥글기
   const N=(L,m)=>{const n=(L-2*k)/((m+1)+ra*m),t=ra*n,a=[];let x=k;for(let i=0;i<=m;i++){a.push([x,x+n]);x+=n+t}return a},
@@ -225,7 +250,7 @@ async function loadAll(){
     sb.from('didi_log').select('*').is('discarded_at',null).order('created_at').order('seq').limit(3000),
     sb.from('didi_log').select('*').not('discarded_at','is',null).order('discarded_at',{ascending:false}).limit(500)]);
   if(fail(a.error)||fail(b.error)||fail(c.error)||fail(d.error))return;
-  S.cats=a.data||[];S.idxs=b.data||[];S.logs=c.data||[];S.trash=d.data||[];
+  S.cats=pinCats(a.data||[]);S.idxs=b.data||[];S.logs=c.data||[];S.trash=d.data||[];
   renderTodo();renderCal();renderDay();renderMore();
 }
 document.querySelectorAll('.tabs [data-t]').forEach(b=>b.onclick=()=>{
@@ -285,27 +310,27 @@ function renderCal(){
   let h='일월화수목금토'.split('').map(w=>`<div class="wd">${w}</div>`).join('')+'<div class="cell blank"></div>'.repeat(first.getDay());
   for(let d=1;d<=n;d++){
     const key=y+'-'+z(m+1)+'-'+z(d);
-    const it=S.logs.filter(l=>onDay(l,key,t)).map(l=>`<div class="st ${l.is_checked?'done':''}" data-id="${l.id}" style="background:${col(l)};color:${fg(col(l))}">${esc(l.text)}</div>`).join('');
-    h+=`<div class="cell ${key===t?'today':''}" data-d="${key}"><div class="dn">${d}<span class="em">${stampsOn(key).map(x=>`<span title="${esc(x.name)}">${esc(x.emoji)}</span>`).join('')}</span></div>${it}</div>`;
+    const it=ord(S.logs.filter(l=>onDay(l,key,t))).map(l=>`<div class="st ${l.is_checked?'done':''}" data-id="${l.id}" style="background:${col(l)};color:${fg(col(l))}">${esc(l.text)}</div>`).join('');
+    h+=`<div class="cell ${key===t?'today':''}" data-d="${key}"><div class="dn">${d}<span class="em">${stampsOn(key).map(x=>`<span data-idx="${x.id}" title="${esc(x.name)}">${esc(x.emoji)}</span>`).join('')}</span></div>${it}</div>`;
   }
   $('cal').innerHTML=h;
 }
-$('cal').onclick=e=>{const c=e.target.closest('.cell[data-d]');if(!c)return;const st=e.target.closest('.st');openDlg(st?find(st.dataset.id):null,c.dataset.d)};
+$('cal').onclick=e=>{const m=e.target.closest('[data-idx]');if(m){openIdx(ix(m.dataset.idx));return}const c=e.target.closest('.cell[data-d]');if(!c)return;const st=e.target.closest('.st');openDlg(st?find(st.dataset.id):null,c.dataset.d)};
 function renderDay(){
   const s0=S.week,t=today(),e=new Date(s0);e.setDate(e.getDate()+6);
   document.querySelectorAll('.wl').forEach(el=>el.textContent=`${s0.getMonth()+1}/${s0.getDate()} – ${e.getMonth()+1}/${e.getDate()}`);
   let h='';
   for(let i=0;i<7;i++){
     const d=new Date(s0);d.setDate(s0.getDate()+i);const key=ymd(d);
-    const it=S.logs.filter(l=>l.is_checked&&(doneDay(l)||l.log_date)===key),em=stampsOn(key).slice(0,4);
+    const it=S.logs.filter(l=>l.is_checked&&(doneDay(l)||l.log_date)===key).sort(byDone),em=stampsOn(key).slice(0,4);
     h+=`<div class="dayrow ${key===t?'today':''}"><div class="dl">${d.getMonth()+1}/${d.getDate()}<br><small>${'일월화수목금토'[i]}</small></div><div class="stamps">`
       +it.map(l=>`<div class="sw"><div class="stamp" data-id="${l.id}" style="background:${col(l)}" title="${esc(l.text)}">${ph(l)}</div></div>`).join('')
-      +(em.length?`<div class="emo4" title="${esc(em.map(x=>x.name).join(', '))}">${em.map(x=>`<span>${esc(x.emoji)}</span>`).join('')}</div>`:'')
+      +(em.length?`<div class="emo4" title="${esc(em.map(x=>x.name).join(', '))}">${em.map(x=>`<span data-idx="${x.id}" title="${esc(x.name)}">${esc(x.emoji)}</span>`).join('')}</div>`:'')
       +(em.length||it.length?'':'<span class="dt">–</span>')+'</div></div>';
   }
   $('days').innerHTML=h;
 }
-$('days').onclick=e=>{const s=e.target.closest('.stamp');if(s&&s.dataset.id)openDlg(find(s.dataset.id))};
+$('days').onclick=e=>{const m=e.target.closest('[data-idx]');if(m){openIdx(ix(m.dataset.idx));return}const s=e.target.closest('.stamp');if(s&&s.dataset.id)openDlg(find(s.dataset.id))};
 
 /* 팝업 */
 function fillCat(v){$('f-cat').innerHTML='<option value="">분류 없음</option>'+S.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')+'<option value="__new">+ 새 분류</option>';$('f-cat').value=v||''}
@@ -316,10 +341,9 @@ async function newCat(){
   const {data,error}=await sb.from('didi_category').insert({user_id:S.user.id,name,color:PALETTE[S.cats.length%PALETTE.length],sort_order:S.cats.length}).select().single();
   if(fail(error)){fillCat('');return}S.cats.push(data);fillCat(data.id);fillIdx('');
 }
-function newIdx(cid){return new Promise(res=>{   // 새 인덱스 창: 이름, 이모지, 시작일, 종료일(모두 선택, 기본 빈칸)
-  S.emoIdx=null;S.emoCid=cid||null;S.emoRes=res;
-  $('emo-t').textContent='새 인덱스';$('emo-nw').classList.remove('hide');$('emo-n').value='';
-  $('emo-in').value='';$('emo-d').value='';$('emo-e').value='';$('emo-off').classList.add('hide');S.emoW=undefined;wkUi(cid,null);showEmo();$('emo-n').focus()})}
+function newIdx(cid){return new Promise(res=>{   // 새 인덱스 창 (이름만 필수, 나머지는 선택)
+  S.emoIdx=null;S.emoRes=res;S.emoRid=crypto.randomUUID();S.emoImg=undefined;S.emoW=undefined;
+  fillEmo({name:'',category_id:cid||null});$('emo-t').textContent='새 인덱스';$('emo-danger').classList.add('hide');emoMode(true);showEmo();$('emo-n').focus()})}
 $('f-cat').onchange=async()=>{if($('f-cat').value==='__new')await newCat();else fillIdx('');prev()};
 $('f-idx').onchange=async()=>{if($('f-idx').value==='__new'){const c=$('f-cat').value,d=await newIdx(c==='__new'?'':c);fillIdx(d?d.id:'')}prev()};
 function setMode(edit){
@@ -414,40 +438,42 @@ function renderMore(){
   const btn='<button class="plain" data-a="img">사진</button><button class="plain" data-a="ren">이름</button>';
   const md=x=>x.replace(/-/g,'/');
   const per=i=>i.started_on?` <small>(${md(i.started_on)}~${i.finished_on?md(i.finished_on):''})</small>`:'';
-  const irow=(i,sub,pre)=>{const end=!!i.finished_on;
-    return `<div class="mr ${sub?'sub':''}" data-k="didi_index" data-id="${i.id}">${th(i,'#E4E4E4')}<span class="t">${pre||''}${i.emoji?esc(i.emoji)+' ':''}${esc(i.name)}${per(i)}${i.meta?.ref?.name?` <small>✍️ ${esc(i.meta.ref.name)}</small>`:''}</span>`
-      +(end?'':btn+'<button class="plain" data-a="emo">설정</button><button class="plain" data-a="end">종료</button>')+'<button class="red" data-a="del">삭제</button></div>'};
-  let h='<h3>분류 · 인덱스</h3>';
-  for(const c of S.cats){
-    h+=`<div class="mr" data-k="didi_category" data-id="${c.id}">${th(c,c.color)}<b class="t">${esc(c.name)}</b><input type="color" value="${c.color}" data-col="${c.id}" style="width:34px;height:26px;padding:1px">${btn}<button data-a="add">+인덱스</button>${locked(c.id)?'<span class="hint">🔒 고정</span>':'<button class="red" data-a="del">삭제</button>'}</div>`;
-    h+=S.idxs.filter(i=>i.category_id===c.id&&!i.finished_on).map(i=>irow(i,1)).join('');
+  const logs=a=>a.length?a.map(l=>`<div class="lg" data-lid="${l.id}"><span class="t">${l.is_checked?'✅ ':''}${esc(l.text)}</span><span class="dt">${dd(l.log_date)}</span></div>`).join(''):'<div class="lg" style="cursor:default;color:#888">기록 없음</div>';
+  const node=(key,label,a)=>{const o=S.open.has(key);return `<div class="mr sub"><span class="t" data-tg="${key}">${o?'▾':'▸'} ${label} <small>(${a.length})</small></span></div>`+(o?logs(a):'')};
+  const irow=i=>{const a=S.logs.filter(l=>l.index_id===i.id),o=S.open.has('i:'+i.id);
+    return `<div class="mr sub ${i.finished_on?'ended':''}" data-k="didi_index" data-id="${i.id}">${th(i,'#E4E4E4')}<span class="t" data-tg="i:${i.id}">${o?'▾':'▸'} ${i.emoji?esc(i.emoji)+' ':''}${esc(i.name)} <small>(${a.length})</small>${per(i)}</span><button class="plain" data-a="edit">수정</button></div>`+(o?logs(a):'')};
+  const idxs=cid=>{const a=S.idxs.filter(i=>cid?i.category_id===cid:(!i.category_id||!cat(i.category_id)));return [...a.filter(i=>!i.finished_on),...a.filter(i=>i.finished_on)]};
+  let h='';
+  for(const c of S.cats){const shut=S.shut.has(c.id);
+    h+=`<div class="mr" data-k="didi_category" data-id="${c.id}">${th(c,c.color)}<b class="t" data-tg="c:${c.id}">${shut?'▸':'▾'} ${esc(c.name)}</b><input type="color" value="${c.color}" data-col="${c.id}" style="width:34px;height:26px;padding:1px">${btn}<button data-a="add">+인덱스</button>${locked(c.id)?'<span class="hint">🔒 고정</span>':'<button class="red" data-a="del">삭제</button>'}</div>`;
+    if(!shut)h+=idxs(c.id).map(irow).join('')+node('n:'+c.id,'(인덱스 없음)',S.logs.filter(l=>l.category_id===c.id&&!ix(l.index_id)));
   }
-  h+=S.idxs.filter(i=>(!i.category_id||!cat(i.category_id))&&!i.finished_on).map(i=>irow(i,0)).join('');
+  const oi=idxs(null),ol=S.logs.filter(l=>(!l.category_id||!cat(l.category_id))&&!ix(l.index_id));
+  if(oi.length||ol.length)h+='<div class="mr"><b class="t">분류 없음</b></div>'+oi.map(irow).join('')+node('n:','(인덱스 없음)',ol);
   h+='<div style="margin-top:8px"><button id="addcat">+ 분류 추가</button></div>';
-  const ended=S.idxs.filter(i=>i.finished_on);
-  if(ended.length)h+=`<h3>종료된 인덱스 (${ended.length})</h3>`+ended.map(i=>irow(i,0,cat(i.category_id)?esc(cat(i.category_id).name)+' · ':'')).join('');
-  h+=`<h3>휴지통 (${S.trash.length})</h3>`+(S.trash.length?S.trash.map(l=>`<div class="mr" data-k="didi_log" data-id="${l.id}"><span class="t">${esc(l.text)}</span><span class="dt">${dd(ymd(new Date(l.discarded_at)))}</span><button class="plain" data-a="res">복원</button><button class="red" data-a="rm">삭제</button></div>`).join(''):'<div class="empty">비어 있어요.</div>');
   $('more').innerHTML=h;
+  $('mp-trash').innerHTML=S.trash.length?S.trash.map(l=>`<div class="mr" data-k="didi_log" data-id="${l.id}"><span class="t">${esc(l.text)}</span><span class="dt">${dd(ymd(new Date(l.discarded_at)))}</span><button class="plain" data-a="res">복원</button><button class="red" data-a="rm">삭제</button></div>`).join(''):'<div class="empty">비어 있어요.</div>';
+  document.querySelector('[data-mp=trash]').textContent=`휴지통 (${S.trash.length})`;
 }
 $('more').addEventListener('change',async e=>{
   if(!e.target.dataset.col)return;
   const {error}=await sb.from('didi_category').update({color:e.target.value}).eq('id',e.target.dataset.col);
   if(!fail(error))loadAll();
 });
-$('more').addEventListener('click',async e=>{
-  if(e.target.id==='addcat'){const n=(prompt('새 분류 이름')||'').trim();if(!n)return;
+$('tab-more').addEventListener('click',async e=>{
+  const t=e.target;
+  if(t.id==='addcat'){const n=(prompt('새 분류 이름')||'').trim();if(!n)return;
     const {error}=await sb.from('didi_category').insert({user_id:S.user.id,name:n,color:PALETTE[S.cats.length%PALETTE.length],sort_order:S.cats.length});if(!fail(error))loadAll();return}
-  const a=e.target.dataset.a,row=e.target.closest('.mr');if(!a||!row)return;
+  const lg=t.closest('[data-lid]');if(lg){const l=find(lg.dataset.lid);if(l)openDlg(l);return}
+  const a=t.dataset.a,row=t.closest('.mr');
+  if(!a){const tg=t.closest('[data-tg]');if(tg){const k=tg.dataset.tg,c=k[0]==='c',set=c?S.shut:S.open,id=c?k.slice(2):k;set.has(id)?set.delete(id):set.add(id);renderMore()}return}
+  if(!row)return;
   const tb=row.dataset.k,id=row.dataset.id;let r;
   if(a==='img'){const f=await pick();if(!f)return;try{r=await sb.from(tb).update({image_url:await uploadImg(f,id)}).eq('id',id)}catch(err){toast(err.message);return}}
-  else if(a==='ren'){const o=(tb==='didi_category'?cat(id):ix(id)),n=(prompt('이름',o.name)||'').trim();if(!n)return;r=await sb.from(tb).update({name:n}).eq('id',id)}
-  else if(a==='add'){const d=await newIdx(id);if(d)loadAll();return}
-  else if(a==='emo'){openEmo(ix(id));return}
-  else if(a==='end'){
-    const d=prompt('종료일을 입력하세요 (YYYY-MM-DD)\n종료하면 선택 목록에서 숨겨지고, 다시 진행 중으로 돌릴 수 없어요.',today());
-    if(!d)return;if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){toast('날짜 형식이 맞지 않아요');return}
-    r=await sb.from('didi_index').update({finished_on:d}).eq('id',id)}
-  else if(a==='del'){if(tb==='didi_category'&&locked(id)){toast('독서·영상·집필 분류는 삭제할 수 없어요');return}if(!confirm('삭제할까요? 연결된 기록은 남고 분류/인덱스만 비워져요.'))return;r=await sb.from(tb).delete().eq('id',id)}
+  else if(a==='ren'){const o=cat(id),n=(prompt('이름',o.name)||'').trim();if(!n)return;r=await sb.from(tb).update({name:n}).eq('id',id)}
+  else if(a==='add'){const d=await newIdx(id);if(d){S.open.add('i:'+d.id);loadAll()}return}
+  else if(a==='edit'){openIdx(ix(id),true);return}
+  else if(a==='del'){if(locked(id)){toast('독서·영상·집필 분류는 삭제할 수 없어요');return}if(!confirm('분류를 삭제할까요?\n이 분류의 인덱스와 기록은 남고, 분류만 비워져요.'))return;r=await sb.from(tb).delete().eq('id',id)}
   else if(a==='res')r=await sb.from('didi_log').update({discarded_at:null}).eq('id',id);
   else if(a==='rm'){if(!confirm('완전히 삭제할까요?'))return;r=await sb.from('didi_log').delete().eq('id',id)}
   if(r&&!fail(r.error))loadAll();
@@ -455,46 +481,95 @@ $('more').addEventListener('click',async e=>{
 
 /* 날짜 입력: 연도는 4자리까지만 (20261010처럼 이어서 입력 가능) */
 document.querySelectorAll('input[type=date]').forEach(i=>{i.min='1000-01-01';i.max='9999-12-31'});
+S.open=new Set();S.shut=new Set();
 
-/* 기간 도장(이모지) */
-function stampsOn(key){const t=today();return S.idxs.filter(i=>i.emoji&&i.started_on&&key>=i.started_on&&key<=t&&(!i.finished_on||key<=i.finished_on))}
+/* 정렬: 완료한 항목은 완료 시각순, 그 뒤에 미완료(입력일순) */
+const byDone=(a,b)=>(a.done_at||'').localeCompare(b.done_at||'');
+const ord=a=>[...a.filter(l=>l.is_checked).sort(byDone),...a.filter(l=>!l.is_checked)];
+
+/* 기간 도장: 이모지 + 시작일~종료일 + 반복(매일/요일/매월). 오늘까지만 찍혀요 */
+function recOn(i,key){const r=i.recur;if(!r)return true;const d=new Date(key+'T00:00:00');
+  if(r.t==='w')return (r.d||[]).includes(d.getDay());
+  if(r.t==='m'){const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();return d.getDate()===Math.min(r.d||1,last)}
+  return true}
+function stampsOn(key){const t=today();return S.idxs.filter(i=>i.emoji&&i.started_on&&key>=i.started_on&&key<=t&&(!i.finished_on||key<=i.finished_on)&&recOn(i,key))}
 const EMOJIS=['🏃','🚶','🧘','🏋️','🚴','🏊','📖','📚','✍️','📝','🎹','🎸','🎨','💻','🧠','💊','🥗','💧','☕','🍎','🛌','🪥','🧹','🌱','🐶','🐱','☀️','🌙','⭐','❤️','🔥','✅','💰','🎧','🎯','📅'];
 $('emo-g').innerHTML=EMOJIS.map(e=>`<button class="plain" type="button">${e}</button>`).join('');
 $('emo-g').onclick=e=>{if(e.target.tagName==='BUTTON')$('emo-in').value=e.target.textContent};
-function wkUi(cid,i){const on=isWrite(cid);$('emo-wr').classList.toggle('hide',!on);const r=S.emoW===undefined?i?.meta?.ref:S.emoW;$('emo-wt').textContent=on&&r?'✍️ '+(r.name||''):''}
+$('emo-p').addEventListener('emoji-click',e=>{$('emo-in').value=e.detail.unicode});
+$('emo-rw').innerHTML='일월화수목금토'.split('').map((c,i)=>`<label class="dchk"><input type="checkbox" value="${i}">${c}</label>`).join('');
+
+/* 인덱스 창: 보기(기본) / 수정 한 창에서 사진·이름·분류·이모지·반복·기간·종료·삭제 */
+function emoMode(edit){$('emo').classList.toggle('view',!edit);$('emo').querySelectorAll('input,select').forEach(e=>e.disabled=!edit)}
+function recUi(){const v=$('emo-r').value;$('emo-rw').classList.toggle('hide',v!=='w');$('emo-rmo').classList.toggle('hide',v!=='m')}
+function wkUi(){const on=isWrite($('emo-c').value);$('emo-wr').classList.toggle('hide',!on);const r=S.emoW===undefined?S.emoIdx?.meta?.ref:S.emoW;$('emo-wt').textContent=on&&r?'✍️ '+(r.name||''):''}
+function pvUi(){const u=Media.url(S.emoImg!==undefined?S.emoImg:S.emoIdx?.image_url);$('emo-pv').innerHTML=u?`<div class="ph" data-img="${esc(u)}"></div>`:''}
+function fillEmo(i){
+  $('emo-n').value=i.name||'';
+  $('emo-c').innerHTML='<option value="">분류 없음</option>'+S.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');$('emo-c').value=i.category_id||'';
+  $('emo-in').value=i.emoji||'';$('emo-d').value=i.started_on||'';$('emo-e').value=i.finished_on||'';
+  const r=i.recur;$('emo-r').value=r?r.t:'';recUi();
+  document.querySelectorAll('#emo-rw input').forEach(c=>c.checked=!!(r&&r.t==='w'&&(r.d||[]).includes(+c.value)));
+  $('emo-rd').value=r&&r.t==='m'?r.d:'';
+  $('emo-cnt').textContent=i.id?`기록 ${S.logs.filter(l=>l.index_id===i.id).length}개`:'';
+  wkUi();pvUi();
+}
+function showEmo(){const ok=!!customElements.get('emoji-picker');$('emo-p').classList.toggle('hide',!ok);$('emo-g').classList.toggle('hide',ok);$('emo').showModal()}
+function openIdx(i,edit){
+  if(!i)return;S.emoIdx=i;S.emoRes=null;S.emoRid=i.id;S.emoImg=undefined;S.emoW=undefined;
+  fillEmo(i);$('emo-t').textContent=i.name+(edit?' · 수정':'');$('emo-danger').classList.remove('hide');emoMode(!!edit);showEmo();
+}
+$('emo-edit').onclick=()=>{emoMode(true);$('emo-t').textContent=(S.emoIdx?.name||'')+' · 수정'};
+$('emo-r').onchange=recUi;$('emo-c').onchange=wkUi;
+$('emo-end').onclick=()=>{$('emo-e').value=today()};
+$('emo-pick').onclick=async()=>{const f=await pick();if(!f)return;try{S.emoImg=await uploadImg(f,S.emoRid);pvUi();toast('사진을 올렸어요')}catch(e){toast(e.message)}};
+$('emo-rm').onclick=()=>{S.emoImg=null;pvUi()};
 $('emo-w').onclick=async()=>{try{
   const w=await sb.from('wkwk_work').select('id,name,cover').limit(1000);
   if(w.error)throw new Error(w.error.message);
   const items=w.data.map(x=>({hash:x.cover||'',title:x.name||'(제목 없음)',ref:{t:'wkwk_work',id:x.id}})).sort((a,b)=>a.title.localeCompare(b.title,'ko'));
   const o=await choose(items,'작품 검색');if(!o)return;
-  S.emoW={t:'wkwk_work',id:o.ref.id,name:o.title,hash:o.hash};
-  if(!S.emoIdx&&!$('emo-n').value.trim())$('emo-n').value=o.title;
-  wkUi(S.emoIdx?S.emoIdx.category_id:S.emoCid,S.emoIdx)}catch(e){toast(e.message)}};
-$('emo-wx').onclick=()=>{S.emoW=null;wkUi(S.emoIdx?S.emoIdx.category_id:S.emoCid,S.emoIdx)};
-function showEmo(){const ok=!!customElements.get('emoji-picker');$('emo-p').classList.toggle('hide',!ok);$('emo-g').classList.toggle('hide',ok);$('emo').showModal()}
-function openEmo(i){S.emoIdx=i;S.emoRes=null;$('emo-t').textContent=i.name+' · 설정';$('emo-nw').classList.add('hide');
-  $('emo-in').value=i.emoji||'';$('emo-d').value=i.started_on||'';$('emo-e').value=i.finished_on||'';$('emo-off').classList.remove('hide');S.emoW=undefined;wkUi(i.category_id,i);showEmo()}
-$('emo-p').addEventListener('emoji-click',e=>{$('emo-in').value=e.detail.unicode});
+  S.emoW={t:'wkwk_work',id:o.ref.id,name:o.title};if(o.hash){S.emoImg=o.hash;pvUi()}
+  if(!$('emo-n').value.trim())$('emo-n').value=o.title;
+  wkUi()}catch(e){toast(e.message)}};
+$('emo-wx').onclick=()=>{S.emoW=null;wkUi()};
 $('emo-x').onclick=()=>$('emo').close();
 $('emo').addEventListener('close',()=>{if(S.emoRes){S.emoRes(null);S.emoRes=null}});
 $('emo-ok').onclick=async()=>{
+  const name=$('emo-n').value.trim();if(!name){toast('이름을 입력하세요');return}
   const em=$('emo-in').value.trim(),sd=$('emo-d').value,ed=$('emo-e').value;
   if(sd&&ed&&ed<sd){toast('종료일이 시작일보다 빨라요');return}
-  const f={emoji:em||null,started_on:sd||(em?today():null),finished_on:ed||null};   // 이모지만 있고 시작일이 비면 오늘부터
-  if(S.emoW!==undefined){const meta={...(S.emoIdx?.meta||{})};   // 집필 작품 연결: 표지는 인덱스 사진으로, 작품 정보는 meta.ref에
-    if(S.emoW){meta.ref={t:S.emoW.t,id:S.emoW.id,name:S.emoW.name};f.image_url=S.emoW.hash||null}else{delete meta.ref;f.image_url=null}
-    f.meta=meta}
-  if(S.emoIdx){const {error}=await sb.from('didi_index').update(f).eq('id',S.emoIdx.id);if(!fail(error)){$('emo').close();loadAll()}return}
-  const name=$('emo-n').value.trim();if(!name){toast('이름을 입력하세요');return}
-  const {data,error}=await sb.from('didi_index').insert({user_id:S.user.id,name,category_id:S.emoCid,sort_order:S.idxs.length,...f}).select().single();
+  let recur=null;const rt=$('emo-r').value;
+  if(rt==='w'){const d=[...document.querySelectorAll('#emo-rw input:checked')].map(c=>+c.value);if(!d.length){toast('요일을 하나 이상 고르세요');return}recur={t:'w',d}}
+  else if(rt==='m'){const d=parseInt($('emo-rd').value);if(!(d>=1&&d<=31)){toast('날짜(1~31)를 입력하세요');return}recur={t:'m',d}}
+  const f={name,category_id:$('emo-c').value||null,emoji:em||null,started_on:sd||(em?today():null),finished_on:ed||null,recur};
+  const old=S.emoIdx&&S.emoIdx.id?S.emoIdx:null,meta={...(old?.meta||{})};
+  if(S.emoW!==undefined){if(S.emoW)meta.ref=S.emoW;else delete meta.ref}
+  f.meta=meta;if(S.emoImg!==undefined)f.image_url=S.emoImg;
+  if(old){
+    const {error}=await sb.from('didi_index').update(f).eq('id',old.id);if(fail(error))return;
+    if((old.category_id||null)!==f.category_id)await sb.from('didi_log').update({category_id:f.category_id}).eq('index_id',old.id);   // 기록의 분류도 함께 이동
+    $('emo').close();loadAll();return}
+  const {data,error}=await sb.from('didi_index').insert({...f,id:S.emoRid,user_id:S.user.id,sort_order:S.idxs.length}).select().single();
   if(fail(error))return;S.idxs.push(data);const r=S.emoRes;S.emoRes=null;$('emo').close();if(r)r(data);loadAll();
 };
-$('emo-off').onclick=async()=>{const {error}=await sb.from('didi_index').update({emoji:null}).eq('id',S.emoIdx.id);if(!fail(error)){$('emo').close();loadAll()}};
+$('emo-del').onclick=async()=>{
+  if(!confirm('이 인덱스를 삭제할까요?\n기록은 남고, 인덱스만 비워져요.'))return;
+  const {error}=await sb.from('didi_index').delete().eq('id',S.emoIdx.id);if(!fail(error)){$('emo').close();loadAll()}
+};
 
-/* 날짜별: 주 단위 */
+/* 날짜별: 주 단위 / 오늘·날짜 이동 */
 function sun(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-x.getDay());return x}
 S.week=sun(new Date());
-document.querySelectorAll('[data-wk]').forEach(b=>b.onclick=()=>{const v=+b.dataset.wk;if(v)S.week.setDate(S.week.getDate()+7*v);else S.week=sun(new Date());renderDay()});
+document.querySelectorAll('[data-wk]').forEach(b=>b.onclick=()=>{S.week.setDate(S.week.getDate()+7*(+b.dataset.wk));renderDay()});
+document.querySelectorAll('.tl').forEach(b=>b.onclick=()=>{if(b.dataset.today==='m'){S.month=new Date();renderCal()}else{S.week=sun(new Date());renderDay()}});
+document.querySelectorAll('.jd').forEach(i=>{
+  i.onclick=()=>{try{i.showPicker()}catch(e){}};
+  i.onchange=()=>{if(!i.value)return;const d=new Date(i.value+'T00:00:00');
+    if(i.dataset.t==='m'){S.month=new Date(d.getFullYear(),d.getMonth(),1);renderCal()}else{S.week=sun(d);renderDay()}i.value=''};
+});
+
+document.querySelectorAll('[data-mp]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-mp]').forEach(x=>x.classList.toggle('on',x===b));['tree','trash','app'].forEach(t=>$('mp-'+t).classList.toggle('hide',t!==b.dataset.mp))});
 
 /* 앱 설치 안내 + 점검 */
 let dp=null;
