@@ -76,6 +76,7 @@ button.plain{background:#fff}button.red{background:var(--pink)}
 .lg{display:flex;gap:8px;padding:3px 0 3px 48px;font-size:14px;cursor:pointer}.lg .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mr.ended{opacity:.55}.mr .t[data-tg]{cursor:pointer}
 .pvx{width:60px;height:72px;border:2px solid var(--ink);border-radius:6px;background:#E4E4E4;overflow:hidden;flex:none}
+dialog .sk{display:inline-flex;align-items:center;gap:2px;font-size:13px;margin:0;font-weight:400}.sk button{padding:0 6px;font-size:12px}
 dialog .dchk{display:inline-flex;align-items:center;gap:3px;margin:0;font-weight:400;font-size:13px}.dchk input{width:16px;height:16px;padding:0}
 .eg{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}.eg button{padding:2px 6px;font-size:20px;background:#fff}
 emoji-picker{width:100%;height:290px;margin-top:10px;--border-color:#ccc;--emoji-size:1.4rem;--num-columns:8}
@@ -166,9 +167,12 @@ const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 
   <label for="emo-c">분류</label><select id="emo-c"></select>
   <div id="emo-wr" class="hide"><label>집필 작품</label><div class="row"><div id="emo-wt" style="flex:1;min-width:0"></div><button id="emo-w" class="plain eo" type="button">작품 연결</button><button id="emo-wx" class="plain eo" type="button">해제</button></div></div>
   <label for="emo-in">이모지 (선택)</label><input id="emo-in" maxlength="8" placeholder="아래에서 고르거나 직접 입력">
-  <label for="emo-r">반복 (도장이 찍히는 날)</label><select id="emo-r"><option value="">매일</option><option value="w">요일마다</option><option value="m">매월</option></select>
+  <label for="emo-r">반복</label><select id="emo-r"><option value="">없음</option><option value="d">매일 도장</option><option value="w">요일마다</option><option value="n">N일마다</option><option value="m">매월</option></select>
+  <div id="emo-rh" class="hint"></div>
   <div id="emo-rw" class="row hide" style="gap:8px;flex-wrap:wrap;margin-top:6px"></div>
+  <div id="emo-rnn" class="row hide" style="margin-top:6px"><input id="emo-rn" type="number" min="1" max="365" style="width:80px"><span>일마다</span></div>
   <div id="emo-rmo" class="row hide" style="margin-top:6px"><input id="emo-rd" type="number" min="1" max="31" style="width:80px"><span>일</span></div>
+  <div id="emo-sk" class="hide"><label>안 한 날 (매일 도장)</label><div id="emo-skl" class="row" style="gap:6px;flex-wrap:wrap"></div><button id="emo-skb" class="plain hide" type="button" style="margin-top:6px"></button></div>
   <div class="g2"><div><label for="emo-d">시작일</label><input id="emo-d" type="date"></div><div><label for="emo-e">종료일</label><div class="row" style="gap:6px"><input id="emo-e" type="date"><button id="emo-end" class="plain eo" type="button" style="flex:none">종료</button></div></div></div>
   <div id="emo-cnt" class="hint"></div>
   <emoji-picker id="emo-p" class="eo"></emoji-picker>
@@ -287,8 +291,11 @@ function renderTodo(){
 }
 $('list').addEventListener('change',async e=>{
   const id=e.target.dataset.c;if(!id)return;
-  const {error}=await sb.from('didi_log').update({is_checked:e.target.checked,done_at:e.target.checked?new Date().toISOString():null}).eq('id',id);
-  if(!fail(error))loadAll();
+  const c=e.target.checked,t=c?new Date().toISOString():null,l=find(id);
+  if(l){l.is_checked=c;l.done_at=t;renderTodo();renderCal();renderDay()}   // 화면 먼저 바꾸고
+  const {error}=await sb.from('didi_log').update({is_checked:c,done_at:t}).eq('id',id);   // 저장은 뒤에서
+  if(error){fail(error);loadAll();return}
+  if(l){if(c)await chainNext(l);else await chainUndo(l)}   // 반복 인덱스: 체크하면 다음 회차 생성, 해제하면 방금 만든 회차 삭제
 });
 $('list').addEventListener('contextmenu',e=>{const r=e.target.closest('.todo');if(!r)return;e.preventDefault();if(!$('dlg').open)openDlg(find(r.dataset.id),null,true)});
 let lp;
@@ -315,22 +322,22 @@ function renderCal(){
   }
   $('cal').innerHTML=h;
 }
-$('cal').onclick=e=>{const m=e.target.closest('[data-idx]');if(m){openIdx(ix(m.dataset.idx));return}const c=e.target.closest('.cell[data-d]');if(!c)return;const st=e.target.closest('.st');openDlg(st?find(st.dataset.id):null,c.dataset.d)};
+$('cal').onclick=e=>{const m=e.target.closest('[data-idx]');if(m){openIdx(ix(m.dataset.idx),false,m.closest('[data-d]')?.dataset.d);return}const c=e.target.closest('.cell[data-d]');if(!c)return;const st=e.target.closest('.st');openDlg(st?find(st.dataset.id):null,c.dataset.d)};
 function renderDay(){
   const s0=S.week,t=today(),e=new Date(s0);e.setDate(e.getDate()+6);
   document.querySelectorAll('.wl').forEach(el=>el.textContent=`${s0.getMonth()+1}/${s0.getDate()} – ${e.getMonth()+1}/${e.getDate()}`);
   let h='';
   for(let i=0;i<7;i++){
     const d=new Date(s0);d.setDate(s0.getDate()+i);const key=ymd(d);
-    const it=S.logs.filter(l=>l.is_checked&&(doneDay(l)||l.log_date)===key).sort(byDone),em=stampsOn(key).slice(0,4);
+    const it=S.logs.filter(l=>l.is_checked&&(doneDay(l)||l.log_date)===key).sort(byDone),emAll=stampsOn(key),em=emAll.length>4?emAll.slice(0,3):emAll;
     h+=`<div class="dayrow ${key===t?'today':''}"><div class="dl">${d.getMonth()+1}/${d.getDate()}<br><small>${'일월화수목금토'[i]}</small></div><div class="stamps">`
       +it.map(l=>`<div class="sw"><div class="stamp" data-id="${l.id}" style="background:${col(l)}" title="${esc(l.text)}">${ph(l)}</div></div>`).join('')
-      +(em.length?`<div class="emo4" title="${esc(em.map(x=>x.name).join(', '))}">${em.map(x=>`<span data-idx="${x.id}" title="${esc(x.name)}">${esc(x.emoji)}</span>`).join('')}</div>`:'')
+      +(em.length?`<div class="emo4" data-d="${key}" title="${esc(emAll.map(x=>x.name).join(', '))}">${em.map(x=>`<span data-idx="${x.id}" title="${esc(x.name)}">${esc(x.emoji)}</span>`).join('')}${emAll.length>4?`<span style="font-size:13px;font-weight:700;cursor:default">+${emAll.length-3}</span>`:''}</div>`:'')
       +(em.length||it.length?'':'<span class="dt">–</span>')+'</div></div>';
   }
   $('days').innerHTML=h;
 }
-$('days').onclick=e=>{const m=e.target.closest('[data-idx]');if(m){openIdx(ix(m.dataset.idx));return}const s=e.target.closest('.stamp');if(s&&s.dataset.id)openDlg(find(s.dataset.id))};
+$('days').onclick=e=>{const m=e.target.closest('[data-idx]');if(m){openIdx(ix(m.dataset.idx),false,m.closest('[data-d]')?.dataset.d);return}const s=e.target.closest('.stamp');if(s&&s.dataset.id)openDlg(find(s.dataset.id))};
 
 /* 팝업 */
 function fillCat(v){$('f-cat').innerHTML='<option value="">분류 없음</option>'+S.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')+'<option value="__new">+ 새 분류</option>';$('f-cat').value=v||''}
@@ -342,7 +349,7 @@ async function newCat(){
   if(fail(error)){fillCat('');return}S.cats.push(data);fillCat(data.id);fillIdx('');
 }
 function newIdx(cid){return new Promise(res=>{   // 새 인덱스 창 (이름만 필수, 나머지는 선택)
-  S.emoIdx=null;S.emoRes=res;S.emoRid=crypto.randomUUID();S.emoImg=undefined;S.emoW=undefined;
+  S.emoIdx=null;S.emoDate=null;S.emoRes=res;S.emoRid=crypto.randomUUID();S.emoImg=undefined;S.emoW=undefined;
   fillEmo({name:'',category_id:cid||null});$('emo-t').textContent='새 인덱스';$('emo-danger').classList.add('hide');emoMode(true);showEmo();$('emo-n').focus()})}
 $('f-cat').onchange=async()=>{if($('f-cat').value==='__new')await newCat();else fillIdx('');prev()};
 $('f-idx').onchange=async()=>{if($('f-idx').value==='__new'){const c=$('f-cat').value,d=await newIdx(c==='__new'?'':c);fillIdx(d?d.id:'')}prev()};
@@ -418,13 +425,15 @@ $('f-ok').onclick=async()=>{
     if(c)upd.done_at=(dn&&dn===doneDay(S.edit))?S.edit.done_at:(dn?noon(dn):new Date().toISOString());
     if(cr&&cr!==ymd(new Date(S.edit.created_at)))upd.created_at=noon(cr);
     r=await sb.from('didi_log').update(upd).eq('id',S.edit.id);
+    if(!r.error){const l2={...S.edit,...upd};if(c&&!S.edit.is_checked)await chainNext(l2);else if(!c&&S.edit.is_checked)await chainUndo(l2)}
   }else r=await sb.from('didi_log').insert({...base,meta,id:S.rid,user_id:S.user.id,is_checked:false});
   if(!fail(r.error)){$('dlg').close();loadAll()}
 };
 $('f-disc').onclick=async()=>{
-  if(!confirm('버릴까요? 목록에서는 사라지고 더보기 > 휴지통에 보관돼요.'))return;
+  const ch=isChain(ix(S.edit.index_id))&&S.edit.is_checked===false;
+  if(!confirm('버릴까요? 목록에서는 사라지고 더보기 > 휴지통에 보관돼요.'+(ch?'\n반복 인덱스라서 이번 회차는 건너뛰고 다음 로그가 만들어져요.':'')))return;
   const {error}=await sb.from('didi_log').update({discarded_at:new Date().toISOString()}).eq('id',S.edit.id);
-  if(!fail(error)){$('dlg').close();loadAll()}
+  if(!fail(error)){if(ch)await chainNext({...S.edit,done_at:new Date().toISOString()});$('dlg').close();loadAll()}
 };
 $('f-del').onclick=async()=>{
   if(!confirm('완전히 삭제할까요? 되돌릴 수 없어요.'))return;
@@ -438,7 +447,9 @@ function renderMore(){
   const btn='<button class="plain" data-a="img">사진</button><button class="plain" data-a="ren">이름</button>';
   const md=x=>x.replace(/-/g,'/');
   const per=i=>i.started_on?` <small>(${md(i.started_on)}~${i.finished_on?md(i.finished_on):''})</small>`:'';
-  const logs=a=>a.length?a.map(l=>`<div class="lg" data-lid="${l.id}"><span class="t">${l.is_checked?'✅ ':''}${esc(l.text)}</span><span class="dt">${dd(l.log_date)}</span></div>`).join(''):'<div class="lg" style="cursor:default;color:#888">기록 없음</div>';
+  const logs=a=>{if(!a.length)return '<div class="lg" style="cursor:default;color:#888">기록 없음</div>';
+    return [...a].reverse().slice(0,30).map(l=>`<div class="lg" data-lid="${l.id}"><span class="t">${l.is_checked?'✅ ':''}${esc(l.text)}</span><span class="dt">${dd(l.log_date)}</span></div>`).join('')
+      +(a.length>30?`<div class="lg" style="cursor:default;color:#888">… 오래된 기록 ${a.length-30}개는 생략 (캘린더·날짜별에서 볼 수 있어요)</div>`:'')};
   const node=(key,label,a)=>{const o=S.open.has(key);return `<div class="mr sub"><span class="t" data-tg="${key}">${o?'▾':'▸'} ${label} <small>(${a.length})</small></span></div>`+(o?logs(a):'')};
   const irow=i=>{const a=S.logs.filter(l=>l.index_id===i.id),o=S.open.has('i:'+i.id);
     return `<div class="mr sub ${i.finished_on?'ended':''}" data-k="didi_index" data-id="${i.id}">${th(i,'#E4E4E4')}<span class="t" data-tg="i:${i.id}">${o?'▾':'▸'} ${i.emoji?esc(i.emoji)+' ':''}${esc(i.name)} <small>(${a.length})</small>${per(i)}</span><button class="plain" data-a="edit">수정</button></div>`+(o?logs(a):'')};
@@ -487,12 +498,8 @@ S.open=new Set();S.shut=new Set();
 const byDone=(a,b)=>(a.done_at||'').localeCompare(b.done_at||'');
 const ord=a=>[...a.filter(l=>l.is_checked).sort(byDone),...a.filter(l=>!l.is_checked)];
 
-/* 기간 도장: 이모지 + 시작일~종료일 + 반복(매일/요일/매월). 오늘까지만 찍혀요 */
-function recOn(i,key){const r=i.recur;if(!r)return true;const d=new Date(key+'T00:00:00');
-  if(r.t==='w')return (r.d||[]).includes(d.getDay());
-  if(r.t==='m'){const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();return d.getDate()===Math.min(r.d||1,last)}
-  return true}
-function stampsOn(key){const t=today();return S.idxs.filter(i=>i.emoji&&i.started_on&&key>=i.started_on&&key<=t&&(!i.finished_on||key<=i.finished_on)&&recOn(i,key))}
+/* 매일 도장: 반복='매일 도장' + 이모지 + 시작일~종료일. 오늘까지만 찍히고, '안 한 날'은 meta.skip에 날짜로 저장해 뺍니다 */
+function stampsOn(key){const t=today();return S.idxs.filter(i=>i.recur?.t==='d'&&i.emoji&&i.started_on&&key>=i.started_on&&key<=t&&(!i.finished_on||key<=i.finished_on)&&!(i.meta?.skip||[]).includes(key))}
 const EMOJIS=['🏃','🚶','🧘','🏋️','🚴','🏊','📖','📚','✍️','📝','🎹','🎸','🎨','💻','🧠','💊','🥗','💧','☕','🍎','🛌','🪥','🧹','🌱','🐶','🐱','☀️','🌙','⭐','❤️','🔥','✅','💰','🎧','🎯','📅'];
 $('emo-g').innerHTML=EMOJIS.map(e=>`<button class="plain" type="button">${e}</button>`).join('');
 $('emo-g').onclick=e=>{if(e.target.tagName==='BUTTON')$('emo-in').value=e.target.textContent};
@@ -501,7 +508,8 @@ $('emo-rw').innerHTML='일월화수목금토'.split('').map((c,i)=>`<label class
 
 /* 인덱스 창: 보기(기본) / 수정 한 창에서 사진·이름·분류·이모지·반복·기간·종료·삭제 */
 function emoMode(edit){$('emo').classList.toggle('view',!edit);$('emo').querySelectorAll('input,select').forEach(e=>e.disabled=!edit)}
-function recUi(){const v=$('emo-r').value;$('emo-rw').classList.toggle('hide',v!=='w');$('emo-rmo').classList.toggle('hide',v!=='m')}
+function recUi(){const v=$('emo-r').value;$('emo-rw').classList.toggle('hide',v!=='w');$('emo-rnn').classList.toggle('hide',v!=='n');$('emo-rmo').classList.toggle('hide',v!=='m');
+  $('emo-rh').textContent={d:'시작일부터 오늘까지 매일 이모지 도장이 찍혀요. (이모지 필요)',w:'이 인덱스의 로그를 체크하면 다음 요일의 로그가 자동으로 만들어져요.',n:'로그를 체크하면 N일 뒤의 로그가 자동으로 만들어져요.',m:'로그를 체크하면 다음 달 그 날짜의 로그가 자동으로 만들어져요.'}[v]||''}
 function wkUi(){const on=isWrite($('emo-c').value);$('emo-wr').classList.toggle('hide',!on);const r=S.emoW===undefined?S.emoIdx?.meta?.ref:S.emoW;$('emo-wt').textContent=on&&r?'✍️ '+(r.name||''):''}
 function pvUi(){const u=Media.url(S.emoImg!==undefined?S.emoImg:S.emoIdx?.image_url);$('emo-pv').innerHTML=u?`<div class="ph" data-img="${esc(u)}"></div>`:''}
 function fillEmo(i){
@@ -510,18 +518,51 @@ function fillEmo(i){
   $('emo-in').value=i.emoji||'';$('emo-d').value=i.started_on||'';$('emo-e').value=i.finished_on||'';
   const r=i.recur;$('emo-r').value=r?r.t:'';recUi();
   document.querySelectorAll('#emo-rw input').forEach(c=>c.checked=!!(r&&r.t==='w'&&(r.d||[]).includes(+c.value)));
-  $('emo-rd').value=r&&r.t==='m'?r.d:'';
+  $('emo-rd').value=r&&r.t==='m'?r.d:'';$('emo-rn').value=r&&r.t==='n'?r.n:'';
   $('emo-cnt').textContent=i.id?`기록 ${S.logs.filter(l=>l.index_id===i.id).length}개`:'';
-  wkUi();pvUi();
+  wkUi();pvUi();skUi();
 }
 function showEmo(){const ok=!!customElements.get('emoji-picker');$('emo-p').classList.toggle('hide',!ok);$('emo-g').classList.toggle('hide',ok);$('emo').showModal()}
-function openIdx(i,edit){
-  if(!i)return;S.emoIdx=i;S.emoRes=null;S.emoRid=i.id;S.emoImg=undefined;S.emoW=undefined;
+function openIdx(i,edit,date){
+  if(!i)return;S.emoIdx=i;S.emoDate=date||null;S.emoRes=null;S.emoRid=i.id;S.emoImg=undefined;S.emoW=undefined;
   fillEmo(i);$('emo-t').textContent=i.name+(edit?' · 수정':'');$('emo-danger').classList.remove('hide');emoMode(!!edit);showEmo();
 }
 $('emo-edit').onclick=()=>{emoMode(true);$('emo-t').textContent=(S.emoIdx?.name||'')+' · 수정'};
 $('emo-r').onchange=recUi;$('emo-c').onchange=wkUi;
 $('emo-end').onclick=()=>{$('emo-e').value=today()};
+
+/* 안 한 날 (매일 도장): 해당 날짜만 도장 제외 */
+function skUi(){const i=S.emoIdx,on=!!(i&&i.id&&i.recur?.t==='d');$('emo-sk').classList.toggle('hide',!on);if(!on)return;
+  const sk=[...(i.meta?.skip||[])].sort(),d=S.emoDate;
+  $('emo-skl').innerHTML=sk.length?sk.map(x=>`<span class="sk">${x.replace(/-/g,'/')}<button type="button" class="plain" data-sk="${x}">✕</button></span>`).join(''):'<span class="hint" style="margin:0">없음</span>';
+  const show=d&&d>=(i.started_on||'')&&d<=today()&&!sk.includes(d);
+  $('emo-skb').classList.toggle('hide',!show);if(show)$('emo-skb').textContent=`${d.replace(/-/g,'/')} 안 함`}
+async function setSkip(list){const i=S.emoIdx,meta={...(i.meta||{}),skip:list};
+  const {error}=await sb.from('didi_index').update({meta}).eq('id',i.id);if(fail(error))return;i.meta=meta;skUi();loadAll()}
+$('emo-skb').onclick=()=>setSkip([...(S.emoIdx.meta?.skip||[]),S.emoDate]);
+$('emo-skl').onclick=e=>{const d=e.target.dataset.sk;if(d)setSkip((S.emoIdx.meta?.skip||[]).filter(x=>x!==d))};
+
+/* 반복 로그(요일마다/N일마다/매월): 체크하면 다음 회차 로그를 만들어요 */
+const isChain=i=>!!i&&['w','n','m'].includes(i.recur?.t);
+const renderAll=()=>{renderTodo();renderCal();renderDay();renderMore()};
+function nextOn(i,l){
+  const r=i.recur,base=[l.log_date,doneDay(l)].filter(Boolean).sort().pop();if(!base)return null;
+  const d=new Date(base+'T00:00:00');let nx=null;
+  if(r.t==='n'){d.setDate(d.getDate()+Math.max(1,r.n||1));nx=ymd(d)}
+  else if(r.t==='w'){const days=r.d||[];if(!days.length)return null;
+    for(let k=1;k<=7;k++){const x=new Date(d);x.setDate(d.getDate()+k);if(days.includes(x.getDay())){nx=ymd(x);break}}}
+  else{let y=d.getFullYear(),m=d.getMonth();
+    for(let k=0;k<2;k++){const last=new Date(y,m+1,0).getDate(),c=ymd(new Date(y,m,Math.min(r.d||1,last)));if(c>base){nx=c;break}m++;if(m>11){m=0;y++}}}
+  return nx&&!(i.finished_on&&nx>i.finished_on)?nx:null}
+async function chainNext(l){
+  const i=ix(l.index_id);if(!isChain(i))return;
+  if(S.logs.some(x=>x.index_id===i.id&&x.is_checked===false&&x.id!==l.id))return;   // 열려 있는 회차가 있으면 만들지 않아요
+  const nx=nextOn(i,l);if(!nx)return;
+  const {data,error}=await sb.from('didi_log').insert({user_id:S.user.id,text:l.text,index_id:l.index_id,category_id:l.category_id,log_date:nx,is_checked:false,meta:{from:l.id}}).select().single();
+  if(fail(error))return;S.logs.push(data);renderAll();toast('다음 회차를 만들었어요 ('+nx.slice(5).replace('-','/')+')')}
+async function chainUndo(l){
+  const {error}=await sb.from('didi_log').delete().eq('meta->>from',l.id).eq('is_checked',false);
+  if(!error){S.logs=S.logs.filter(x=>!(x.meta?.from===l.id&&x.is_checked===false));renderAll()}}
 $('emo-pick').onclick=async()=>{const f=await pick();if(!f)return;try{S.emoImg=await uploadImg(f,S.emoRid);pvUi();toast('사진을 올렸어요')}catch(e){toast(e.message)}};
 $('emo-rm').onclick=()=>{S.emoImg=null;pvUi()};
 $('emo-w').onclick=async()=>{try{
@@ -540,7 +581,9 @@ $('emo-ok').onclick=async()=>{
   const em=$('emo-in').value.trim(),sd=$('emo-d').value,ed=$('emo-e').value;
   if(sd&&ed&&ed<sd){toast('종료일이 시작일보다 빨라요');return}
   let recur=null;const rt=$('emo-r').value;
-  if(rt==='w'){const d=[...document.querySelectorAll('#emo-rw input:checked')].map(c=>+c.value);if(!d.length){toast('요일을 하나 이상 고르세요');return}recur={t:'w',d}}
+  if(rt==='d'){if(!em){toast('매일 도장에는 이모지가 필요해요');return}recur={t:'d'}}
+  else if(rt==='n'){const n=parseInt($('emo-rn').value);if(!(n>=1&&n<=365)){toast('간격(일)을 입력하세요');return}recur={t:'n',n}}
+  else if(rt==='w'){const d=[...document.querySelectorAll('#emo-rw input:checked')].map(c=>+c.value);if(!d.length){toast('요일을 하나 이상 고르세요');return}recur={t:'w',d}}
   else if(rt==='m'){const d=parseInt($('emo-rd').value);if(!(d>=1&&d<=31)){toast('날짜(1~31)를 입력하세요');return}recur={t:'m',d}}
   const f={name,category_id:$('emo-c').value||null,emoji:em||null,started_on:sd||(em?today():null),finished_on:ed||null,recur};
   const old=S.emoIdx&&S.emoIdx.id?S.emoIdx:null,meta={...(old?.meta||{})};
