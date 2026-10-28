@@ -140,6 +140,7 @@ const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 
     <div id="mp-app" class="hide">
       <h3>앱 설치</h3><div id="inst" style="font-size:14px;line-height:1.6"></div>
       <h3>원본 사진 폴더 (PC)</h3><div class="hint">일기 사진의 원본을 이 PC 폴더에 모아요. 폰에서 올린 원본은 서버에 잠시 보관되었다가, 여기서 받으면 폴더로 옮겨져요.</div><button id="dirbtn" class="plain">폴더 연결</button> <button id="syncbtn" class="plain">원본 받기</button><div id="syncmsg" class="hint"></div>
+      <h3>독서앱 동기화</h3><div class="hint">독서앱의 기록 변화(수정·삭제·완독 등)를 일기의 독서 로그에 맞춰요. 새 기록은 저장할 때 자동으로 만들어지고, 이 버튼은 나머지 변화를 반영해요.</div><button id="bksync" class="plain">독서앱 기록 동기화</button><div id="bkmsg" class="hint"></div>
       <div style="margin-top:20px"><button id="logout" class="plain">로그아웃</button></div>
     </div>
   </section>
@@ -394,7 +395,7 @@ $('f-link').onclick=async()=>{
       const [b,r]=await Promise.all([sb.from('bkbk_books').select('id,series,volume,label,cover').not('cover','is',null).order('created_at',{ascending:false}).limit(1000),sb.from('bkbk_series').select('id,name')]);
       if(b.error||r.error)throw new Error((b.error||r.error).message);
       const sn=Object.fromEntries(r.data.map(x=>[x.id,x.name]));
-      items=b.data.map(x=>({hash:x.cover,title:[sn[x.series],x.volume!=null?x.volume+'권':'',x.label].filter(Boolean).join(' ')||'(제목 없음)',ref:{t:'bkbk_books',id:x.id}}));
+      items=b.data.map(x=>({hash:x.cover,title:((sn[x.series]||'')+(x.label?' ['+x.label+']':'')).trim()||'(제목 없음)',ref:{t:'bkbk_books',id:x.id}}));
     }else{
       const m=await sb.from('mvmv_movie').select('id,name,poster').not('poster','is',null).order('created_at',{ascending:false}).limit(1000);
       if(m.error)throw new Error(m.error.message);
@@ -613,6 +614,14 @@ document.querySelectorAll('.jd').forEach(i=>{
 });
 
 document.querySelectorAll('[data-mp]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-mp]').forEach(x=>x.classList.toggle('on',x===b));['tree','trash','app'].forEach(t=>$('mp-'+t).classList.toggle('hide',t!==b.dataset.mp))});
+
+/* 독서앱 동기화: DB 함수 didi_sync_bkbk 호출 */
+$('bksync').onclick=async()=>{
+  $('bksync').disabled=true;$('bkmsg').textContent='동기화 중…';
+  const {data,error}=await sb.rpc('didi_sync_bkbk');$('bksync').disabled=false;
+  if(error){$('bkmsg').textContent='실패: '+error.message;return}
+  $('bkmsg').textContent=data?.changed?`${data.changed}개를 반영했어요`:'바뀐 게 없어요';await loadAll();
+};
 
 /* 앱 설치 안내 + 점검 */
 let dp=null;
