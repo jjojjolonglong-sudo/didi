@@ -17,7 +17,7 @@
 <style>
 :root{--ink:#111;--yel:#FFD60A;--pink:#FF4D8D;--blue:#2D6BFF;--gray:#E4E4E4;
 /* 우표 그림자: drop-shadow(가로 세로 번짐 색) 두 겹. 앞=붙어 있는 얇은 그림자, 뒤=살짝 퍼지는 그림자 */
---shadow:drop-shadow(1px 1px 1px rgba(90,60,0,.22)) drop-shadow(2px 2px 1px rgba(90,60,0,.2))}
+--shadow:drop-shadow(1px 1px 1px rgba(90,60,0,.22)) drop-shadow(2px 2px 2px rgba(90,60,0,.2))}
 *{box-sizing:border-box}
 html{background-color:#FFF2A8;background-image:linear-gradient(#F3E58F 1px,transparent 1px),linear-gradient(90deg,#F3E58F 1px,transparent 1px);background-size:22px 22px;min-height:100%}
 html,body{margin:0;color:var(--ink);font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;font-size:16px;line-height:1.3}
@@ -148,6 +148,7 @@ const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 
 
 <dialog id="dlg">
   <div id="dtitle" style="font-weight:700;font-size:18px"></div>
+  <div id="f-ro" class="hint hide">독서앱에서 가져온 기록이에요. 수정은 독서앱에서 해 주세요.</div>
   <div class="row" style="align-items:flex-end"><div class="sw"><div class="pv" id="f-prev"></div></div>
     <div class="eo btns"><button id="f-pick" class="plain">사진 선택</button><button id="f-link" class="plain hide"></button><button id="f-gal" class="plain hide">서버 사진</button><button id="f-rm" class="plain">사진 제거</button></div></div>
   <div id="f-ref" class="hint"></div>
@@ -199,7 +200,7 @@ const isWrite=cid=>cid===CAT_WRITE,locked=id=>LOCKED.has(id);
 /* 집필·독서·영상은 분류 목록 맨 위 세 개로 고정 */
 const PIN=[CAT_WRITE,CAT_BOOK,CAT_MOVIE],pinCats=a=>[...PIN.map(id=>a.find(c=>c.id===id)).filter(Boolean),...a.filter(c=>!PIN.includes(c.id))];
 const $=id=>document.getElementById(id);
-function stampPath(W=60,H=72,k=5,d=3,mx=6,my=8,ra=1.45,rr=.7){ // k=모서리 블록, d=톱니 깊이, mx/my=가로/세로 톱니 수, ra=톱니:홈 폭 비율, rr=모서리 둥글기
+function stampPath(W=60,H=72,k=5,d=3,mx=7,my=9,ra=1.45,rr=.7){ // k=모서리 블록, d=톱니 깊이, mx/my=가로/세로 톱니 수, ra=톱니:홈 폭 비율, rr=모서리 둥글기
   const N=(L,m)=>{const n=(L-2*k)/((m+1)+ra*m),t=ra*n,a=[];let x=k;for(let i=0;i<=m;i++){a.push([x,x+n]);x+=n+t}return a},
     X=N(W,mx),Y=N(H,my),P=[[0,0]];
   X.forEach(([a,b])=>P.push([a,0],[a,d],[b,d],[b,0]));P.push([W,0]);
@@ -285,7 +286,7 @@ new MutationObserver(hydrate).observe(document.body,{childList:true,subtree:true
 /* 할 일 */
 function renderTodo(){
   const t=today();
-  const rows=S.logs.filter(l=>l.is_checked===false||(l.is_checked===true&&(doneDay(l)||l.log_date||t)>=t));
+  const rows=S.logs.filter(l=>l.category_id!==CAT_BOOK&&(l.is_checked===false||(l.is_checked===true&&(doneDay(l)||l.log_date||t)>=t)));
   $('list').innerHTML=rows.length?rows.map(l=>{
     const lim=ymd(new Date(Date.now()+3*864e5)),soon=!l.is_checked&&l.log_date&&l.log_date<=lim;
     return `<div class="todo ${l.is_checked?'done':soon?'soon':''}" data-id="${l.id}"><span class="t">${esc(l.text)}</span><span class="dt">${dd(l.log_date)}</span><input type="checkbox" data-c="${l.id}" ${l.is_checked?'checked':''} aria-label="완료"></div>`}).join(''):'<div class="empty">할 일이 없어요.</div>';
@@ -341,7 +342,7 @@ function renderDay(){
 $('days').onclick=e=>{const m=e.target.closest('[data-idx]');if(m){openIdx(ix(m.dataset.idx),false,m.closest('[data-d]')?.dataset.d);return}const s=e.target.closest('.stamp');if(s&&s.dataset.id)openDlg(find(s.dataset.id))};
 
 /* 팝업 */
-function fillCat(v){$('f-cat').innerHTML='<option value="">분류 없음</option>'+S.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')+'<option value="__new">+ 새 분류</option>';$('f-cat').value=v||''}
+function fillCat(v){$('f-cat').innerHTML='<option value="">분류 없음</option>'+S.cats.filter(c=>c.id!==CAT_BOOK||c.id===v).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')+'<option value="__new">+ 새 분류</option>';$('f-cat').value=v||''}
 function fillIdx(v){const c=$('f-cat').value;$('f-idx').innerHTML='<option value="">인덱스 없음</option>'+S.idxs.filter(i=>(i.category_id||'')===c&&(!i.finished_on||i.id===v)).map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('')+'<option value="__new">+ 새 인덱스</option>';$('f-idx').value=v||''}
 function prev(){const o={...(S.edit||{}),text:$('f-t').value,image_url:S.img!==undefined?S.img:S.edit?.image_url,index_id:$('f-idx').value,category_id:$('f-cat').value};$('f-prev').style.background=col(o);$('f-prev').innerHTML=ph(o,1)}
 async function newCat(){
@@ -360,7 +361,7 @@ function setMode(edit){
   $('dtitle').textContent=!S.edit?'새 기록':edit?'수정':'상세 보기';
 }
 function openDlg(log,date,edit){
-  S.edit=log||null;S.img=undefined;S.rid=log?log.id:Media.newId();const x=log&&ix(log.index_id);
+  S.edit=log||null;S.img=undefined;S.rid=log?log.id:Media.newId();const x=log&&ix(log.index_id),ro=!!(log&&log.category_id===CAT_BOOK);
   $('f-t').value=log?log.text:'';
   $('f-cr').value=log?ymd(new Date(log.created_at)):'';
   $('f-d').value=log?(log.log_date||''):(date||'');
@@ -370,7 +371,7 @@ function openDlg(log,date,edit){
   fillCat(x?x.category_id:log?.category_id);fillIdx(log?.index_id);
   document.querySelectorAll('.ext').forEach(e=>e.classList.toggle('hide',!log));
   $('f-danger').classList.toggle('hide',!log);
-  S.ref=undefined;linkUi();refTxt();setMode(!log||edit);prev();$('dlg').showModal();
+  S.ref=undefined;linkUi();refTxt();setMode(!log||(edit&&!ro));$('f-edit').classList.toggle('hide',ro);$('f-ro').classList.toggle('hide',!ro);prev();$('dlg').showModal();
   if(log&&Media.folder.supported)Media.folder.fileUrl(log.id).then(u=>{const e=$('f-prev').querySelector('.ph[data-img]');if(u&&e&&S.edit&&S.edit.id===log.id)e.style.backgroundImage=`url('${u}')`}).catch(()=>{});
 }
 $('f-edit').onclick=()=>setMode(true);
@@ -378,7 +379,7 @@ $('f-x').onclick=()=>$('dlg').close();
 $('f-c').onchange=()=>{$('f-dn').value=$('f-c').checked?($('f-dn').value||today()):''};
 $('f-dn').onchange=()=>{$('f-c').checked=!!$('f-dn').value};
 const curCat=()=>{const x=ix($('f-idx').value);return x?x.category_id:$('f-cat').value};
-function linkUi(){const c=curCat(),b=c===CAT_BOOK,v=c===CAT_MOVIE;$('f-link').classList.toggle('hide',!(b||v));$('f-gal').classList.toggle('hide',!(b||v));$('f-link').textContent=b?'독서 연결':'영상 연결'}
+function linkUi(){const v=curCat()===CAT_MOVIE;$('f-link').classList.toggle('hide',!v);$('f-gal').classList.toggle('hide',!v);$('f-link').textContent='영상 연결'}
 function refTxt(){const r=S.ref===undefined?S.edit?.meta?.ref:S.ref;$('f-ref').textContent=r?(r.t==='bkbk_books'?'📖 ':r.t==='wkwk_work'?'✍️ ':'🎬 ')+(r.name||''):''}
 $('f-cat').addEventListener('change',()=>setTimeout(linkUi,0));$('f-idx').addEventListener('change',()=>setTimeout(linkUi,0));
 function choose(items,ph){return new Promise(res=>{   // 사진이 있는 항목 중 하나 고르기
