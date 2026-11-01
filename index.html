@@ -101,7 +101,7 @@ dialog.view .eo,dialog:not(.view) .vo{display:none!important}
 <script>
 const CFG=window.APP_CONFIG||{};   // 공용 설정(config.js). 못 불러와도(오프라인 등) 아래 값으로 동작해요
 /* 한국 시간 날짜: config.js의 함수를 쓰고, 못 불러오면 같은 동작의 대체 함수 */
-if(!window.kstDate)window.kstDate=d=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul'}).format(d==null?new Date():(d instanceof Date?d:new Date(d)));
+if(!window.kstDate)window.kstDate=d=>{const t=d==null?Date.now():(d instanceof Date?d.getTime():new Date(d).getTime());return isNaN(t)?'':new Date(t+32400000).toISOString().slice(0,10)};
 if(!window.todayKST)window.todayKST=()=>window.kstDate();
 const SUPABASE_URL=CFG.SB||'https://rtvvajhsnwkkrmncyfbs.supabase.co';
 const SUPABASE_ANON_KEY=CFG.ANON||'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0dnZhamhzbndra3JtbmN5ZmJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0NjkwMTEsImV4cCI6MjEwNzA0NTAxMX0.O2aLLeazv_FhUhbVAkp4vz3pw8GPb_683dUu7Et1Cwk';
