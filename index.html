@@ -13,7 +13,8 @@
 <meta name="apple-mobile-web-app-title" content="디디">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.26.1/index.js"></script>
-<script src="https://jjojjolonglong-sudo.github.io/mnmn/media.js"></script>
+<script src="https://jjojjolonglong-sudo.github.io/mnmn/config.js"></script>
+<script src="https://jjojjolonglong-sudo.github.io/mnmn/media.v1.js"></script>
 <style>
 :root{--ink:#111;--yel:#FFD60A;--pink:#FF4D8D;--blue:#2D6BFF;--gray:#E4E4E4;
 /* 우표 그림자: drop-shadow(가로 세로 번짐 색) 두 겹. 앞=붙어 있는 얇은 그림자, 뒤=살짝 퍼지는 그림자 */
@@ -98,9 +99,13 @@ dialog.view .eo,dialog:not(.view) .vo{display:none!important}
 </head>
 <body>
 <script>
-const SUPABASE_URL='https://rtvvajhsnwkkrmncyfbs.supabase.co';
-const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0dnZhamhzbndra3JtbmN5ZmJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0NjkwMTEsImV4cCI6MjEwNzA0NTAxMX0.O2aLLeazv_FhUhbVAkp4vz3pw8GPb_683dUu7Et1Cwk';
-const MEDIA_URL='https://media.jjojjolonglong.workers.dev'; // 공용 미디어 Worker
+const CFG=window.APP_CONFIG||{};   // 공용 설정(config.js). 못 불러와도(오프라인 등) 아래 값으로 동작해요
+/* 한국 시간 날짜: config.js의 함수를 쓰고, 못 불러오면 같은 동작의 대체 함수 */
+if(!window.kstDate)window.kstDate=d=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul'}).format(d==null?new Date():(d instanceof Date?d:new Date(d)));
+if(!window.todayKST)window.todayKST=()=>window.kstDate();
+const SUPABASE_URL=CFG.SB||'https://rtvvajhsnwkkrmncyfbs.supabase.co';
+const SUPABASE_ANON_KEY=CFG.ANON||'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0dnZhamhzbndra3JtbmN5ZmJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0NjkwMTEsImV4cCI6MjEwNzA0NTAxMX0.O2aLLeazv_FhUhbVAkp4vz3pw8GPb_683dUu7Et1Cwk';
+const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용 미디어 Worker
 </script>
 
 <section id="auth" class="hide">
@@ -215,9 +220,9 @@ const PALETTE=['#FFD60A','#FF4D8D','#2D6BFF','#19C37D','#FF7A1A','#8B5CF6','#00C
 const S={user:null,logs:[],trash:[],cats:[],idxs:[],month:new Date(),edit:null,img:undefined};
 const z=n=>String(n).padStart(2,'0');
 const ymd=d=>d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());
-const today=()=>ymd(new Date());
-const noon=d=>new Date(d+'T12:00:00').toISOString();
-const doneDay=l=>l.done_at?ymd(new Date(l.done_at)):'';
+const today=()=>todayKST();   // 한국 시간 기준 오늘
+const noon=d=>new Date(d+'T12:00:00+09:00').toISOString();   // 날짜의 한국 시간 정오
+const doneDay=l=>l.done_at?kstDate(l.done_at):'';
 const dd=s=>s?s.slice(5,10).replace('-','/'):'';
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(m){const t=$('toast');t.textContent=m;t.classList.remove('hide');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.add('hide'),2400)}
@@ -288,7 +293,7 @@ function renderTodo(){
   const t=today();
   const rows=S.logs.filter(l=>l.category_id!==CAT_BOOK&&(l.is_checked===false||(l.is_checked===true&&(doneDay(l)||l.log_date||t)>=t)));
   $('list').innerHTML=rows.length?rows.map(l=>{
-    const lim=ymd(new Date(Date.now()+3*864e5)),soon=!l.is_checked&&l.log_date&&l.log_date<=lim;
+    const lim=kstDate(Date.now()+3*864e5),soon=!l.is_checked&&l.log_date&&l.log_date<=lim;
     return `<div class="todo ${l.is_checked?'done':soon?'soon':''}" data-id="${l.id}"><span class="t">${esc(l.text)}</span><span class="dt">${dd(l.log_date)}</span><input type="checkbox" data-c="${l.id}" ${l.is_checked?'checked':''} aria-label="완료"></div>`}).join(''):'<div class="empty">할 일이 없어요.</div>';
 }
 $('list').addEventListener('change',async e=>{
@@ -363,7 +368,7 @@ function setMode(edit){
 function openDlg(log,date,edit){
   S.edit=log||null;S.img=undefined;S.rid=log?log.id:Media.newId();const x=log&&ix(log.index_id),ro=!!(log&&log.category_id===CAT_BOOK);
   $('f-t').value=log?log.text:'';
-  $('f-cr').value=log?ymd(new Date(log.created_at)):'';
+  $('f-cr').value=log?kstDate(log.created_at):'';
   $('f-d').value=log?(log.log_date||''):(date||'');
   $('f-c').checked=!!(log&&log.is_checked);
   $('f-dn').value=log?doneDay(log):'';
@@ -425,7 +430,7 @@ $('f-ok').onclick=async()=>{
   if(S.edit){
     const c=$('f-c').checked,dn=$('f-dn').value,cr=$('f-cr').value,upd={...base,meta,is_checked:c,done_at:null};
     if(c)upd.done_at=(dn&&dn===doneDay(S.edit))?S.edit.done_at:(dn?noon(dn):new Date().toISOString());
-    if(cr&&cr!==ymd(new Date(S.edit.created_at)))upd.created_at=noon(cr);
+    if(cr&&cr!==kstDate(S.edit.created_at))upd.created_at=noon(cr);
     r=await sb.from('didi_log').update(upd).eq('id',S.edit.id);
     if(!r.error){const l2={...S.edit,...upd};if(c&&!S.edit.is_checked)await chainNext(l2);else if(!c&&S.edit.is_checked)await chainUndo(l2)}
   }else r=await sb.from('didi_log').insert({...base,meta,id:S.rid,user_id:S.user.id,is_checked:false});
@@ -465,7 +470,7 @@ function renderMore(){
   if(oi.length||ol.length)h+='<div class="mr"><b class="t">분류 없음</b></div>'+oi.map(irow).join('')+node('n:','(인덱스 없음)',ol);
   h+='<div style="margin-top:8px"><button id="addcat">+ 분류 추가</button></div>';
   $('more').innerHTML=h;
-  $('mp-trash').innerHTML=S.trash.length?S.trash.map(l=>`<div class="mr" data-k="didi_log" data-id="${l.id}"><span class="t">${esc(l.text)}</span><span class="dt">${dd(ymd(new Date(l.discarded_at)))}</span><button class="plain" data-a="res">복원</button><button class="red" data-a="rm">삭제</button></div>`).join(''):'<div class="empty">비어 있어요.</div>';
+  $('mp-trash').innerHTML=S.trash.length?S.trash.map(l=>`<div class="mr" data-k="didi_log" data-id="${l.id}"><span class="t">${esc(l.text)}</span><span class="dt">${dd(kstDate(l.discarded_at))}</span><button class="plain" data-a="res">복원</button><button class="red" data-a="rm">삭제</button></div>`).join(''):'<div class="empty">비어 있어요.</div>';
   document.querySelector('[data-mp=trash]').textContent=`휴지통 (${S.trash.length})`;
 }
 $('more').addEventListener('change',async e=>{
