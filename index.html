@@ -61,22 +61,25 @@ button.plain{background:#fff}button.red{background:var(--pink)}
 .st{margin-top:3px;padding:2px 3px;min-height:19px;font-size:11px;line-height:15px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:clip}
 .st.done{opacity:.45;text-decoration:line-through}
 .stamp,.pv{width:60px;height:72px;padding:0;background:var(--yel);cursor:pointer;flex:none;clip-path:var(--stamp)}
-/* 컬렉션: 6열 고정 격자. 날짜 도장·우표·이모지 스티커가 모두 같은 한 칸. 그림자는 컨테이너에 한 번만 */
+/* 컬렉션: 6열 고정 격자. 날짜 도장·우표·이모지 스티커가 모두 같은 한 칸. 그림자는 우표 칸에만 한 겹 */
 #days{--cw:56px;--ch:67px}
-.col{display:grid;grid-template-columns:repeat(6,var(--cw));gap:6px;justify-content:space-between;padding:6px 0;filter:drop-shadow(1px 1px 1px rgba(90,60,0,.25))}
+.col{display:grid;grid-template-columns:repeat(6,var(--cw));gap:6px;justify-content:space-between;padding:6px 0}
+.col>.sh{filter:drop-shadow(1px 1px 1px rgba(90,60,0,.25))}
 .col>div{width:var(--cw);height:var(--ch);display:flex;align-items:center;justify-content:center}
 .col .stamp{width:100%;height:100%;clip-path:var(--stampC)}
-.dst{position:relative;width:calc(var(--cw)*.9);height:calc(var(--cw)*.9);border-radius:50%;border:2px solid var(--c);color:var(--c);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;opacity:.9}
+.dst{position:relative;width:calc(var(--cw)*.92);height:calc(var(--cw)*.92);border-radius:50%;border:2px solid var(--c);color:var(--c);line-height:1;opacity:.9}
 .dst::before{content:"";position:absolute;inset:2.5px;border:1px solid var(--c);border-radius:50%}
-.dst b{font-size:calc(var(--cw)*.36);font-weight:800}
-.dst i{font-style:normal;font-size:calc(var(--cw)*.14);font-weight:700;margin-top:calc(var(--cw)*.02)}
+.dst b{position:absolute;left:0;right:0;top:50%;transform:translateY(-52%);text-align:center;font-size:calc(var(--cw)*.34);font-weight:800}
+.dst i{position:absolute;left:0;right:0;text-align:center;font-style:normal;font-weight:700;font-size:calc(var(--cw)*.125);white-space:nowrap}
+.dst .mo{top:21%}.dst .wd2{bottom:19%;font-size:calc(var(--cw)*.14)}
 .dst.today{background:var(--c);color:#FFF2A8}.dst.today::before{border-color:#FFF2A8}
 .tk{background:#FFFBE6;display:flex}
 .tk .ks{flex:none;width:23%;background:var(--c);color:var(--f);writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cw)*.13);font-weight:700;letter-spacing:1px;overflow:hidden;white-space:nowrap}
 .tk p{margin:0;flex:1;min-width:0;padding:calc(var(--cw)*.1) calc(var(--cw)*.06) calc(var(--cw)*.1) calc(var(--cw)*.07);font-size:calc(var(--cw)*.16);line-height:1.2;word-break:break-all;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5}
-.emo{width:100%;height:100%;border-radius:22%;background:var(--c);border:2.5px solid #fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--cw)*.04);cursor:pointer;overflow:hidden}
-.emo .e{font-size:calc(var(--cw)*.46);line-height:1}
-.emo small{font-size:calc(var(--cw)*.17);font-weight:700;line-height:1;color:var(--f);max-width:100%;white-space:nowrap;overflow:hidden}
+.emo{width:var(--cw);height:var(--cw);border-radius:22%;background:var(--c);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--cw)*.09);cursor:pointer;overflow:hidden}
+.emo .e{font-size:calc(var(--cw)*.4);line-height:1;filter:drop-shadow(1.2px 0 0 #fff) drop-shadow(-1.2px 0 0 #fff) drop-shadow(0 1.2px 0 #fff) drop-shadow(0 -1.2px 0 #fff) drop-shadow(1px 1.5px 1px rgba(0,0,0,.25))}
+.emo small{font-size:calc(var(--cw)*.16);font-weight:700;line-height:1;color:var(--f);max-width:92%;white-space:nowrap;overflow:hidden}
+.cal-head .wl{font-size:13px}
 .em{margin-left:2px;font-size:11px;font-weight:400}
 .em span{cursor:pointer}
 .seg{display:flex;gap:6px;margin-bottom:10px}.seg button{flex:1;min-width:0;background:#fff;padding:6px 2px;font-size:14px}.seg button.on{background:var(--yel)}
@@ -347,19 +350,25 @@ function fitDay(){   // 폰 너비에 맞춰 한 줄 6칸, 우표 톱니 모양�
   g.style.setProperty('--stampC',stampPath(cw,ch,5*k,3*k,7,9,1.45,.7*k));
 }
 window.addEventListener('resize',fitDay);
+const MON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 function renderDay(){
   fitDay();
   const s0=S.week,t=today(),e=new Date(s0);e.setDate(e.getDate()+6);
-  document.querySelectorAll('.wl').forEach(el=>el.textContent=`${s0.getMonth()+1}/${s0.getDate()} – ${e.getMonth()+1}/${e.getDate()}`);
+  const y=e.getFullYear(),wn=Math.round((s0-sun(new Date(y,0,1)))/604800000)+1,f=d=>z(d.getMonth()+1)+'/'+z(d.getDate());
+  document.querySelectorAll('.wl').forEach(el=>el.textContent=`${y}년 ${z(wn)}주차 ${f(s0)}-${f(e)}`);
+  const nx=new Date(s0);nx.setDate(nx.getDate()+7);
+  document.querySelectorAll('[data-wk="1"]').forEach(b=>b.style.visibility=ymd(nx)>t?'hidden':'');   // 미래로 가는 버튼은 숨김
+  document.querySelectorAll('.jd[data-t="w"]').forEach(i=>i.max=t);
   let h='<div class="col">';
   for(let i=0;i<7;i++){
     const d=new Date(s0);d.setDate(s0.getDate()+i);const key=ymd(d);
+    if(key>t)break;   // 오늘 이후 날짜는 도장을 찍지 않음
     const dc=i===0?'#FF4D8D':i===6?'#2D6BFF':'#111';
-    h+=`<div><div class="dst ${key===t?'today':''}" style="--c:${dc};transform:${tilt(key,3)}"><b>${d.getDate()}</b><i>${d.getMonth()+1}월 ${'일월화수목금토'[i]}</i></div></div>`;
+    h+=`<div><div class="dst ${key===t?'today':''}" style="--c:${dc};transform:${tilt(key,6)}"><i class="mo">${MON[d.getMonth()]} ’${String(d.getFullYear()).slice(2)}</i><b>${d.getDate()}</b><i class="wd2">${'일월화수목금토'[i]}</i></div></div>`;
     S.logs.filter(l=>l.is_checked&&(doneDay(l)||l.log_date)===key).sort(byDone).forEach(l=>{
       const c=col(l),tf=`transform:${tilt(l.id,.6)}`;
-      if(Media.url(rep(l)))h+=`<div style="${tf}"><div class="stamp" data-id="${l.id}" style="background:${c}" title="${esc(l.text)}">${ph(l)}</div></div>`;
-      else h+=`<div style="${tf}"><div class="stamp tk" data-id="${l.id}" style="--c:${c};--f:${fg(c)}" title="${esc(l.text)}"><span class="ks">${esc(Array.from(cat(l.category_id)?.name||'').slice(0,4).join(''))}</span><p>${esc(l.text||'')}</p></div></div>`;
+      if(Media.url(rep(l)))h+=`<div class="sh" style="${tf}"><div class="stamp" data-id="${l.id}" style="background:${c}" title="${esc(l.text)}">${ph(l)}</div></div>`;
+      else h+=`<div class="sh" style="${tf}"><div class="stamp tk" data-id="${l.id}" style="--c:${c};--f:${fg(c)}" title="${esc(l.text)}"><span class="ks">${esc(Array.from(cat(l.category_id)?.name||'').slice(0,4).join(''))}</span><p>${esc(l.text||'')}</p></div></div>`;
     });
     stampsOn(key).forEach(x=>{
       const c=cat(x.category_id)?.color||'#E4E4E4';
