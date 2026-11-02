@@ -1,5 +1,5 @@
-const V='didi-v8';
-const SHELL=['./','index.html','manifest.json','icon-192.png','icon-512.png'];
+const V='didi-v9';
+const SHELL=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-maskable-512.png','apple-touch-icon.png'];
 // 파일 하나가 없어도 설치가 실패하지 않도록 하나씩 저장
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>Promise.all(SHELL.map(u=>c.add(u).catch(()=>{})))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
