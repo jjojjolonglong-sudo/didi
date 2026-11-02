@@ -60,16 +60,25 @@ button.plain{background:#fff}button.red{background:var(--pink)}
 .dn{font-size:12px;font-weight:700}
 .st{margin-top:3px;padding:2px 3px;min-height:19px;font-size:11px;line-height:15px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:clip}
 .st.done{opacity:.45;text-decoration:line-through}
-.dayrow{display:flex;gap:12px;padding:8px 0}
-.dl{width:48px;flex:none;font-weight:700}.dl small{font-weight:400;color:#666}
-.stamps{display:flex;flex-wrap:wrap;gap:8px}
 .stamp,.pv{width:60px;height:72px;padding:0;background:var(--yel);cursor:pointer;flex:none;clip-path:var(--stamp)}
-.sw{filter:var(--shadow);flex:none}
-.emo4{width:60px;height:72px;flex:none;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;place-items:center;font-size:22px;line-height:1}
-.emo4 span{filter:var(--shadow)}
+/* 컬렉션: 6열 고정 격자. 날짜 도장·우표·이모지 스티커가 모두 같은 한 칸. 그림자는 컨테이너에 한 번만 */
+#days{--cw:56px;--ch:67px}
+.col{display:grid;grid-template-columns:repeat(6,var(--cw));gap:6px;justify-content:space-between;padding:6px 0;filter:drop-shadow(1px 1px 1px rgba(90,60,0,.25))}
+.col>div{width:var(--cw);height:var(--ch);display:flex;align-items:center;justify-content:center}
+.col .stamp{width:100%;height:100%;clip-path:var(--stampC)}
+.dst{position:relative;width:calc(var(--cw)*.9);height:calc(var(--cw)*.9);border-radius:50%;border:2px solid var(--c);color:var(--c);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;opacity:.9}
+.dst::before{content:"";position:absolute;inset:2.5px;border:1px solid var(--c);border-radius:50%}
+.dst b{font-size:calc(var(--cw)*.36);font-weight:800}
+.dst i{font-style:normal;font-size:calc(var(--cw)*.14);font-weight:700;margin-top:calc(var(--cw)*.02)}
+.dst.today{background:var(--c);color:#FFF2A8}.dst.today::before{border-color:#FFF2A8}
+.tk{background:#FFFBE6;display:flex}
+.tk .ks{flex:none;width:23%;background:var(--c);color:var(--f);writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cw)*.13);font-weight:700;letter-spacing:1px;overflow:hidden;white-space:nowrap}
+.tk p{margin:0;flex:1;min-width:0;padding:calc(var(--cw)*.1) calc(var(--cw)*.06) calc(var(--cw)*.1) calc(var(--cw)*.07);font-size:calc(var(--cw)*.16);line-height:1.2;word-break:break-all;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5}
+.emo{width:100%;height:100%;border-radius:22%;background:var(--c);border:2.5px solid #fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--cw)*.04);cursor:pointer;overflow:hidden}
+.emo .e{font-size:calc(var(--cw)*.46);line-height:1}
+.emo small{font-size:calc(var(--cw)*.17);font-weight:700;line-height:1;color:var(--f);max-width:100%;white-space:nowrap;overflow:hidden}
 .em{margin-left:2px;font-size:11px;font-weight:400}
-.dayrow.today .dl{color:var(--blue)}
-.emo4 span,.em span{cursor:pointer}
+.em span{cursor:pointer}
 .seg{display:flex;gap:6px;margin-bottom:10px}.seg button{flex:1;min-width:0;background:#fff;padding:6px 2px;font-size:14px}.seg button.on{background:var(--yel)}
 .hd{display:flex;align-items:baseline;gap:8px}.jump{position:relative;cursor:pointer;display:inline-block}
 .jd{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;padding:0;border:0;cursor:pointer}
@@ -119,7 +128,7 @@ const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용
 
 <main id="app" class="hide">
   <div class="tabs">
-    <button data-t="todo" class="on">할 일</button><button data-t="cal">캘린더</button><button data-t="day">날짜별</button><button data-t="more">더보기</button>
+    <button data-t="todo" class="on">할 일</button><button data-t="cal">캘린더</button><button data-t="day">컬렉션</button><button data-t="more">더보기</button>
   </div>
 
   <section id="tab-todo">
@@ -316,7 +325,7 @@ $('addf').onsubmit=async e=>{
   window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});$('nt').focus();
 };
 
-/* 캘린더 / 날짜별 */
+/* 캘린더 / 컬렉션 */
 document.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{
   const v=+b.dataset.mv;S.month=v?new Date(S.month.getFullYear(),S.month.getMonth()+v,1):new Date();renderCal();renderDay()});
 function renderCal(){
@@ -331,19 +340,33 @@ function renderCal(){
   $('cal').innerHTML=h;
 }
 $('cal').onclick=e=>{const m=e.target.closest('[data-idx]');if(m){openIdx(ix(m.dataset.idx),false,m.closest('[data-d]')?.dataset.d);return}const c=e.target.closest('.cell[data-d]');if(!c)return;const st=e.target.closest('.st');openDlg(st?find(st.dataset.id):null,c.dataset.d)};
+function tilt(id,max){let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))|0;const a=((h&1023)/1023)*2-1,b=(((h>>>10)&1023)/1023)*2-1;return `rotate(${(a*max).toFixed(2)}deg) translate(${(b*.4).toFixed(2)}px,${(a*.4).toFixed(2)}px)`}
+function fitDay(){   // 폰 너비에 맞춰 한 줄 6칸, 우표 톱니 모양도 칸 크기에 맞게 다시 계산
+  const g=$('days'),w=Math.min(document.body.clientWidth-24,616),cw=Math.max(30,(w-30)/6),ch=cw*1.2,k=cw/60;
+  g.style.setProperty('--cw',cw.toFixed(2)+'px');g.style.setProperty('--ch',ch.toFixed(2)+'px');
+  g.style.setProperty('--stampC',stampPath(cw,ch,5*k,3*k,7,9,1.45,.7*k));
+}
+window.addEventListener('resize',fitDay);
 function renderDay(){
+  fitDay();
   const s0=S.week,t=today(),e=new Date(s0);e.setDate(e.getDate()+6);
   document.querySelectorAll('.wl').forEach(el=>el.textContent=`${s0.getMonth()+1}/${s0.getDate()} – ${e.getMonth()+1}/${e.getDate()}`);
-  let h='';
+  let h='<div class="col">';
   for(let i=0;i<7;i++){
     const d=new Date(s0);d.setDate(s0.getDate()+i);const key=ymd(d);
-    const it=S.logs.filter(l=>l.is_checked&&(doneDay(l)||l.log_date)===key).sort(byDone),emAll=stampsOn(key),em=emAll.length>4?emAll.slice(0,3):emAll;
-    h+=`<div class="dayrow ${key===t?'today':''}"><div class="dl">${d.getMonth()+1}/${d.getDate()}<br><small>${'일월화수목금토'[i]}</small></div><div class="stamps">`
-      +it.map(l=>`<div class="sw"><div class="stamp" data-id="${l.id}" style="background:${col(l)}" title="${esc(l.text)}">${ph(l)}</div></div>`).join('')
-      +(em.length?`<div class="emo4" data-d="${key}" title="${esc(emAll.map(x=>x.name).join(', '))}">${em.map(x=>`<span data-idx="${x.id}" title="${esc(x.name)}">${esc(x.emoji)}</span>`).join('')}${emAll.length>4?`<span style="font-size:13px;font-weight:700;cursor:default">+${emAll.length-3}</span>`:''}</div>`:'')
-      +(em.length||it.length?'':'<span class="dt">–</span>')+'</div></div>';
+    const dc=i===0?'#FF4D8D':i===6?'#2D6BFF':'#111';
+    h+=`<div><div class="dst ${key===t?'today':''}" style="--c:${dc};transform:${tilt(key,3)}"><b>${d.getDate()}</b><i>${d.getMonth()+1}월 ${'일월화수목금토'[i]}</i></div></div>`;
+    S.logs.filter(l=>l.is_checked&&(doneDay(l)||l.log_date)===key).sort(byDone).forEach(l=>{
+      const c=col(l),tf=`transform:${tilt(l.id,.6)}`;
+      if(Media.url(rep(l)))h+=`<div style="${tf}"><div class="stamp" data-id="${l.id}" style="background:${c}" title="${esc(l.text)}">${ph(l)}</div></div>`;
+      else h+=`<div style="${tf}"><div class="stamp tk" data-id="${l.id}" style="--c:${c};--f:${fg(c)}" title="${esc(l.text)}"><span class="ks">${esc(Array.from(cat(l.category_id)?.name||'').slice(0,4).join(''))}</span><p>${esc(l.text||'')}</p></div></div>`;
+    });
+    stampsOn(key).forEach(x=>{
+      const c=cat(x.category_id)?.color||'#E4E4E4';
+      h+=`<div style="transform:${tilt(x.id+key,.9)}"><div class="emo" data-idx="${x.id}" data-d="${key}" style="--c:${c};--f:${fg(c)}" title="${esc(x.name)}"><span class="e">${esc(x.emoji)}</span><small>${esc(Array.from(x.name||'').slice(0,5).join(''))}</small></div></div>`;
+    });
   }
-  $('days').innerHTML=h;
+  $('days').innerHTML=h+'</div>';
 }
 $('days').onclick=e=>{const m=e.target.closest('[data-idx]');if(m){openIdx(ix(m.dataset.idx),false,m.closest('[data-d]')?.dataset.d);return}const s=e.target.closest('.stamp');if(s&&s.dataset.id)openDlg(find(s.dataset.id))};
 
@@ -457,7 +480,7 @@ function renderMore(){
   const per=i=>i.started_on?` <small>(${md(i.started_on)}~${i.finished_on?md(i.finished_on):''})</small>`:'';
   const logs=a=>{if(!a.length)return '<div class="lg" style="cursor:default;color:#888">기록 없음</div>';
     return [...a].reverse().slice(0,30).map(l=>`<div class="lg" data-lid="${l.id}"><span class="t">${l.is_checked?'✅ ':''}${esc(l.text)}</span><span class="dt">${dd(l.log_date)}</span></div>`).join('')
-      +(a.length>30?`<div class="lg" style="cursor:default;color:#888">… 오래된 기록 ${a.length-30}개는 생략 (캘린더·날짜별에서 볼 수 있어요)</div>`:'')};
+      +(a.length>30?`<div class="lg" style="cursor:default;color:#888">… 오래된 기록 ${a.length-30}개는 생략 (캘린더·컬렉션에서 볼 수 있어요)</div>`:'')};
   const node=(key,label,a)=>{const o=S.open.has(key);return `<div class="mr sub"><span class="t" data-tg="${key}">${o?'▾':'▸'} ${label} <small>(${a.length})</small></span></div>`+(o?logs(a):'')};
   const irow=i=>{const a=S.logs.filter(l=>l.index_id===i.id),o=S.open.has('i:'+i.id);
     return `<div class="mr sub ${i.finished_on?'ended':''}" data-k="didi_index" data-id="${i.id}">${th(i,'#E4E4E4')}<span class="t" data-tg="i:${i.id}">${o?'▾':'▸'} ${i.emoji?esc(i.emoji)+' ':''}${esc(i.name)} <small>(${a.length})</small>${per(i)}</span><button class="plain" data-a="edit">수정</button></div>`+(o?logs(a):'')};
