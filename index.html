@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>디디 다이어리</title>
+<script src="https://jjojjolonglong-sudo.github.io/mnmn/fonts.v1.js" data-app="didi"></script>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#FFD60A">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -61,6 +62,7 @@ button.plain{background:#fff}button.red{background:var(--pink)}
 .st{margin-top:3px;padding:2px 3px;min-height:19px;font-size:11px;line-height:15px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:clip}
 .st.done{opacity:.45;text-decoration:line-through}
 .stamp,.pv{width:60px;height:72px;padding:0;background:var(--yel);cursor:pointer;flex:none;clip-path:var(--stamp)}
+.sw{filter:var(--shadow);flex:none}
 /* 컬렉션: 6열 고정 격자. 날짜 도장·우표·이모지 스티커가 모두 같은 한 칸. 그림자는 우표 칸에만 한 겹 */
 #days{--cw:56px;--ch:67px}
 .col{display:grid;grid-template-columns:repeat(6,var(--cw));gap:6px;justify-content:space-between;padding:6px 0}
@@ -102,6 +104,32 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 dialog label{display:block;font-size:13px;font-weight:700;margin:9px 0 3px}
 dialog.view .eo,dialog:not(.view) .vo{display:none!important}
 .btns{display:grid;gap:6px}
+dialog{position:relative}
+.ebtn{position:absolute;right:12px;top:12px;padding:5px 12px;font-size:14px;z-index:2}
+.vv{margin-top:14px}.vv .tt{font-size:19px;font-weight:800;line-height:1.3;text-align:center;margin-top:12px;word-break:break-word;white-space:pre-wrap}
+.vv .cs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700;border:2px solid var(--ink);background:#fff}
+.chip i{width:10px;height:10px;border-radius:50%;display:inline-block;border:1.5px solid var(--ink)}
+.chip.no{color:#888;border-color:#bbb}.chip.no i{border-color:#bbb;background:#eee!important}
+.vv .dates{font-size:12.5px;color:#555;line-height:1.7;text-align:center;margin-top:10px}
+.vv .lb{font-size:11px;font-weight:800;color:#888;letter-spacing:.5px;margin:14px 0 6px}
+.vv .memo{background:#FFFBE6;border:2px solid var(--ink);border-radius:6px;padding:10px 12px;font-size:14px;line-height:22px;white-space:pre-wrap;word-break:break-word;background-image:repeating-linear-gradient(transparent 0 21px,#e9dfae 21px 22px)}
+.vv .hint{text-align:center;margin:6px 0 0;font-size:11px}
+.vst{width:132px;height:158px;margin:0 auto;filter:drop-shadow(.8px 1px 1px rgba(90,60,0,.3))}
+.vst .stamp{width:100%;height:100%;clip-path:var(--stampL);--cw:75px}
+.vst.cl{cursor:zoom-in}
+.vem{--o:3.4px;width:112px;height:112px;margin:0 auto;border-radius:22%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;box-shadow:.5px 1px 1.5px rgba(90,60,0,.28);overflow:hidden;background-size:cover;background-position:center}
+.vem .e{font-size:44px;line-height:1;text-shadow:calc(var(--o)*1) 0 0 #fff,calc(var(--o)*.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*.5) calc(var(--o)*.87) 0 #fff,0 var(--o) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*.87) 0 #fff,calc(var(--o)*-.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*-1) 0 0 #fff,calc(var(--o)*-.87) calc(var(--o)*-.5) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*-.87) 0 #fff,0 calc(var(--o)*-1) 0 #fff,calc(var(--o)*.5) calc(var(--o)*-.87) 0 #fff,calc(var(--o)*.87) calc(var(--o)*-.5) 0 #fff}
+.vem small{font-size:19px;font-weight:800;letter-spacing:-.04em;line-height:1;max-width:96%;white-space:nowrap;overflow:hidden}
+.vsum{text-align:center;font-size:13px;line-height:1.9;margin-top:12px}
+.vmini{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.vmini>div{aspect-ratio:5/6;cursor:pointer;filter:drop-shadow(.6px .8px .8px rgba(90,60,0,.22))}
+.vmini .stamp{width:100%;height:100%;clip-path:var(--stampM);--cw:40px}
+.vmini .tk p{-webkit-line-clamp:4}
+#cr{max-width:min(94vw,820px)}#cr-box{position:relative;width:fit-content;margin:10px auto;touch-action:none;user-select:none}#cr-img{max-width:min(86vw,760px);max-height:56vh;display:block}
+#cr-sel{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px #0008;cursor:move}#cr-rz{position:absolute;right:-9px;bottom:-9px;width:16px;height:16px;border-radius:50%;background:var(--yel);border:2px solid #fff;cursor:nwse-resize}
+dialog.view .foot{display:none}
+.vmini .ks{font-size:0}
 .foot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:16px}
 #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:6px;font-size:14px}
 </style>
@@ -162,8 +190,11 @@ const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용
 </main>
 
 <dialog id="dlg">
-  <div id="dtitle" style="font-weight:700;font-size:18px"></div>
+  <button id="f-edit" class="vo ebtn" type="button">편집</button>
+  <div id="dtitle" class="eo" style="font-weight:700;font-size:18px"></div>
   <div id="f-ro" class="hint hide">독서앱에서 가져온 기록이에요. 수정은 독서앱에서 해 주세요.</div>
+  <div class="vv vo" id="f-vv"></div>
+  <div class="fm eo">
   <div class="row" style="align-items:flex-end"><div class="sw"><div class="pv" id="f-prev"></div></div>
     <div class="eo btns"><button id="f-pick" class="plain">사진 선택</button><button id="f-link" class="plain hide"></button><button id="f-gal" class="plain hide">서버 사진</button><button id="f-rm" class="plain">사진 제거</button></div></div>
   <div id="f-ref" class="hint"></div>
@@ -172,12 +203,16 @@ const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용
   <div class="g2"><div><label for="f-cat">분류</label><select id="f-cat"></select></div><div><label for="f-idx">인덱스</label><select id="f-idx"></select></div></div>
   <div class="g2 ext"><div><label for="f-cr">입력일</label><input id="f-cr" type="date"></div><div><label for="f-dn">완료일</label><div class="row" style="gap:6px"><input id="f-c" type="checkbox" style="width:22px;height:22px;flex:none" aria-label="완료"><input id="f-dn" type="date"></div></div></div>
   <label for="f-m">메모</label><textarea id="f-m"></textarea>
+  </div>
   <div class="foot">
     <div class="row eo" id="f-danger"><button id="f-disc" class="plain">버리기</button><button id="f-del" class="red">삭제</button></div>
-    <div class="row" style="margin-left:auto"><button id="f-edit" class="vo">편집</button><button id="f-x" class="plain">닫기</button><button id="f-ok" class="eo">저장</button></div>
+    <div class="row" style="margin-left:auto"><button id="f-x" class="plain eo">취소</button><button id="f-ok" class="eo">저장</button></div>
   </div>
 </dialog>
-<dialog id="emo"><div id="emo-t" style="font-weight:700;font-size:18px"></div>
+<dialog id="emo"><button id="emo-edit" class="vo ebtn" type="button">편집</button>
+  <div id="emo-t" class="eo" style="font-weight:700;font-size:18px"></div>
+  <div class="vv vo" id="emo-vv"></div>
+  <div class="fm eo">
   <div class="row" style="align-items:flex-end;margin-top:8px"><div class="pvx" id="emo-pv"></div>
     <div class="eo btns"><button id="emo-pick" class="plain" type="button">사진 선택</button><button id="emo-rm" class="plain" type="button">사진 제거</button></div></div>
   <label for="emo-n">이름</label><input id="emo-n">
@@ -194,12 +229,17 @@ const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용
   <div id="emo-cnt" class="hint"></div>
   <emoji-picker id="emo-p" class="eo"></emoji-picker>
   <div class="eg eo hide" id="emo-g"></div>
+  </div>
   <div class="foot">
     <div class="row eo" id="emo-danger"><button id="emo-del" class="red">삭제</button></div>
-    <div class="row" style="margin-left:auto"><button id="emo-edit" class="vo">편집</button><button id="emo-x" class="plain">닫기</button><button id="emo-ok" class="eo">저장</button></div>
+    <div class="row" style="margin-left:auto"><button id="emo-x" class="plain eo">취소</button><button id="emo-ok" class="eo">저장</button></div>
   </div>
 </dialog>
 <dialog id="pk"><div class="row"><input id="pk-q" placeholder="검색"><button id="pk-x" class="plain">닫기</button></div><div id="pk-l" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;max-height:60vh;overflow:auto;margin-top:10px"></div></dialog>
+<dialog id="orig" style="padding:0;border:0;background:transparent;max-width:96vw;max-height:96vh;overflow:visible"><img id="orig-img" alt="" style="display:block;max-width:94vw;max-height:90vh;border-radius:6px;box-shadow:0 4px 24px rgba(0,0,0,.5)"></dialog>
+<dialog id="cr"><div style="font-weight:700">우표에 들어갈 영역 (5:6 고정)</div>
+  <div id="cr-box"><img id="cr-img" alt=""><div id="cr-sel"><i id="cr-rz"></i></div></div>
+  <div class="row" style="justify-content:flex-end;flex-wrap:wrap"><button type="button" class="plain" id="cr-x">취소</button><button type="button" class="plain" id="cr-full">자르지 않고 전체</button><button type="button" id="cr-ok">이 영역으로</button></div></dialog>
 <dialog id="busy"><span class="spin"></span>사진 올리는 중…</dialog>
 <input type="file" id="pick" accept="image/*" hidden>
 <div id="toast" class="hide"></div>
@@ -226,6 +266,7 @@ function stampPath(W=60,H=72,k=5,d=3,mx=7,my=9,ra=1.45,rr=.7){ // k=모서리 �
   return 'polygon('+R.map(([x,y])=>x.toFixed(2)+'px '+y.toFixed(2)+'px').join(',')+')';
 }
 document.documentElement.style.setProperty('--stamp',stampPath());
+document.documentElement.style.setProperty('--stampL',stampPath(132,158,10,6,7,9,1.45,1.4));
 const PALETTE=['#FFD60A','#FF4D8D','#2D6BFF','#19C37D','#FF7A1A','#8B5CF6','#00C2E0'];
 const S={user:null,logs:[],trash:[],cats:[],idxs:[],month:new Date(),edit:null,img:undefined};
 const z=n=>String(n).padStart(2,'0');
@@ -282,12 +323,36 @@ document.querySelectorAll('.tabs [data-t]').forEach(b=>b.onclick=()=>{
 /* 이미지: 공용 모듈(media.js). image_url에는 해시 16자만 저장하고, 원본은 폴더가 연결된 PC면 폴더에, 아니면 서버 inbox에 보관 */
 $('busy').addEventListener('cancel',e=>e.preventDefault());
 function pick(){return new Promise(res=>{const i=$('pick');i.value='';i.onchange=()=>res(i.files[0]||null);i.click()})}
-async function uploadImg(file,id){
+function cropPick(file){   // 우표 비율(5:6) 고정으로 영역 고르기
+  return new Promise(res=>{
+    const dlg=$('cr'),img=$('cr-img'),sel=$('cr-sel'),box=$('cr-box'),url=URL.createObjectURL(file),R=1.2;let q={x:0,y:0,w:0};
+    const done=r=>{dlg.oncancel=null;document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);URL.revokeObjectURL(url);if(dlg.open)dlg.close();res(r)};
+    const paint=()=>{sel.style.cssText=`left:${q.x}px;top:${q.y}px;width:${q.w}px;height:${q.w*R}px`};
+    let g=null;
+    function mv(m){if(!g)return;const W=img.clientWidth,H=img.clientHeight,dx=m.clientX-g.cx,dy=m.clientY-g.cy;
+      if(g.rz)q.w=Math.max(30,Math.min(g.w+Math.max(dx,dy/R),W-q.x,(H-q.y)/R));
+      else{q.x=Math.max(0,Math.min(g.x+dx,W-q.w));q.y=Math.max(0,Math.min(g.y+dy,H-q.w*R))}paint()}
+    function up(){g=null}
+    img.onload=()=>{const W=img.clientWidth,H=img.clientHeight,w0=Math.min(W*.8,H*.8/R);q={x:(W-w0)/2,y:(H-w0*R)/2,w:w0};paint()};
+    box.onpointerdown=ev=>{const rz=ev.target.id==='cr-rz';if(!rz&&ev.target.id!=='cr-sel')return;ev.preventDefault();g={rz,cx:ev.clientX,cy:ev.clientY,x:q.x,y:q.y,w:q.w}};
+    document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);
+    $('cr-x').onclick=()=>done(null);$('cr-full').onclick=()=>done({crop:null});dlg.oncancel=()=>done(null);
+    $('cr-ok').onclick=async()=>{try{
+      const bmp=await createImageBitmap(file,{imageOrientation:'from-image'}),k=bmp.width/img.clientWidth,sw=Math.max(1,Math.round(q.w*k)),sh=Math.max(1,Math.round(q.w*R*k)),c=document.createElement('canvas');
+      c.width=sw;c.height=sh;c.getContext('2d').drawImage(bmp,q.x*k,q.y*k,q.w*k,q.w*R*k,0,0,sw,sh);bmp.close();
+      const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.95));done({crop:new File([blob],'crop.jpg',{type:'image/jpeg'})});
+    }catch(e){toast('이미지를 읽을 수 없어요');done(null)}};
+    img.src=url;dlg.showModal();
+  });
+}
+async function uploadImg(file,id){   // 영역을 골라 200px WebP로 올리고, 원본은 폴더(PC) 또는 서버 inbox에. 취소하면 null
+  const r=await cropPick(file);if(!r)return null;
   $('busy').showModal();
   try{
-    const s=await Media.save(file,{id});
-    if(s.original==='failed')toast('원본 보관에 실패했어요: '+s.originalError);
-    s.close();return s.hash;
+    const p=await Media.process(r.crop||file);let hash;try{hash=await Media.upload(p)}finally{p.close()}
+    let orig='failed',err='';try{orig=await Media.original(id,file)}catch(e){err=e.message}
+    if(orig==='failed')toast('원본 보관에 실패했어요: '+err);
+    return hash;
   }finally{$('busy').close()}
 }
 function hydrate(){
@@ -406,11 +471,65 @@ function openDlg(log,date,edit){
   fillCat(x?x.category_id:log?.category_id);fillIdx(log?.index_id);
   document.querySelectorAll('.ext').forEach(e=>e.classList.toggle('hide',!log));
   $('f-danger').classList.toggle('hide',!log);
-  S.ref=undefined;linkUi();refTxt();setMode(!log||(edit&&!ro));$('f-edit').classList.toggle('hide',ro);$('f-ro').classList.toggle('hide',!ro);prev();$('dlg').showModal();
+  S.ref=undefined;linkUi();refTxt();setMode(!log||(edit&&!ro));$('f-edit').classList.toggle('hide',ro);$('f-ro').classList.toggle('hide',!ro);prev();$('f-vv').innerHTML=log?viewLog(log):'';if(!$('dlg').open)$('dlg').showModal();
   if(log&&Media.folder.supported)Media.folder.fileUrl(log.id).then(u=>{const e=$('f-prev').querySelector('.ph[data-img]');if(u&&e&&S.edit&&S.edit.id===log.id)e.style.backgroundImage=`url('${u}')`}).catch(()=>{});
 }
 $('f-edit').onclick=()=>setMode(true);
-$('f-x').onclick=()=>$('dlg').close();
+$('f-x').onclick=()=>{if(S.edit&&find(S.edit.id))openDlg(find(S.edit.id));else $('dlg').close()};
+/* 상세창(보기 모드): 우표 / 스티커를 크게, 그 아래에 요약 */
+const origId=l=>l.image_url?l.id:ix(l.index_id)?.image_url?l.index_id:cat(l.category_id)?.image_url?l.category_id:l.id;
+function stampEl(l){
+  const c=col(l);
+  if(Media.url(rep(l)))return `<div class="stamp" style="background:${c}">${ph(l)}</div>`;
+  const nm=Array.from(cat(l.category_id)?.name||'').slice(0,4).join('');
+  return `<div class="stamp tk" style="--c:${c};--f:${fg(c)}"><span class="ks">${esc(nm)}</span><p>${esc(l.text||'')}</p></div>`;
+}
+const catChip=c=>c?`<span class="chip"><i style="background:${esc(c.color||'#ddd')}"></i>${esc(c.name)}</span>`:'<span class="chip no"><i></i>카테고리 없음</span>';
+function viewLog(l){
+  const x=ix(l.index_id),c=cat(l.category_id)||(x&&cat(x.category_id)),has=!!Media.url(rep(l)),cr=kstDate(l.created_at),chk=l.is_checked;
+  let dl=chk?`✓ ${dd(doneDay(l)||l.log_date||cr)} 완료`:chk===false?(l.log_date?`예정 ${dd(l.log_date)}`:'예정일 없음'):(l.log_date?dd(l.log_date):'');
+  dl+=(dl?' · ':'')+`입력 ${dd(cr)}`;
+  const memo=(l.meta?.memo||'').trim();
+  return `<div class="vst ${has?'cl':''}" ${has?'data-orig="1"':''} style="transform:rotate(${(tilt(l.id,1.2).match(/-?[\d.]+(?=deg)/)||[0])[0]}deg)">${stampEl(l)}</div>`
+    +(has?'<div class="hint">우표를 누르면 원본 보기</div>':'')
+    +`<div class="tt">${esc(l.text||'')}</div>`
+    +`<div class="cs">${catChip(c)}${x?`<span class="chip">${esc(x.emoji||'')} ${esc(x.name)}</span>`:'<span class="chip no">인덱스 없음</span>'}</div>`
+    +`<div class="dates">${dl}</div>`
+    +(memo?`<div class="lb">메모</div><div class="memo">${esc(memo)}</div>`:'');
+}
+function idxHas(i,key){return !!(i.recur?.t==='d'&&i.emoji&&i.started_on&&key>=i.started_on&&key<=today()&&(!i.finished_on||key<=i.finished_on)&&!(i.meta?.skip||[]).includes(key))}
+function dayStats(i){
+  let tot=0,st=0;const t=today(),end=(i.finished_on&&i.finished_on<t)?i.finished_on:t,a=new Date(i.started_on+'T12:00:00'),b=new Date(end+'T12:00:00');
+  for(const d=new Date(a);d<=b;d.setDate(d.getDate()+1))if(idxHas(i,ymd(d)))tot++;
+  for(const d=new Date(b);d>=a;d.setDate(d.getDate()-1)){if(idxHas(i,ymd(d)))st++;else break}
+  return {tot,st};
+}
+function viewIdx(i){
+  const c=cat(i.category_id),col0=c?.color||'#E4E4E4',bg=/^#[0-9a-f]{6}$/i.test(col0)?col0+'99':col0,nm=Array.from(i.name||''),u=Media.url(i.image_url);
+  const sticker=i.emoji?`<span class="e">${esc(i.emoji)}</span><small>${esc(nm.slice(0,5).join(''))}</small>`:`<span class="e" style="font-size:40px">${esc(nm[0]||'')}</span>`;
+  const rec=i.recur,rl=!rec?'':rec.t==='d'?'매일 도장':rec.t==='w'?'요일마다':rec.t==='n'?`${rec.n}일마다`:`매월 ${rec.d}일`;
+  const logs=S.logs.filter(l=>l.index_id===i.id).sort((a,b)=>((doneDay(b)||b.log_date||kstDate(b.created_at))).localeCompare(doneDay(a)||a.log_date||kstDate(a.created_at))),
+    ds=i.recur?.t==='d'&&i.emoji&&i.started_on?dayStats(i):null;
+  return `<div class="vem" style="background-color:${bg};${u&&!i.emoji?`background-image:url('${esc(u)}')`:''};transform:rotate(-1deg)">${sticker}</div>`
+    +(nm.length>5?`<div class="tt">${esc(i.name)}</div>`:'')
+    +`<div class="cs">${catChip(c)}${rl?`<span class="chip">${esc(rl)}</span>`:''}</div>`
+    +`<div class="vsum">${i.started_on?`<div>${dd(i.started_on)} 시작 · ${i.finished_on?dd(i.finished_on)+' 종료':'진행 중'}</div>`:''}${ds?`<div style="font-weight:800">총 ${ds.tot}일 · 연속 ${ds.st}일</div>`:''}</div>`
+    +(logs.length?`<div class="lb">최근 기록</div><div class="vmini">${logs.slice(0,6).map(l=>`<div data-lid="${l.id}" title="${esc(l.text)}">${stampEl(l)}</div>`).join('')}</div><div class="hint" style="text-align:right">기록 ${logs.length}개 · 누르면 상세</div>`:'');
+}
+async function showOrig(id){
+  if(!Media.folder.supported){toast('이 브라우저에서는 원본을 볼 수 없어요');return}
+  let u=null;try{u=await Media.folder.fileUrl(id)}catch(e){}
+  if(!u){toast('연결된 폴더에 원본이 없어요');return}
+  $('orig-img').src=u;$('orig').onclose=()=>{URL.revokeObjectURL(u);$('orig-img').removeAttribute('src')};$('orig').showModal();
+}
+$('orig').onclick=()=>$('orig').close();
+$('f-vv').onclick=e=>{if(e.target.closest('[data-orig]')&&S.edit)showOrig(origId(S.edit))};
+$('emo-vv').onclick=e=>{const m=e.target.closest('[data-lid]');if(m){const l=find(m.dataset.lid);$('emo').close();if(l)openDlg(l)}};
+/* 보기 모드에서는 팝업 바깥을 누르면 닫힘. 편집 중에는 실수로 닫히지 않음(취소 버튼 사용) */
+['dlg','emo'].forEach(id=>{const d=$(id);
+  d.addEventListener('click',e=>{if(!d.classList.contains('view')||e.target!==d)return;const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close()});
+  d.addEventListener('cancel',e=>{if(!d.classList.contains('view'))e.preventDefault()})});
+
 $('f-c').onchange=()=>{$('f-dn').value=$('f-c').checked?($('f-dn').value||today()):''};
 $('f-dn').onchange=()=>{$('f-c').checked=!!$('f-dn').value};
 const curCat=()=>{const x=ix($('f-idx').value);return x?x.category_id:$('f-cat').value};
@@ -448,7 +567,7 @@ $('f-gal').onclick=async()=>{
     S.img=o.hash;S.ref=null;refTxt();prev();
   }catch(e){toast(e.message)}
 };
-$('f-pick').onclick=async()=>{const f=await pick();if(!f)return;try{S.img=await uploadImg(f,S.rid);prev();toast('사진을 올렸어요')}catch(e){toast(e.message)}};
+$('f-pick').onclick=async()=>{const f=await pick();if(!f)return;try{const h=await uploadImg(f,S.rid);if(!h)return;S.img=h;prev();toast('사진을 올렸어요')}catch(e){toast(e.message)}};
 $('f-rm').onclick=()=>{S.img=null;S.ref=null;refTxt();prev()};
 $('f-t').oninput=prev;
 $('f-ok').onclick=async()=>{
@@ -517,7 +636,7 @@ $('tab-more').addEventListener('click',async e=>{
   if(!a){const tg=t.closest('[data-tg]');if(tg){const k=tg.dataset.tg,c=k[0]==='c',set=c?S.shut:S.open,id=c?k.slice(2):k;set.has(id)?set.delete(id):set.add(id);renderMore()}return}
   if(!row)return;
   const tb=row.dataset.k,id=row.dataset.id;let r;
-  if(a==='img'){const f=await pick();if(!f)return;try{r=await sb.from(tb).update({image_url:await uploadImg(f,id)}).eq('id',id)}catch(err){toast(err.message);return}}
+  if(a==='img'){const f=await pick();if(!f)return;try{const h=await uploadImg(f,id);if(!h)return;r=await sb.from(tb).update({image_url:h}).eq('id',id)}catch(err){toast(err.message);return}}
   else if(a==='ren'){const o=cat(id),n=(prompt('이름',o.name)||'').trim();if(!n)return;r=await sb.from(tb).update({name:n}).eq('id',id)}
   else if(a==='add'){const d=await newIdx(id);if(d){S.open.add('i:'+d.id);loadAll()}return}
   else if(a==='edit'){openIdx(ix(id),true);return}
@@ -559,10 +678,10 @@ function fillEmo(i){
   $('emo-cnt').textContent=i.id?`기록 ${S.logs.filter(l=>l.index_id===i.id).length}개`:'';
   wkUi();pvUi();skUi();
 }
-function showEmo(){const ok=!!customElements.get('emoji-picker');$('emo-p').classList.toggle('hide',!ok);$('emo-g').classList.toggle('hide',ok);$('emo').showModal()}
+function showEmo(){const ok=!!customElements.get('emoji-picker');$('emo-p').classList.toggle('hide',!ok);$('emo-g').classList.toggle('hide',ok);if(!$('emo').open)$('emo').showModal()}
 function openIdx(i,edit,date){
   if(!i)return;S.emoIdx=i;S.emoDate=date||null;S.emoRes=null;S.emoRid=i.id;S.emoImg=undefined;S.emoW=undefined;
-  fillEmo(i);$('emo-t').textContent=i.name+(edit?' · 수정':'');$('emo-danger').classList.remove('hide');emoMode(!!edit);showEmo();
+  fillEmo(i);$('emo-vv').innerHTML=viewIdx(i);{const w=Math.max(30,(Math.min(innerWidth*.92,420)-38-30)/6),k=w/60;$('emo-vv').style.setProperty('--stampM',stampPath(w,w*1.2,5*k,3*k,7,9,1.45,.7*k))}$('emo-t').textContent=i.name+(edit?' · 수정':'');$('emo-danger').classList.remove('hide');emoMode(!!edit);showEmo();
 }
 $('emo-edit').onclick=()=>{emoMode(true);$('emo-t').textContent=(S.emoIdx?.name||'')+' · 수정'};
 $('emo-r').onchange=recUi;$('emo-c').onchange=wkUi;
@@ -600,7 +719,7 @@ async function chainNext(l){
 async function chainUndo(l){
   const {error}=await sb.from('didi_log').delete().eq('meta->>from',l.id).eq('is_checked',false);
   if(!error){S.logs=S.logs.filter(x=>!(x.meta?.from===l.id&&x.is_checked===false));renderAll()}}
-$('emo-pick').onclick=async()=>{const f=await pick();if(!f)return;try{S.emoImg=await uploadImg(f,S.emoRid);pvUi();toast('사진을 올렸어요')}catch(e){toast(e.message)}};
+$('emo-pick').onclick=async()=>{const f=await pick();if(!f)return;try{const h=await uploadImg(f,S.emoRid);if(!h)return;S.emoImg=h;pvUi();toast('사진을 올렸어요')}catch(e){toast(e.message)}};
 $('emo-rm').onclick=()=>{S.emoImg=null;pvUi()};
 $('emo-w').onclick=async()=>{try{
   const w=await sb.from('wkwk_work').select('id,name,cover').limit(1000);
@@ -611,7 +730,7 @@ $('emo-w').onclick=async()=>{try{
   if(!$('emo-n').value.trim())$('emo-n').value=o.title;
   wkUi()}catch(e){toast(e.message)}};
 $('emo-wx').onclick=()=>{S.emoW=null;wkUi()};
-$('emo-x').onclick=()=>$('emo').close();
+$('emo-x').onclick=()=>{if(S.emoIdx)openIdx(S.emoIdx,false,S.emoDate);else $('emo').close()};
 $('emo').addEventListener('close',()=>{if(S.emoRes){S.emoRes(null);S.emoRes=null}});
 $('emo-ok').onclick=async()=>{
   const name=$('emo-n').value.trim();if(!name){toast('이름을 입력하세요');return}
