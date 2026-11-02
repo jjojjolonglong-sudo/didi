@@ -120,6 +120,7 @@ dialog{position:relative}
 .vst.cl{cursor:zoom-in}
 .vst.sm{width:95px;height:114px;margin:0}.vst.sm .stamp{clip-path:var(--stampS);--cw:54px}
 .dtl{margin:0 auto 8px;text-align:center;font-weight:800;font-size:13px;color:var(--blue);border:2px solid var(--blue);border-radius:4px;padding:2px 0;letter-spacing:-.02em;white-space:nowrap;transform:rotate(-1.2deg)}
+.vst.bd{margin-bottom:22px}.vbadge{position:absolute;right:-16px;bottom:-18px;width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:.5px 1px 2px rgba(90,60,0,.4);transform:rotate(8deg);--o:2.2px}.vbadge .e{font-size:28px;line-height:1;transform:rotate(-8deg);text-shadow:calc(var(--o)*1) 0 0 #fff,calc(var(--o)*.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*.5) calc(var(--o)*.87) 0 #fff,0 var(--o) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*.87) 0 #fff,calc(var(--o)*-.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*-1) 0 0 #fff,calc(var(--o)*-.87) calc(var(--o)*-.5) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*-.87) 0 #fff,0 calc(var(--o)*-1) 0 #fff,calc(var(--o)*.5) calc(var(--o)*-.87) 0 #fff,calc(var(--o)*.87) calc(var(--o)*-.5) 0 #fff}
 .pair{margin-top:34px;display:flex;gap:16px;justify-content:center;align-items:center}
 .tgl{display:inline-block;min-width:32px;text-align:center;cursor:pointer;font-size:22px;line-height:1;vertical-align:-2px}
 .cnt{color:var(--blue);text-decoration:underline;font-weight:700;cursor:pointer}
@@ -533,7 +534,10 @@ function viewIdx(i,date){
   const list=(n)=>logs.length?`<div class="lb">${i.emoji?'최근 기록':'포함된 기록'}</div><div class="vmini">${logs.slice(0,n).map(l=>`<div data-lid="${l.id}" title="${esc(l.text)}">${stampEl(l)}</div>`).join('')}</div><div class="hint" style="text-align:right">기록 ${logs.length}개 · 누르면 상세</div>`:'';
   if(i.emoji){   // 스티커(반복) 인덱스
     if(date)return dlab(date,112)+stk+(nm.length>5?`<div class="tt">${esc(i.name)}</div>`:'')+`<div class="cs">${catChip(c)}${rl?`<span class="chip">${esc(rl)}</span>`:''}</div>`+sum;   // 날짜에서 들어오면 그날의 기록이라 포함된 기록은 숨김
-    return (u?`<div class="pair">${stk}${photo('sm')}</div>`:stk)+(nm.length>5?`<div class="tt">${esc(i.name)}</div>`:'')+`<div class="cs">${catChip(c)}${rl?`<span class="chip">${esc(rl)}</span>`:''}</div>`+sum+list(6);
+    const nameT=`<div class="tt">${esc(i.name)}</div>`,chips=`<div class="cs">${catChip(c)}${rl?`<span class="chip">${esc(rl)}</span>`:''}</div>`;
+    if(u){const badge=`<div class="vbadge" style="background:${col0}"><span class="e">${esc(i.emoji)}</span></div>`;   // 사진이 있으면 우표 오른쪽 아래에 작은 원형 스티커로 붙임
+      return `<div class="vst bd cl" data-orig="1" style="transform:rotate(-1deg)">${idxStamp(i)}${badge}</div><div class="hint">우표를 누르면 원본 보기</div>`+nameT+chips+sum+list(6)}
+    return stk+(nm.length>5?nameT:'')+chips+sum+list(6);
   }
   return photo()+(u?'<div class="hint">우표를 누르면 원본 보기</div>':'')+`<div class="tt">${esc(i.name)}</div>`+`<div class="cs">${catChip(c)}${rl?`<span class="chip">${esc(rl)}</span>`:''}</div>`+sum+list(12);   // 폴더용 인덱스
 }
@@ -627,7 +631,7 @@ function renderMore(){
   const logs=a=>{if(!a.length)return '<div class="lg" style="cursor:default;color:#888">기록 없음</div>';
     return [...a].reverse().slice(0,30).map(l=>`<div class="lg" data-lid="${l.id}"><span class="t">${l.is_checked?'✅ ':''}${esc(l.text)}</span><span class="dt">${dd(l.log_date)}</span></div>`).join('')
       +(a.length>30?`<div class="lg" style="cursor:default;color:#888">… 오래된 기록 ${a.length-30}개는 생략 (캘린더·컬렉션에서 볼 수 있어요)</div>`:'')};
-  const node=(key,label,a)=>{const o=S.open.has(key);return `<div class="mr sub"><span class="t" data-tg="${key}">${o?'▾':'▸'} ${label} <small>(${a.length})</small></span></div>`+(o?logs(a):'')};
+  const node=(key,label,a)=>{if(!a.length)return '';const o=S.open.has(key);return `<div class="mr sub"><span class="t" data-tg="${key}">${o?'▾':'▸'} ${label} <small>(${a.length})</small></span></div>`+(o?logs(a):'')};
   const irow=i=>{const a=S.logs.filter(l=>l.index_id===i.id),o=S.open.has('i:'+i.id);
     return `<div class="mr sub ${i.finished_on?'ended':''}" data-k="didi_index" data-id="${i.id}">${th(i,'#E4E4E4')}<span class="t"><b class="tgl" data-tg="i:${i.id}">${o?'▾':'▸'}</b> <span data-open="${i.id}" style="cursor:pointer">${i.emoji?esc(i.emoji)+' ':''}${esc(i.name)}</span> <small class="cnt" data-tg="i:${i.id}">(${a.length})</small>${per(i)}</span></div>`+(o?logs(a):'')};
   const idxs=cid=>{const a=S.idxs.filter(i=>cid?i.category_id===cid:(!i.category_id||!cat(i.category_id)));return [...a.filter(i=>!i.finished_on),...a.filter(i=>i.finished_on)]};
