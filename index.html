@@ -106,7 +106,7 @@ dialog.view .eo,dialog:not(.view) .vo{display:none!important}
 .btns{display:grid;gap:6px}
 dialog{position:relative}
 .ebtn{position:absolute;right:12px;top:12px;padding:5px 12px;font-size:14px;z-index:2}
-.vv{margin-top:14px}.vv .tt{font-size:19px;font-weight:800;line-height:1.3;text-align:center;margin-top:12px;word-break:break-word;white-space:pre-wrap}
+.vv{margin-top:14px}.vv .tt{font-size:19px;font-weight:800;line-height:1.3;text-align:center;margin:12px auto 0;max-width:11.5em;word-break:keep-all;overflow-wrap:anywhere;white-space:pre-wrap}
 .vv .cs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px}
 .chip{display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700;border:2px solid var(--ink);background:#fff}
 .chip i{width:10px;height:10px;border-radius:50%;display:inline-block;border:1.5px solid var(--ink)}
@@ -115,16 +115,16 @@ dialog{position:relative}
 .vv .lb{font-size:11px;font-weight:800;color:#888;letter-spacing:.5px;margin:14px 0 6px}
 .vv .memo{background:#FFFBE6;border:2px solid var(--ink);border-radius:6px;padding:10px 12px;font-size:14px;line-height:22px;white-space:pre-wrap;word-break:break-word;background-image:repeating-linear-gradient(transparent 0 21px,#e9dfae 21px 22px)}
 .vv .hint{text-align:center;margin:6px 0 0;font-size:11px}
-.vst{width:132px;height:158px;margin:0 auto;filter:drop-shadow(.8px 1px 1px rgba(90,60,0,.3))}
+.vst{width:132px;height:158px;margin:22px auto;filter:drop-shadow(.8px 1px 1px rgba(90,60,0,.3))}
 .vst .stamp{width:100%;height:100%;clip-path:var(--stampL);--cw:75px}
 .vst.cl{cursor:zoom-in}
 .vst.sm{width:95px;height:114px;margin:0}.vst.sm .stamp{clip-path:var(--stampS);--cw:54px}
 .dtl{margin:0 auto 8px;text-align:center;font-weight:800;font-size:13px;color:var(--blue);border:2px solid var(--blue);border-radius:4px;padding:2px 0;letter-spacing:-.02em;white-space:nowrap;transform:rotate(-1.2deg)}
-.vst.bd{margin-bottom:0}.vbadge{position:absolute;right:9px;bottom:9px;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:.5px 1px 2px rgba(90,60,0,.4);transform:rotate(8deg);--o:2.2px}.vbadge .e{font-size:25px;line-height:1;transform:rotate(-8deg);text-shadow:calc(var(--o)*1) 0 0 #fff,calc(var(--o)*.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*.5) calc(var(--o)*.87) 0 #fff,0 var(--o) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*.87) 0 #fff,calc(var(--o)*-.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*-1) 0 0 #fff,calc(var(--o)*-.87) calc(var(--o)*-.5) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*-.87) 0 #fff,0 calc(var(--o)*-1) 0 #fff,calc(var(--o)*.5) calc(var(--o)*-.87) 0 #fff,calc(var(--o)*.87) calc(var(--o)*-.5) 0 #fff}
+.vbadge{position:absolute;right:9px;bottom:9px;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:.5px 1px 2px rgba(90,60,0,.4);transform:rotate(8deg);--o:2.2px}.vbadge .e{font-size:25px;line-height:1;transform:rotate(-8deg);text-shadow:calc(var(--o)*1) 0 0 #fff,calc(var(--o)*.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*.5) calc(var(--o)*.87) 0 #fff,0 var(--o) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*.87) 0 #fff,calc(var(--o)*-.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*-1) 0 0 #fff,calc(var(--o)*-.87) calc(var(--o)*-.5) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*-.87) 0 #fff,0 calc(var(--o)*-1) 0 #fff,calc(var(--o)*.5) calc(var(--o)*-.87) 0 #fff,calc(var(--o)*.87) calc(var(--o)*-.5) 0 #fff}
 .pair{margin-top:34px;display:flex;gap:16px;justify-content:center;align-items:center}
 .tgl{display:inline-block;min-width:32px;text-align:center;cursor:pointer;font-size:22px;line-height:1;vertical-align:-2px}
 .cnt{color:var(--blue);text-decoration:underline;font-weight:700;cursor:pointer}
-.vem{--o:3.4px;width:112px;height:112px;margin:0 auto;border-radius:22%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;box-shadow:.5px 1px 1.5px rgba(90,60,0,.28);overflow:hidden;background-size:cover;background-position:center}
+.vem{--o:3.4px;width:112px;height:112px;margin:22px auto;border-radius:22%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;box-shadow:.5px 1px 1.5px rgba(90,60,0,.28);overflow:hidden;background-size:cover;background-position:center}
 .vem .e{font-size:44px;line-height:1;text-shadow:calc(var(--o)*1) 0 0 #fff,calc(var(--o)*.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*.5) calc(var(--o)*.87) 0 #fff,0 var(--o) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*.87) 0 #fff,calc(var(--o)*-.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*-1) 0 0 #fff,calc(var(--o)*-.87) calc(var(--o)*-.5) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*-.87) 0 #fff,0 calc(var(--o)*-1) 0 #fff,calc(var(--o)*.5) calc(var(--o)*-.87) 0 #fff,calc(var(--o)*.87) calc(var(--o)*-.5) 0 #fff}
 .vem small{font-size:19px;font-weight:800;letter-spacing:-.04em;line-height:1;max-width:96%;white-space:nowrap;overflow:hidden}
 .vsum{text-align:center;font-size:13px;line-height:1.9;margin-top:12px}
@@ -429,6 +429,8 @@ function renderCal(){
 }
 $('cal').onclick=e=>{const m=e.target.closest('[data-idx]');if(m){openIdx(ix(m.dataset.idx),false,m.closest('[data-d]')?.dataset.d);return}const c=e.target.closest('.cell[data-d]');if(!c)return;const st=e.target.closest('.st');openDlg(st?find(st.dataset.id):null,c.dataset.d)};
 function tilt(id,max){let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))|0;const a=((h&1023)/1023)*2-1,b=(((h>>>10)&1023)/1023)*2-1;return `rotate(${(a*max).toFixed(2)}deg) translate(${(b*.4).toFixed(2)}px,${(a*.4).toFixed(2)}px)`}
+function mixKey(s){let h=0x811c9dc5;for(const c of String(s))h=Math.imul(h^c.charCodeAt(0),16777619);h^=h>>>15;h=Math.imul(h,0x2c1b3c6d);h^=h>>>12;h=Math.imul(h,0x297a2d39);h^=h>>>15;return h>>>0}   // 글자 하나만 달라도(연속된 날짜) 값이 크게 달라지게 섞음
+const dstAngle=key=>(-(7+mixKey(key)/4294967295*3)).toFixed(2);   // 날짜 도장: 반시계 방향 7~10도, 같은 날짜는 항상 같은 각도
 function fitDay(){   // 폰 너비에 맞춰 한 줄 6칸, 우표 톱니 모양도 칸 크기에 맞게 다시 계산
   const g=$('days'),w=Math.min(document.body.clientWidth-24,616),cw=Math.max(30,(w-30)/6),ch=cw*1.2,k=cw/60;
   g.style.setProperty('--cw',cw.toFixed(2)+'px');g.style.setProperty('--ch',ch.toFixed(2)+'px');
@@ -449,15 +451,15 @@ function renderDay(){
     const d=new Date(s0);d.setDate(s0.getDate()+i);const key=ymd(d);
     if(key>t)break;   // 오늘 이후 날짜는 도장을 찍지 않음
     const dc=i===0?'#FF4D8D':i===6?'#2D6BFF':'#111';
-    h+=`<div style="transform:${tilt(key,6)}"><svg class="dst ${key===t?'today':''}" viewBox="0 0 100 120" style="--c:${dc}"><circle class="r o" cx="50" cy="47" r="45.5" stroke-width="4.5"/><circle class="r i" cx="50" cy="47" r="36" stroke-width="2.2"/><text x="50" y="26.5" font-size="12.5" letter-spacing=".6">${MON[d.getMonth()]}</text><text x="50" y="47.5" font-size="32">${d.getDate()}</text><text x="50" y="68.5" font-size="13">${'일월화수목금토'[i]}</text><rect class="r y" x="7" y="91" width="86" height="26" rx="4" stroke-width="3"/><text x="50" y="104.5" font-size="28" letter-spacing="-.8" style="font-weight:900">${d.getFullYear()}</text></svg></div>`;
+    h+=`<div style="transform:rotate(${dstAngle(key)}deg)"><svg class="dst ${key===t?'today':''}" viewBox="0 0 100 120" style="--c:${dc}"><circle class="r o" cx="50" cy="45" r="43" stroke-width="4.5"/><circle class="r i" cx="50" cy="45" r="34" stroke-width="2.2"/><text x="50" y="25.5" font-size="12.5" letter-spacing=".6">${MON[d.getMonth()]}</text><text x="50" y="45.5" font-size="32">${d.getDate()}</text><text x="50" y="65.5" font-size="13">${'일월화수목금토'[i]}</text><rect class="r y" x="7" y="95" width="86" height="23" rx="4" stroke-width="4.2"/><text x="50" y="115" font-size="24" letter-spacing="-.8" style="font-weight:900;dominant-baseline:auto">${d.getFullYear()}</text></svg></div>`;
     S.logs.filter(l=>l.is_checked&&(doneDay(l)||l.log_date)===key).sort(byDone).forEach(l=>{
       const c=col(l),tf=`transform:${tilt(l.id,.6)}`;
       if(Media.url(rep(l)))h+=`<div class="sh" style="${tf}"><div class="stamp" data-id="${l.id}" style="background:${c}" title="${esc(l.text)}">${ph(l)}</div></div>`;
       else h+=`<div class="sh" style="${tf}"><div class="stamp tk" data-id="${l.id}" style="--c:${c};--f:${fg(c)}" title="${esc(l.text)}"><span class="ks">${esc(Array.from(cat(l.category_id)?.name||'').slice(0,4).join(''))}</span><p>${esc(l.text||'')}</p></div></div>`;
     });
     stampsOn(key).forEach(x=>{
-      const c=cat(x.category_id)?.color||'#E4E4E4',bg=/^#[0-9a-f]{6}$/i.test(c)?c+'99':c,nm=Array.from(x.name||'').slice(0,6),fs=Math.min(.2,.8/(Math.max(nm.length,1)*.95));
-      h+=`<div style="transform:${tilt(x.id+key,3.5)}"><div class="emo" data-idx="${x.id}" data-d="${key}" style="background:${bg};--f:${fg(c)}" title="${esc(x.name)}"><span class="e">${esc(x.emoji)}</span><small style="font-size:calc(var(--cw)*${fs.toFixed(3)})">${esc(nm.join(''))}</small></div></div>`;
+      const c=cat(x.category_id)?.color||'#E4E4E4',bg=/^#[0-9a-f]{6}$/i.test(c)?c+'80':c,nm=Array.from(x.name||'').slice(0,6),fs=Math.min(.2,.8/(Math.max(nm.length,1)*.95));
+      h+=`<div style="transform:${tilt(mixKey(x.id+key),9)}"><div class="emo" data-idx="${x.id}" data-d="${key}" style="background:${bg};--f:${fg(c)}" title="${esc(x.name)}"><span class="e">${esc(x.emoji)}</span><small style="font-size:calc(var(--cw)*${fs.toFixed(3)})">${esc(nm.join(''))}</small></div></div>`;
     });
   }
   $('days').innerHTML=h+'</div>';
@@ -535,7 +537,7 @@ function idxStamp(i){   // 폴더용 인덱스의 우표: 사진이 있으면 �
   return `<div class="stamp tk" style="--c:${cc};--f:${fg(cc)}"><span class="ks">${esc(Array.from(c?.name||'').slice(0,4).join(''))}</span><p>${esc(i.name||'')}</p></div>`;
 }
 function viewIdx(i,date){
-  const c=cat(i.category_id),col0=c?.color||'#E4E4E4',bg=/^#[0-9a-f]{6}$/i.test(col0)?col0+'99':col0,nm=Array.from(i.name||''),u=Media.url(i.image_url);
+  const c=cat(i.category_id),col0=c?.color||'#E4E4E4',bg=/^#[0-9a-f]{6}$/i.test(col0)?col0+'80':col0,nm=Array.from(i.name||''),u=Media.url(i.image_url);
   const rec=i.recur,rl=!rec?'':rec.t==='d'?'매일 도장':rec.t==='w'?'요일마다':rec.t==='n'?`${rec.n}일마다`:`매월 ${rec.d}일`;
   const logs=S.logs.filter(l=>l.index_id===i.id).sort((a,b)=>((doneDay(b)||b.log_date||kstDate(b.created_at))).localeCompare(doneDay(a)||a.log_date||kstDate(a.created_at))),
     ds=rec?.t==='d'&&i.emoji&&i.started_on?dayStats(i):null;
@@ -645,7 +647,7 @@ function renderMore(){
       +(a.length>30?`<div class="lg" style="cursor:default;color:#888">… 오래된 기록 ${a.length-30}개는 생략 (캘린더·컬렉션에서 볼 수 있어요)</div>`:'')};
   const node=(key,label,a)=>{if(!a.length)return '';const o=S.open.has(key);return `<div class="mr sub"><span class="t" data-tg="${key}">${o?'▾':'▸'} ${label} <small>(${a.length})</small></span></div>`+(o?logs(a):'')};
   const irow=i=>{const a=S.logs.filter(l=>l.index_id===i.id),o=S.open.has('i:'+i.id);
-    return `<div class="mr sub ${i.finished_on?'ended':''}" data-k="didi_index" data-id="${i.id}">${th(i,'#E4E4E4')}<span class="t"><b class="tgl" data-tg="i:${i.id}">${o?'▾':'▸'}</b> <span data-open="${i.id}" style="cursor:pointer">${i.emoji?esc(i.emoji)+' ':''}${esc(i.name)}</span> <small class="cnt" data-tg="i:${i.id}">(${a.length})</small>${per(i)}</span></div>`+(o?logs(a):'')};
+    return `<div class="mr sub ${i.finished_on?'ended':''}" data-k="didi_index" data-id="${i.id}"><span class="t">${a.length?`<b class="tgl" data-tg="i:${i.id}">${o?'▾':'▸'}</b>`:'<b class="tgl" style="cursor:default"></b>'} <span data-open="${i.id}" style="cursor:pointer">${i.emoji?esc(i.emoji)+' ':''}${esc(i.name)}</span>${a.length?` <small class="cnt" data-tg="i:${i.id}">(${a.length})</small>`:''}${per(i)}</span></div>`+(o&&a.length?logs(a):'')};
   const idxs=cid=>{const a=S.idxs.filter(i=>cid?i.category_id===cid:(!i.category_id||!cat(i.category_id)));return [...a.filter(i=>!i.finished_on),...a.filter(i=>i.finished_on)]};
   let h='';
   for(const c of S.cats){const shut=S.shut.has(c.id);
