@@ -15,7 +15,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.26.1/index.js"></script>
 <script src="https://jjojjolonglong-sudo.github.io/mnmn/config.js"></script>
-<script src="https://jjojjolonglong-sudo.github.io/mnmn/media.v1.js"></script>
+<script src="https://jjojjolonglong-sudo.github.io/mnmn/media.v2.js"></script>
 <style>
 :root{--ink:#111;--yel:#FFD60A;--pink:#FF4D8D;--blue:#2D6BFF;--gray:#E4E4E4;
 /* 우표 그림자: drop-shadow(가로 세로 번짐 색) 두 겹. 앞=붙어 있는 얇은 그림자, 뒤=살짝 퍼지는 그림자 */
@@ -120,7 +120,7 @@ dialog{position:relative}
 .vst.cl{cursor:zoom-in}
 .vst.sm{width:95px;height:114px;margin:0}.vst.sm .stamp{clip-path:var(--stampS);--cw:54px}
 .dtl{margin:0 auto 8px;text-align:center;font-weight:800;font-size:13px;color:var(--blue);border:2px solid var(--blue);border-radius:4px;padding:2px 0;letter-spacing:-.02em;white-space:nowrap;transform:rotate(-1.2deg)}
-.vst.bd{margin-bottom:22px}.vbadge{position:absolute;right:-16px;bottom:-18px;width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:.5px 1px 2px rgba(90,60,0,.4);transform:rotate(8deg);--o:2.2px}.vbadge .e{font-size:28px;line-height:1;transform:rotate(-8deg);text-shadow:calc(var(--o)*1) 0 0 #fff,calc(var(--o)*.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*.5) calc(var(--o)*.87) 0 #fff,0 var(--o) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*.87) 0 #fff,calc(var(--o)*-.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*-1) 0 0 #fff,calc(var(--o)*-.87) calc(var(--o)*-.5) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*-.87) 0 #fff,0 calc(var(--o)*-1) 0 #fff,calc(var(--o)*.5) calc(var(--o)*-.87) 0 #fff,calc(var(--o)*.87) calc(var(--o)*-.5) 0 #fff}
+.vst.bd{margin-bottom:0}.vbadge{position:absolute;right:9px;bottom:9px;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:.5px 1px 2px rgba(90,60,0,.4);transform:rotate(8deg);--o:2.2px}.vbadge .e{font-size:25px;line-height:1;transform:rotate(-8deg);text-shadow:calc(var(--o)*1) 0 0 #fff,calc(var(--o)*.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*.5) calc(var(--o)*.87) 0 #fff,0 var(--o) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*.87) 0 #fff,calc(var(--o)*-.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*-1) 0 0 #fff,calc(var(--o)*-.87) calc(var(--o)*-.5) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*-.87) 0 #fff,0 calc(var(--o)*-1) 0 #fff,calc(var(--o)*.5) calc(var(--o)*-.87) 0 #fff,calc(var(--o)*.87) calc(var(--o)*-.5) 0 #fff}
 .pair{margin-top:34px;display:flex;gap:16px;justify-content:center;align-items:center}
 .tgl{display:inline-block;min-width:32px;text-align:center;cursor:pointer;font-size:22px;line-height:1;vertical-align:-2px}
 .cnt{color:var(--blue);text-decoration:underline;font-weight:700;cursor:pointer}
@@ -189,9 +189,9 @@ const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용
     <div id="mp-trash" class="hide"></div>
     <div id="mp-app" class="hide">
       <h3>앱 설치</h3><div id="inst" style="font-size:14px;line-height:1.6"></div>
-      <h3>원본 사진 폴더 (PC)</h3><div class="hint">일기 사진의 원본을 이 PC 폴더에 모아요. 폰에서 올린 원본은 서버에 잠시 보관되었다가, 여기서 받으면 폴더로 옮겨져요.</div><button id="dirbtn" class="plain">폴더 연결</button> <button id="syncbtn" class="plain">원본 받기</button><div id="syncmsg" class="hint"></div>
-      <h3>독서앱 동기화</h3><div class="hint">독서앱의 기록 변화(수정·삭제·완독 등)를 일기의 독서 로그에 맞춰요. 새 기록은 저장할 때 자동으로 만들어지고, 이 버튼은 나머지 변화를 반영해요.</div><button id="bksync" class="plain">독서앱 기록 동기화</button><div id="bkmsg" class="hint"></div>
-      <h3>영상앱 동기화</h3><div class="hint">영상앱의 기록 변화(시청일 입력·수정·삭제)를 일기의 영상 로그에 맞춰요. 직접 연결해 둔 옛 로그는 그대로 두고, 자동으로 만든 로그만 맞춰요.</div><button id="mvsync" class="plain">영상앱 기록 동기화</button><div id="mvmsg" class="hint"></div>
+      <h3>원본 사진 폴더 (PC)</h3><div class="hint">일기 사진의 원본을 보관하는 PC 폴더는 mnmn의 "원본 폴더" 탭에서 정해요. 폰에서 올린 원본은 서버에 잠시 보관되었다가, mnmn의 "원본 받기"로 폴더에 옮겨져요.</div><div id="dirmsg" class="hint" style="margin-top:0"></div><button id="dirbtn" class="plain">폴더 권한 허용</button>
+      <h3>독서앱 동기화</h3><div class="hint">독서앱에서 기록을 저장하면 일기의 독서 로그가 자동으로 만들어져요(앱을 다시 열거나 새로고침하면 보여요). 수정·삭제·완독 같은 나머지 변화는 이 버튼을 눌러야 반영돼요. 독서 로그는 독서앱에서만 고칠 수 있어요.</div><button id="bksync" class="plain">독서앱 기록 동기화</button><div id="bkmsg" class="hint"></div>
+      <h3>영상앱 동기화</h3><div class="hint">영상앱에서 작품·에피소드의 이름·포스터·시청일을 저장하거나 지우면 일기의 영상 로그가 자동으로 따라가요(앱을 다시 열거나 새로고침하면 보여요). 이 버튼은 자동 반영이 놓친 게 있을 때 전체를 다시 맞춰요. 영상 로그는 영상앱에서만 고칠 수 있어요.</div><button id="mvsync" class="plain">영상앱 기록 동기화</button><div id="mvmsg" class="hint"></div>
       <div style="margin-top:20px"><button id="logout" class="plain">로그아웃</button></div>
     </div>
   </section>
@@ -203,13 +203,15 @@ const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용
   <div class="vv vo" id="f-vv"></div>
   <div class="fm eo">
   <div class="row" style="align-items:flex-end"><div class="sw"><div class="pv" id="f-prev"></div></div>
-    <div class="eo btns"><button id="f-pick" class="plain">사진 선택</button><button id="f-link" class="plain hide"></button><button id="f-gal" class="plain hide">서버 사진</button><button id="f-rm" class="plain">사진 제거</button></div></div>
+    <div class="eo btns"><button id="f-pick" class="plain">사진 선택</button><button id="f-recrop" class="plain hide" type="button">다시 자르기</button><button id="f-link" class="plain hide"></button><button id="f-gal" class="plain hide">서버 사진</button><button id="f-rm" class="plain">사진 제거</button></div></div>
   <div id="f-ref" class="hint"></div>
   <label for="f-t">내용</label><input id="f-t">
-  <label for="f-d">예정일</label><input id="f-d" type="date">
   <div class="g2"><div><label for="f-cat">분류</label><select id="f-cat"></select></div><div><label for="f-idx">인덱스</label><select id="f-idx"></select></div></div>
-  <div class="g2 ext"><div><label for="f-cr">입력일</label><input id="f-cr" type="date"></div><div><label for="f-dn">완료일</label><div class="row" style="gap:6px"><input id="f-c" type="checkbox" style="width:22px;height:22px;flex:none" aria-label="완료"><input id="f-dn" type="date"></div></div></div>
-  <label for="f-m">메모</label><textarea id="f-m"></textarea>
+  <div class="sec">날짜</div>
+  <div class="g2"><div><label for="f-d" style="margin-top:0">예정일</label><input id="f-d" type="date"></div><div class="ext"><label for="f-dn" style="margin-top:0">완료일</label><div class="row" style="gap:6px"><input id="f-c" type="checkbox" style="width:22px;height:22px;flex:none" aria-label="완료"><input id="f-dn" type="date"></div></div></div>
+  <div class="sec">메모</div>
+  <textarea id="f-m"></textarea>
+  <details class="dt2 ext"><summary>고급</summary><label for="f-cr">입력일</label><input id="f-cr" type="date"></details>
   </div>
   <div id="f-ro" class="hint hide" style="text-align:center;margin-top:16px"></div>
   <div class="foot">
@@ -222,7 +224,7 @@ const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용
   <div class="vv vo" id="emo-vv"></div>
   <div class="fm eo">
   <div class="row" style="align-items:flex-end;margin-top:8px"><div class="pvx" id="emo-pv"></div>
-    <div class="eo btns"><button id="emo-pick" class="plain" type="button">사진 선택</button><button id="emo-rm" class="plain" type="button">사진 제거</button></div></div>
+    <div class="eo btns"><button id="emo-pick" class="plain" type="button">사진 선택</button><button id="emo-recrop" class="plain hide" type="button">다시 자르기</button><button id="emo-rm" class="plain" type="button">사진 제거</button></div></div>
   <label for="emo-n">이름</label><input id="emo-n">
   <label for="emo-c">분류</label><select id="emo-c"></select>
   <div class="sec">반복</div>
@@ -258,7 +260,7 @@ const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용
 <script>
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 if(!window.Media)window.Media={init(){},url:()=>'',img:()=>'',newId:()=>crypto.randomUUID(),folder:{supported:false,name:async()=>''},process:async()=>{throw new Error('media.js could not be loaded')},upload:async()=>{throw new Error('media.js could not be loaded')},save:async()=>{throw new Error('media.js could not be loaded')}};
-Media.init({worker:MEDIA_URL,getToken:async()=>(await sb.auth.getSession()).data.session?.access_token});
+Media.init({app:'didi',worker:MEDIA_URL,getToken:async()=>(await sb.auth.getSession()).data.session?.access_token});
 /* 독서·영상 분류는 코드에 고정: 삭제 불가, 이 분류의 일기는 독서앱(bkbk)·영화앱(mvmv) 행을 연결해서 표지/포스터를 가져올 수 있어요 */
 const CAT_BOOK='eed2cf8c-8db6-42ba-b67f-cb18d51af4f0',CAT_MOVIE='89253f70-a97f-4747-b304-061a942866ed',CAT_WRITE='16edcf59-2231-4be4-b94e-39f5421424b3',LOCKED=new Set([CAT_BOOK,CAT_MOVIE,CAT_WRITE]);
 /* 집필 분류도 고정: 이 분류의 인덱스는 인덱스 설정 창에서 집필앱(wkwk_work)의 작품(name, cover)에 직접 연결할 수 있어요 */
@@ -311,9 +313,13 @@ async function boot(){
 $('login').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});if(!fail(error))boot()};
 $('signup').onclick=async()=>{const {error}=await sb.auth.signUp({email:$('em').value.trim(),password:$('pw').value});if(!fail(error)){toast('가입 완료. 메일 인증을 켰다면 확인하세요');boot()}};
 $('logout').onclick=async()=>{await sb.auth.signOut();boot()};
-const dirLabel=()=>Media.folder.name().then(n=>{$('dirbtn').textContent=n?'폴더: '+n+' (변경)':'폴더 연결'}).catch(()=>{});
-$('dirbtn').onclick=async()=>{try{await Media.folder.connect();dirLabel()}catch(e){if(e.name!=='AbortError')toast(e.message||'이 브라우저에서는 지원하지 않아요')}};
-$('syncbtn').onclick=async()=>{const m=$('syncmsg');try{m.textContent='받는 중…';const r=await Media.sync({onProgress:p=>m.textContent=p.done+'/'+p.total});m.textContent=r.total?`완료: ${r.done}/${r.total}`+(r.failed.length?` · 실패 ${r.failed.length}`:''):'받을 원본이 없어요'}catch(e){m.textContent=e.message}};
+const dirLabel=async()=>{try{
+  if(!Media.folder.supported){$('dirmsg').textContent='이 브라우저에서는 원본 폴더를 쓸 수 없어요 (PC의 Chrome·Edge에서 가능)';$('dirbtn').classList.add('hide');return}
+  const h=await Media.folder.saved(),own=await Media.folder.own();let ok=false;
+  if(h&&typeof h.queryPermission==='function')ok=(await h.queryPermission({mode:'readwrite'}))==='granted';
+  $('dirmsg').textContent=h?`원본 폴더: ${h.name}${own?'':' (공통 폴더)'} · ${ok?'권한 있음':'권한 필요 — 아래 버튼을 눌러 허용하세요'}`:'원본 폴더가 아직 없어요. mnmn의 "원본 폴더" 탭에서 지정해 주세요.';
+  $('dirbtn').classList.toggle('hide',!h||ok)}catch(e){}};
+$('dirbtn').onclick=async()=>{try{await Media.folder.ensure();dirLabel()}catch(e){toast(e.message)}};
 dirLabel();
 
 /* 데이터 */
@@ -357,15 +363,20 @@ function cropPick(file){   // 우표 비율(5:6) 고정으로 영역 고르기
     img.src=url;dlg.showModal();
   });
 }
-async function uploadImg(file,id){   // 영역을 골라 200px WebP로 올리고, 원본은 폴더(PC) 또는 서버 inbox에. 취소하면 null
+async function uploadImg(file,id,skipOrig){   // 영역을 골라 200px WebP로 올리고, 원본은 폴더(PC) 또는 서버 inbox에. 취소하면 null
   const r=await cropPick(file);if(!r)return null;
   $('busy').showModal();
   try{
     const p=await Media.process(r.crop||file);let hash;try{hash=await Media.upload(p)}finally{p.close()}
-    let orig='failed',err='';try{orig=await Media.original(id,file)}catch(e){err=e.message}
-    if(orig==='failed')toast('원본 보관에 실패했어요: '+err);
+    if(!skipOrig){let orig='failed',err='';try{orig=await Media.original(id,file)}catch(e){err=e.message}
+    if(orig==='failed')toast('원본 보관에 실패했어요: '+err)}
     return hash;
   }finally{$('busy').close()}
+}
+async function recrop(id,done){   // 연결된 폴더의 원본을 다시 불러와 영역만 새로 고르기
+  if(!Media.folder.supported){toast('이 브라우저에서는 쓸 수 없어요 (PC의 Chrome·Edge)');return}
+  const f=await Media.folder.find(id);if(!f){toast('연결된 폴더에서 원본을 찾지 못했어요 (폴더 권한도 확인해 보세요)');return}
+  try{const h=await uploadImg(f,id,true);if(h)done(h)}catch(e){toast(e.message)}
 }
 function hydrate(){
   document.querySelectorAll('[data-img]:not([data-ok])').forEach(el=>{
@@ -445,8 +456,8 @@ function renderDay(){
       else h+=`<div class="sh" style="${tf}"><div class="stamp tk" data-id="${l.id}" style="--c:${c};--f:${fg(c)}" title="${esc(l.text)}"><span class="ks">${esc(Array.from(cat(l.category_id)?.name||'').slice(0,4).join(''))}</span><p>${esc(l.text||'')}</p></div></div>`;
     });
     stampsOn(key).forEach(x=>{
-      const c=cat(x.category_id)?.color||'#E4E4E4',bg=/^#[0-9a-f]{6}$/i.test(c)?c+'99':c,nm=Array.from(x.name||'').slice(0,5),fs=Math.min(.2,.8/(Math.max(nm.length,1)*.95));
-      h+=`<div style="transform:${tilt(x.id+key,.9)}"><div class="emo" data-idx="${x.id}" data-d="${key}" style="background:${bg};--f:${fg(c)}" title="${esc(x.name)}"><span class="e">${esc(x.emoji)}</span><small style="font-size:calc(var(--cw)*${fs.toFixed(3)})">${esc(nm.join(''))}</small></div></div>`;
+      const c=cat(x.category_id)?.color||'#E4E4E4',bg=/^#[0-9a-f]{6}$/i.test(c)?c+'99':c,nm=Array.from(x.name||'').slice(0,6),fs=Math.min(.2,.8/(Math.max(nm.length,1)*.95));
+      h+=`<div style="transform:${tilt(x.id+key,3.5)}"><div class="emo" data-idx="${x.id}" data-d="${key}" style="background:${bg};--f:${fg(c)}" title="${esc(x.name)}"><span class="e">${esc(x.emoji)}</span><small style="font-size:calc(var(--cw)*${fs.toFixed(3)})">${esc(nm.join(''))}</small></div></div>`;
     });
   }
   $('days').innerHTML=h+'</div>';
@@ -456,7 +467,7 @@ $('days').onclick=e=>{const m=e.target.closest('[data-idx]');if(m){openIdx(ix(m.
 /* 팝업 */
 function fillCat(v){$('f-cat').innerHTML='<option value="">분류 없음</option>'+S.cats.filter(c=>(c.id!==CAT_BOOK&&c.id!==CAT_MOVIE)||c.id===v).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')+'<option value="__new">+ 새 분류</option>';$('f-cat').value=v||''}
 function fillIdx(v){const c=$('f-cat').value;$('f-idx').innerHTML='<option value="">인덱스 없음</option>'+S.idxs.filter(i=>(i.category_id||'')===c&&(!i.finished_on||i.id===v)).map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('')+'<option value="__new">+ 새 인덱스</option>';$('f-idx').value=v||''}
-function prev(){const o={...(S.edit||{}),text:$('f-t').value,image_url:S.img!==undefined?S.img:S.edit?.image_url,index_id:$('f-idx').value,category_id:$('f-cat').value};$('f-prev').style.background=col(o);$('f-prev').innerHTML=ph(o,1)}
+function prev(){const o={...(S.edit||{}),text:$('f-t').value,image_url:S.img!==undefined?S.img:S.edit?.image_url,index_id:$('f-idx').value,category_id:$('f-cat').value};$('f-prev').style.background=col(o);$('f-prev').innerHTML=ph(o,1);$('f-recrop').classList.toggle('hide',!(o.image_url&&S.edit&&Media.folder.supported))}
 async function newCat(){
   const name=(prompt('새 분류 이름')||'').trim();if(!name){fillCat('');fillIdx('');return}
   const {data,error}=await sb.from('didi_category').insert({user_id:S.user.id,name,color:PALETTE[S.cats.length%PALETTE.length],sort_order:S.cats.length}).select().single();
@@ -529,15 +540,15 @@ function viewIdx(i,date){
   const logs=S.logs.filter(l=>l.index_id===i.id).sort((a,b)=>((doneDay(b)||b.log_date||kstDate(b.created_at))).localeCompare(doneDay(a)||a.log_date||kstDate(a.created_at))),
     ds=rec?.t==='d'&&i.emoji&&i.started_on?dayStats(i):null;
   const sum=`<div class="vsum">${i.started_on?`<div>${dd(i.started_on)} 시작 · ${i.finished_on?dd(i.finished_on)+' 종료':'진행 중'}</div>`:''}${ds?`<div style="font-weight:800">총 ${ds.tot}일 · 연속 ${ds.st}일</div>`:''}</div>`;
-  const stk=`<div class="vem" style="background-color:${bg};transform:rotate(-1deg)"><span class="e">${esc(i.emoji||'')}</span><small>${esc(nm.slice(0,5).join(''))}</small></div>`;
+  const stk=`<div class="vem" style="background-color:${bg};transform:rotate(-1deg)"><span class="e">${esc(i.emoji||'')}</span><small style="font-size:${Math.min(19,100/(Math.max(Math.min(nm.length,6),1)*.96)).toFixed(1)}px">${esc(nm.slice(0,6).join(''))}</small></div>`;
   const photo=(cls)=>`<div class="vst ${cls||''} ${u?'cl':''}" ${u?'data-orig="1"':''} style="transform:rotate(-1deg)">${idxStamp(i)}</div>`;
-  const list=(n)=>logs.length?`<div class="lb">${i.emoji?'최근 기록':'포함된 기록'}</div><div class="vmini">${logs.slice(0,n).map(l=>`<div data-lid="${l.id}" title="${esc(l.text)}">${stampEl(l)}</div>`).join('')}</div><div class="hint" style="text-align:right">기록 ${logs.length}개 · 누르면 상세</div>`:'';
+  const list=(n)=>{const lim=Math.max(n,S.vn||0);return logs.length?`<div class="lb">${i.emoji?'최근 기록':'포함된 기록'}</div><div class="vmini">${logs.slice(0,lim).map(l=>`<div data-lid="${l.id}" title="${esc(l.text)}">${stampEl(l)}</div>`).join('')}</div><div class="hint" style="text-align:right">기록 ${logs.length}개 · 누르면 상세</div>${logs.length>lim?`<button type="button" class="plain" data-more="1" style="width:100%;margin-top:6px">더 보기 (${Math.min(30,logs.length-lim)}개 더)</button>`:''}`:''};
   if(i.emoji){   // 스티커(반복) 인덱스
-    if(date)return dlab(date,112)+stk+(nm.length>5?`<div class="tt">${esc(i.name)}</div>`:'')+`<div class="cs">${catChip(c)}${rl?`<span class="chip">${esc(rl)}</span>`:''}</div>`+sum;   // 날짜에서 들어오면 그날의 기록이라 포함된 기록은 숨김
+    if(date)return dlab(date,112)+stk+(nm.length>6?`<div class="tt">${esc(i.name)}</div>`:'')+`<div class="cs">${catChip(c)}${rl?`<span class="chip">${esc(rl)}</span>`:''}</div>`+sum;   // 날짜에서 들어오면 그날의 기록이라 포함된 기록은 숨김
     const nameT=`<div class="tt">${esc(i.name)}</div>`,chips=`<div class="cs">${catChip(c)}${rl?`<span class="chip">${esc(rl)}</span>`:''}</div>`;
     if(u){const badge=`<div class="vbadge" style="background:${col0}"><span class="e">${esc(i.emoji)}</span></div>`;   // 사진이 있으면 우표 오른쪽 아래에 작은 원형 스티커로 붙임
       return `<div class="vst bd cl" data-orig="1" style="transform:rotate(-1deg)">${idxStamp(i)}${badge}</div><div class="hint">우표를 누르면 원본 보기</div>`+nameT+chips+sum+list(6)}
-    return stk+(nm.length>5?nameT:'')+chips+sum+list(6);
+    return stk+(nm.length>6?nameT:'')+chips+sum+list(6);
   }
   return photo()+(u?'<div class="hint">우표를 누르면 원본 보기</div>':'')+`<div class="tt">${esc(i.name)}</div>`+`<div class="cs">${catChip(c)}${rl?`<span class="chip">${esc(rl)}</span>`:''}</div>`+sum+list(12);   // 폴더용 인덱스
 }
@@ -549,7 +560,7 @@ async function showOrig(id){
 }
 $('orig').onclick=()=>$('orig').close();
 $('f-vv').onclick=e=>{if(e.target.closest('[data-orig]')&&S.edit)showOrig(origId(S.edit))};
-$('emo-vv').onclick=e=>{if(e.target.closest('[data-orig]')&&S.emoIdx){showOrig(S.emoIdx.id);return}const m=e.target.closest('[data-lid]');if(m){const l=find(m.dataset.lid);$('emo').close();if(l)openDlg(l)}};
+$('emo-vv').onclick=e=>{if(e.target.closest('[data-more]')&&S.emoIdx){S.vn=Math.max(S.vn||0,S.emoIdx.emoji?6:12)+30;$('emo-vv').innerHTML=viewIdx(S.emoIdx,S.emoDate);return}if(e.target.closest('[data-orig]')&&S.emoIdx){showOrig(S.emoIdx.id);return}const m=e.target.closest('[data-lid]');if(m){const l=find(m.dataset.lid);$('emo').close();if(l)openDlg(l)}};
 /* 보기 모드에서는 팝업 바깥을 누르면 닫힘. 편집 중에는 실수로 닫히지 않음(취소 버튼 사용) */
 ['dlg','emo'].forEach(id=>{const d=$(id);
   d.addEventListener('click',e=>{if(!d.classList.contains('view')||e.target!==d)return;const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close()});
@@ -593,6 +604,7 @@ $('f-gal').onclick=async()=>{
   }catch(e){toast(e.message)}
 };
 $('f-pick').onclick=async()=>{const f=await pick();if(!f)return;try{const h=await uploadImg(f,S.rid);if(!h)return;S.img=h;prev();toast('사진을 올렸어요')}catch(e){toast(e.message)}};
+$('f-recrop').onclick=()=>recrop(S.rid,h=>{S.img=h;prev();toast('다시 잘랐어요')});
 $('f-rm').onclick=()=>{S.img=null;S.ref=null;refTxt();prev()};
 $('f-t').oninput=prev;
 $('f-ok').onclick=async()=>{
@@ -696,7 +708,7 @@ function advUi(){$('emo-adv').classList.toggle('hide',$('emo-wr').classList.cont
 function recUi(){erUi();const v=$('emo-r').value;$('emo-rw').classList.toggle('hide',v!=='w');$('emo-rnn').classList.toggle('hide',v!=='n');$('emo-rmo').classList.toggle('hide',v!=='m');
   $('emo-rh').textContent={d:'시작일부터 오늘까지 매일 이모지 도장이 찍혀요. (이모지 필요)',w:'이 인덱스의 로그를 체크하면 다음 요일의 로그가 자동으로 만들어져요.',n:'로그를 체크하면 N일 뒤의 로그가 자동으로 만들어져요.',m:'로그를 체크하면 다음 달 그 날짜의 로그가 자동으로 만들어져요.'}[v]||''}
 function wkUi(){const on=isWrite($('emo-c').value);$('emo-wr').classList.toggle('hide',!on);const r=S.emoW===undefined?S.emoIdx?.meta?.ref:S.emoW;$('emo-wt').textContent=on&&r?'✍️ '+(r.name||''):''}
-function pvUi(){const u=Media.url(S.emoImg!==undefined?S.emoImg:S.emoIdx?.image_url);$('emo-pv').innerHTML=u?`<div class="ph" data-img="${esc(u)}"></div>`:''}
+function pvUi(){const u=Media.url(S.emoImg!==undefined?S.emoImg:S.emoIdx?.image_url);$('emo-pv').innerHTML=u?`<div class="ph" data-img="${esc(u)}"></div>`:'';$('emo-recrop').classList.toggle('hide',!(u&&S.emoIdx&&S.emoIdx.id&&Media.folder.supported))}
 function fillEmo(i){
   $('emo-n').value=i.name||'';
   $('emo-c').innerHTML='<option value="">분류 없음</option>'+S.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');$('emo-c').value=i.category_id||'';
@@ -709,7 +721,7 @@ function fillEmo(i){
 }
 function showEmo(){const ok=!!customElements.get('emoji-picker');$('emo-p').classList.toggle('hide',!ok);$('emo-g').classList.toggle('hide',ok);if(!$('emo').open)$('emo').showModal()}
 function openIdx(i,edit,date){
-  if(!i)return;S.emoIdx=i;S.emoDate=date||null;S.emoRes=null;S.emoRid=i.id;S.emoImg=undefined;S.emoW=undefined;
+  if(!i)return;S.vn=0;S.emoIdx=i;S.emoDate=date||null;S.emoRes=null;S.emoRid=i.id;S.emoImg=undefined;S.emoW=undefined;
   fillEmo(i);$('emo-vv').innerHTML=viewIdx(i,date);{const w=Math.max(30,(Math.min(innerWidth*.92,420)-38-30)/6),k=w/60;$('emo-vv').style.setProperty('--stampM',stampPath(w,w*1.2,5*k,3*k,7,9,1.45,.7*k))}$('emo-t').textContent=i.name+(edit?' · 수정':'');$('emo-danger').classList.remove('hide');emoMode(!!edit);showEmo();
 }
 $('emo-edit').onclick=()=>{emoMode(true);$('emo-t').textContent=(S.emoIdx?.name||'')+' · 수정'};
@@ -748,6 +760,7 @@ async function chainNext(l){
 async function chainUndo(l){
   const {error}=await sb.from('didi_log').delete().eq('meta->>from',l.id).eq('is_checked',false);
   if(!error){S.logs=S.logs.filter(x=>!(x.meta?.from===l.id&&x.is_checked===false));renderAll()}}
+$('emo-recrop').onclick=()=>recrop(S.emoRid,h=>{S.emoImg=h;pvUi();toast('다시 잘랐어요')});
 $('emo-pick').onclick=async()=>{const f=await pick();if(!f)return;try{const h=await uploadImg(f,S.emoRid);if(!h)return;S.emoImg=h;pvUi();toast('사진을 올렸어요')}catch(e){toast(e.message)}};
 $('emo-rm').onclick=()=>{S.emoImg=null;pvUi()};
 $('emo-w').onclick=async()=>{try{
@@ -821,9 +834,9 @@ addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;showInst()});
 async function pwaCheck(){
   const out=[],ok=(t,v)=>out.push((v?'✅ ':'❌ ')+t);
   ok('HTTPS 접속',location.protocol==='https:');
-  try{const r=await fetch('manifest.json');ok('manifest.json 파일',r.ok);const m=await r.json();
+  try{const r=await fetch('manifest.webmanifest');ok('manifest.webmanifest 파일',r.ok);const m=await r.json();
     for(const i of m.icons||[]){try{ok('아이콘 '+i.sizes+(i.purpose==='maskable'?' (maskable)':''),(await fetch(i.src)).ok)}catch(e){ok('아이콘 '+i.sizes,false)}}
-  }catch(e){ok('manifest.json 파일',false)}
+  }catch(e){ok('manifest.webmanifest 파일',false)}
   let reg=null;try{reg=await navigator.serviceWorker.getRegistration()}catch(e){}
   ok('서비스 워커 등록',!!reg);
   return out;
