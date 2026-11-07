@@ -70,7 +70,7 @@ button.plain{background:#fff}button.red{background:var(--pink)}
 .col>div{width:var(--cw);height:var(--ch);display:flex;align-items:center;justify-content:center}
 .col .stamp{width:100%;height:100%;clip-path:var(--stampC)}
 .dst{display:block;width:var(--cw);height:var(--ch);color:var(--c);opacity:.92;overflow:visible;font-family:inherit}
-.dst .r{fill:none;stroke:currentColor}.dst text{fill:currentColor;text-anchor:middle;dominant-baseline:central;font-weight:800}
+.dst .r{fill:none;stroke:currentColor}.dst .y{fill:#FFF2A8}   /* 연도 상자는 바탕색으로 채워서 원의 아랫선을 덮음 → 원과 상자가 딱 붙고 선이 겹치지 않음 */.dst text{fill:currentColor;text-anchor:middle;dominant-baseline:central;font-weight:800}
 .dst.today .o{fill:currentColor}.dst.today .i{stroke:#FFF2A8}.dst.today .y{fill:currentColor}.dst.today text{fill:#FFF2A8}
 .tk{background:#FFFBE6;display:flex}
 .tk .ks{flex:none;width:23%;background:var(--c);color:var(--f);writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cw)*.13);font-weight:700;letter-spacing:1px;overflow:hidden;white-space:nowrap}
@@ -104,8 +104,13 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 dialog label{display:block;font-size:13px;font-weight:700;margin:9px 0 3px}
 dialog.view .eo,dialog:not(.view) .vo{display:none!important}
 .btns{display:grid;gap:6px}
+/* 편집창 사진: 우표를 크게 가운데에, 버튼은 그 아래 가로로 */
+.phrow{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:12px}
+#f-prev{width:95px;height:114px;clip-path:var(--stampS)}#f-prev .ph.t3{font-size:22px}
+.phrow .pvx{width:95px;height:114px}
+.pbtn{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.pbtn button{padding:5px 10px;font-size:14px}
 dialog{position:relative}
-.ebtn{position:absolute;right:12px;top:12px;padding:5px 12px;font-size:14px;z-index:2}
+.ebtn{display:block;margin:18px auto 0;padding:6px 22px;font-size:14px}   /* 상세창 편집 버튼: 아래 가운데 */
 .vv{margin-top:14px}.vv .tt{font-size:19px;font-weight:800;line-height:1.3;text-align:center;margin:12px auto 0;max-width:11.5em;word-break:keep-all;overflow-wrap:anywhere;white-space:pre-wrap}
 .vv .cs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px}
 .chip{display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700;border:2px solid var(--ink);background:#fff}
@@ -119,7 +124,7 @@ dialog{position:relative}
 .vst .stamp{width:100%;height:100%;clip-path:var(--stampL);--cw:75px}
 .vst.cl{cursor:zoom-in}
 .vst.sm{width:95px;height:114px;margin:0}.vst.sm .stamp{clip-path:var(--stampS);--cw:54px}
-.dtl{margin:0 auto 8px;text-align:center;font-weight:800;font-size:13px;color:var(--blue);border:2px solid var(--blue);border-radius:4px;padding:2px 0;letter-spacing:-.02em;white-space:nowrap;transform:rotate(-1.2deg)}
+.dtl{margin:0 auto 8px;text-align:center;font-weight:800;font-size:13px;color:var(--blue);border:2px solid var(--blue);border-radius:4px;padding:2px 0;letter-spacing:-.02em;white-space:nowrap}
 .vbadge{position:absolute;right:9px;bottom:9px;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:.5px 1px 2px rgba(90,60,0,.4);transform:rotate(8deg);--o:2.2px}.vbadge .e{font-size:25px;line-height:1;transform:rotate(-8deg);text-shadow:calc(var(--o)*1) 0 0 #fff,calc(var(--o)*.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*.5) calc(var(--o)*.87) 0 #fff,0 var(--o) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*.87) 0 #fff,calc(var(--o)*-.87) calc(var(--o)*.5) 0 #fff,calc(var(--o)*-1) 0 0 #fff,calc(var(--o)*-.87) calc(var(--o)*-.5) 0 #fff,calc(var(--o)*-.5) calc(var(--o)*-.87) 0 #fff,0 calc(var(--o)*-1) 0 #fff,calc(var(--o)*.5) calc(var(--o)*-.87) 0 #fff,calc(var(--o)*.87) calc(var(--o)*-.5) 0 #fff}
 .pair{margin-top:34px;display:flex;gap:16px;justify-content:center;align-items:center}
 .tgl{display:inline-block;min-width:32px;text-align:center;cursor:pointer;font-size:22px;line-height:1;vertical-align:-2px}
@@ -190,20 +195,18 @@ const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용
     <div id="mp-app" class="hide">
       <h3>앱 설치</h3><div id="inst" style="font-size:14px;line-height:1.6"></div>
       <h3>원본 사진 폴더 (PC)</h3><div class="hint">일기 사진의 원본을 보관하는 PC 폴더는 mnmn의 "원본 폴더" 탭에서 정해요. 폰에서 올린 원본은 서버에 잠시 보관되었다가, mnmn의 "원본 받기"로 폴더에 옮겨져요.</div><div id="dirmsg" class="hint" style="margin-top:0"></div><button id="dirbtn" class="plain">폴더 권한 허용</button>
-      <h3>독서앱 동기화</h3><div class="hint">독서앱에서 기록을 추가·수정·삭제하거나 완독하면 일기의 독서 로그에 자동으로 반영돼요(앱을 다시 열거나 새로고침하면 보여요). 책 제목이나 표지를 바꾼 경우에만 이 버튼을 눌러 주세요. 독서 로그는 독서앱에서만 고칠 수 있어요.</div><button id="bksync" class="plain">독서앱 기록 동기화</button><div id="bkmsg" class="hint"></div>
-      <h3>영상앱 동기화</h3><div class="hint">영상앱에서 작품·에피소드의 이름·포스터·시청일을 저장하거나 지우면 일기의 영상 로그가 자동으로 따라가요(앱을 다시 열거나 새로고침하면 보여요). 이 버튼은 자동 반영이 놓친 게 있을 때 전체를 다시 맞춰요. 영상 로그는 영상앱에서만 고칠 수 있어요.</div><button id="mvsync" class="plain">영상앱 기록 동기화</button><div id="mvmsg" class="hint"></div>
+      <h3>독서·영상앱 연결</h3><div class="hint">독서앱·영상앱에서 기록을 추가·수정·삭제하거나 제목·표지를 바꾸면 일기에 자동으로 반영돼요(앱을 다시 열거나 새로고침하면 보여요). 독서·영상 기록은 각 앱에서만 고칠 수 있어요.</div>
       <div style="margin-top:20px"><button id="logout" class="plain">로그아웃</button></div>
     </div>
   </section>
 </main>
 
 <dialog id="dlg">
-  <button id="f-edit" class="vo ebtn" type="button">편집</button>
   <div id="dtitle" class="eo" style="font-weight:700;font-size:18px"></div>
   <div class="vv vo" id="f-vv"></div>
   <div class="fm eo">
-  <div class="row" style="align-items:flex-end"><div class="sw"><div class="pv" id="f-prev"></div></div>
-    <div class="eo btns"><button id="f-pick" class="plain">사진 선택</button><button id="f-recrop" class="plain hide" type="button">다시 자르기</button><button id="f-link" class="plain hide"></button><button id="f-gal" class="plain hide">서버 사진</button><button id="f-rm" class="plain">사진 제거</button></div></div>
+  <div class="phrow"><div class="sw"><div class="pv" id="f-prev"></div></div>
+    <div class="eo pbtn"><button id="f-pick" class="plain">사진 선택</button><button id="f-recrop" class="plain hide" type="button">다시 자르기</button><button id="f-link" class="plain hide"></button><button id="f-gal" class="plain hide">서버 사진</button><button id="f-rm" class="plain">사진 제거</button></div></div>
   <div id="f-ref" class="hint"></div>
   <label for="f-t">내용</label><input id="f-t">
   <div class="g2"><div><label for="f-cat">분류</label><select id="f-cat"></select></div><div><label for="f-idx">인덱스</label><select id="f-idx"></select></div></div>
@@ -218,13 +221,14 @@ const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용
     <div class="row eo" id="f-danger"><button id="f-disc" class="plain">버리기</button><button id="f-del" class="red">삭제</button></div>
     <div class="row" style="margin-left:auto"><button id="f-x" class="plain eo">취소</button><button id="f-ok" class="eo">저장</button></div>
   </div>
+  <button id="f-edit" class="vo ebtn" type="button">편집</button>
 </dialog>
-<dialog id="emo"><button id="emo-edit" class="vo ebtn" type="button">편집</button>
+<dialog id="emo">
   <div id="emo-t" class="eo" style="font-weight:700;font-size:18px"></div>
   <div class="vv vo" id="emo-vv"></div>
   <div class="fm eo">
-  <div class="row" style="align-items:flex-end;margin-top:8px"><div class="pvx" id="emo-pv"></div>
-    <div class="eo btns"><button id="emo-pick" class="plain" type="button">사진 선택</button><button id="emo-recrop" class="plain hide" type="button">다시 자르기</button><button id="emo-rm" class="plain" type="button">사진 제거</button></div></div>
+  <div class="phrow"><div class="pvx" id="emo-pv"></div>
+    <div class="eo pbtn"><button id="emo-pick" class="plain" type="button">사진 선택</button><button id="emo-recrop" class="plain hide" type="button">다시 자르기</button><button id="emo-rm" class="plain" type="button">사진 제거</button></div></div>
   <label for="emo-n">이름</label><input id="emo-n">
   <label for="emo-c">분류</label><select id="emo-c"></select>
   <div class="sec">반복</div>
@@ -247,6 +251,7 @@ const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용
     <div class="row eo" id="emo-danger"><button id="emo-del" class="red">삭제</button></div>
     <div class="row" style="margin-left:auto"><button id="emo-x" class="plain eo">취소</button><button id="emo-ok" class="eo">저장</button></div>
   </div>
+  <button id="emo-edit" class="vo ebtn" type="button">편집</button>
 </dialog>
 <dialog id="pk"><div class="row"><input id="pk-q" placeholder="검색"><button id="pk-x" class="plain">닫기</button></div><div id="pk-l" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;max-height:60vh;overflow:auto;margin-top:10px"></div></dialog>
 <dialog id="orig" style="padding:0;border:0;background:transparent;max-width:96vw;max-height:96vh;overflow:visible"><img id="orig-img" alt="" style="display:block;max-width:94vw;max-height:90vh;border-radius:6px;box-shadow:0 4px 24px rgba(0,0,0,.5)"></dialog>
@@ -451,7 +456,7 @@ function renderDay(){
     const d=new Date(s0);d.setDate(s0.getDate()+i);const key=ymd(d);
     if(key>t)break;   // 오늘 이후 날짜는 도장을 찍지 않음
     const dc=i===0?'#FF4D8D':i===6?'#2D6BFF':'#111';
-    h+=`<div style="transform:rotate(${dstAngle(key)}deg)"><svg class="dst ${key===t?'today':''}" viewBox="0 0 100 120" style="--c:${dc}"><circle class="r o" cx="50" cy="45" r="43" stroke-width="4.5"/><circle class="r i" cx="50" cy="45" r="34" stroke-width="2.2"/><text x="50" y="25.5" font-size="12.5" letter-spacing=".6">${MON[d.getMonth()]}</text><text x="50" y="45.5" font-size="32">${d.getDate()}</text><text x="50" y="65.5" font-size="13">${'일월화수목금토'[i]}</text><rect class="r y" x="7" y="95" width="86" height="23" rx="4" stroke-width="4.2"/><text x="50" y="115" font-size="24" letter-spacing="-.8" style="font-weight:900;dominant-baseline:auto">${d.getFullYear()}</text></svg></div>`;
+    h+=`<div style="transform:rotate(${dstAngle(key)}deg)"><svg class="dst ${key===t?'today':''}" viewBox="0 0 100 120" style="--c:${dc}"><circle class="r o" cx="50" cy="45" r="43" stroke-width="4.5"/><circle class="r i" cx="50" cy="45" r="34" stroke-width="2.2"/><text x="50" y="25.5" font-size="12.5" letter-spacing=".6">${MON[d.getMonth()]}</text><text x="50" y="45.5" font-size="32">${d.getDate()}</text><text x="50" y="65.5" font-size="13">${'일월화수목금토'[i]}</text><rect class="r y" x="7" y="89" width="86" height="25" rx="4" stroke-width="4.2"/><text x="50" y="110.5" font-size="24" letter-spacing="-.8" style="font-weight:900;dominant-baseline:auto">${d.getFullYear()}</text></svg></div>`;
     S.logs.filter(l=>l.is_checked&&(doneDay(l)||l.log_date)===key).sort(byDone).forEach(l=>{
       const c=col(l),tf=`transform:${tilt(l.id,.6)}`;
       if(Media.url(rep(l)))h+=`<div class="sh" style="${tf}"><div class="stamp" data-id="${l.id}" style="background:${c}" title="${esc(l.text)}">${ph(l)}</div></div>`;
@@ -486,7 +491,7 @@ function setMode(edit){
   $('dtitle').textContent=!S.edit?'새 기록':edit?'수정':'상세 보기';
 }
 function openDlg(log,date,edit){
-  S.edit=log||null;S.img=undefined;S.rid=log?log.id:Media.newId();const x=log&&ix(log.index_id),ro=!!(log&&(log.category_id===CAT_BOOK||log.category_id===CAT_MOVIE));
+  S.edit=log||null;S.direct=!!(log&&edit);S.img=undefined;S.rid=log?log.id:Media.newId();const x=log&&ix(log.index_id),ro=!!(log&&(log.category_id===CAT_BOOK||log.category_id===CAT_MOVIE));
   $('f-t').value=log?log.text:'';
   $('f-cr').value=log?kstDate(log.created_at):'';
   $('f-d').value=log?(log.log_date||''):(date||'');
@@ -496,11 +501,11 @@ function openDlg(log,date,edit){
   fillCat(x?x.category_id:log?.category_id);fillIdx(log?.index_id);
   document.querySelectorAll('.ext').forEach(e=>e.classList.toggle('hide',!log));
   $('f-danger').classList.toggle('hide',!log);
-  S.ref=undefined;linkUi();refTxt();setMode(!log||(edit&&!ro));$('f-edit').classList.toggle('hide',ro);$('f-ro').classList.toggle('hide',!ro);if(ro){const mv=log.category_id===CAT_MOVIE;$('f-ro').textContent=mv?'영상앱에서 가져온 기록이에요. 수정은 영상앱에서 해 주세요.':'독서앱에서 가져온 기록이에요. 수정은 독서앱에서 해 주세요.'}prev();$('f-vv').innerHTML=log?viewLog(log):'';if(!$('dlg').open)$('dlg').showModal();
+  S.ref=undefined;linkUi();refTxt();setMode(!log||(edit&&!ro));$('f-edit').classList.toggle('hide',ro);$('f-ro').classList.add('hide');if(ro){const mv=log.category_id===CAT_MOVIE;$('f-ro').textContent=mv?'영상앱에서 가져온 기록이에요. 수정은 영상앱에서 해 주세요.':'독서앱에서 가져온 기록이에요. 수정은 독서앱에서 해 주세요.'}prev();$('f-vv').innerHTML=log?viewLog(log):'';if(log&&ro)loadReview(log);if(!$('dlg').open)$('dlg').showModal();
   if(log&&Media.folder.supported)Media.folder.fileUrl(log.id).then(u=>{const e=$('f-prev').querySelector('.ph[data-img]');if(u&&e&&S.edit&&S.edit.id===log.id)e.style.backgroundImage=`url('${u}')`}).catch(()=>{});
 }
-$('f-edit').onclick=()=>setMode(true);
-$('f-x').onclick=()=>{if(S.edit&&find(S.edit.id))openDlg(find(S.edit.id));else $('dlg').close()};
+$('f-edit').onclick=()=>{S.direct=false;setMode(true)};
+$('f-x').onclick=()=>{if(!S.direct&&S.edit&&find(S.edit.id))openDlg(find(S.edit.id));else $('dlg').close()};   // 할 일에서 바로 편집했으면 상세창 없이 닫기
 /* 상세창(보기 모드): 우표 / 스티커를 크게, 그 아래에 요약 */
 const origId=l=>l.image_url?l.id:ix(l.index_id)?.image_url?l.index_id:cat(l.category_id)?.image_url?l.category_id:l.id;
 function stampEl(l){
@@ -522,7 +527,28 @@ function viewLog(l){
     +`<div class="tt">${esc(l.text||'')}</div>`
     +`<div class="cs">${catChip(c)}${x?`<span class="chip">${esc(x.emoji||'')} ${esc(x.name)}</span>`:'<span class="chip no">인덱스 없음</span>'}</div>`
     +`<div class="dates">${dl}</div>`
-    +(memo?`<div class="lb">메모</div><div class="memo">${esc(memo)}</div>`:'');
+    +(memo?`<div class="lb">메모</div><div class="memo">${esc(memo)}</div>`:'')
+    +((l.category_id===CAT_BOOK||l.category_id===CAT_MOVIE)?'<div id="rvw"></div>':'');
+}
+/* 독서·영상 기록: 각 앱에 적어 둔 별점·리뷰(독서 bkbk_books.comment, 영상 mvmv_movie.review)를 가져와 보여줘요 */
+const RVW=new Map();
+async function loadReview(l){
+  const r=l.meta?.ref,mv=l.category_id===CAT_MOVIE;
+  try{
+    const key=r&&r.id?r.t+':'+r.id:(mv?'name:'+l.text:'');if(!key)return;
+    let v=RVW.get(key);
+    if(v===undefined){
+      let q;
+      if(r&&r.t==='bkbk_books')q=await sb.from('bkbk_books').select('star,comment').eq('id',r.id).maybeSingle();
+      else if(r&&r.t==='mvmv_episode')q=await sb.from('mvmv_episode').select('review').eq('id',r.id).maybeSingle();
+      else if(r&&r.t==='mvmv_movie')q=await sb.from('mvmv_movie').select('star,review').eq('id',r.id).maybeSingle();
+      else if(mv)q=await sb.from('mvmv_movie').select('star,review').eq('name',l.text).limit(1).maybeSingle();
+      v=q&&!q.error&&q.data?{star:q.data.star,text:String(q.data.comment??q.data.review??'').trim()}:null;RVW.set(key,v);
+    }
+    const b=$('rvw');if(!b||!S.edit||S.edit.id!==l.id||!v||(!v.text&&!v.star))return;
+    const n=Math.max(0,Math.min(5,Math.round(+v.star||0)));
+    b.innerHTML=`<div class="lb">리뷰</div><div class="memo">${n?`<div style="color:#E5252A;letter-spacing:1px">${'★'.repeat(n)}${'☆'.repeat(5-n)}</div>`:''}${esc(v.text)}</div>`;
+  }catch(e){}
 }
 function idxHas(i,key){return !!(i.recur?.t==='d'&&i.emoji&&i.started_on&&key>=i.started_on&&key<=today()&&(!i.finished_on||key<=i.finished_on)&&!(i.meta?.skip||[]).includes(key))}
 function dayStats(i){
@@ -619,9 +645,11 @@ $('f-ok').onclick=async()=>{
     const c=$('f-c').checked,dn=$('f-dn').value,cr=$('f-cr').value,upd={...base,meta,is_checked:c,done_at:null};
     if(c)upd.done_at=(dn&&dn===doneDay(S.edit))?S.edit.done_at:(dn?noon(dn):new Date().toISOString());
     if(cr&&cr!==kstDate(S.edit.created_at))upd.created_at=noon(cr);
+    {const doneD=c?(dn||doneDay(S.edit)||today()):null,early=[base.log_date,doneD].filter(Boolean).sort()[0],crD=cr||kstDate(S.edit.created_at);
+     if(early&&crD>early)upd.created_at=noon(early)}   // 입력일이 예정일·완료일보다 늦으면(과거 기록을 나중에 입력) 둘 중 이른 날짜로
     r=await sb.from('didi_log').update(upd).eq('id',S.edit.id);
     if(!r.error){const l2={...S.edit,...upd};if(c&&!S.edit.is_checked)await chainNext(l2);else if(!c&&S.edit.is_checked)await chainUndo(l2)}
-  }else r=await sb.from('didi_log').insert({...base,meta,id:S.rid,user_id:S.user.id,is_checked:false});
+  }else{const row={...base,meta,id:S.rid,user_id:S.user.id,is_checked:false};if(base.log_date&&base.log_date<today())row.created_at=noon(base.log_date);r=await sb.from('didi_log').insert(row)}
   if(!fail(r.error)){$('dlg').close();loadAll()}
 };
 $('f-disc').onclick=async()=>{
@@ -813,22 +841,6 @@ document.querySelectorAll('.jd').forEach(i=>{
 });
 
 document.querySelectorAll('[data-mp]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-mp]').forEach(x=>x.classList.toggle('on',x===b));['tree','trash','app'].forEach(t=>$('mp-'+t).classList.toggle('hide',t!==b.dataset.mp))});
-
-/* 독서앱 동기화: DB 함수 didi_sync_bkbk 호출 */
-$('bksync').onclick=async()=>{
-  $('bksync').disabled=true;$('bkmsg').textContent='동기화 중…';
-  const {data,error}=await sb.rpc('didi_sync_bkbk');$('bksync').disabled=false;
-  if(error){$('bkmsg').textContent='실패: '+error.message;return}
-  $('bkmsg').textContent=data?.changed?`${data.changed}개를 반영했어요`:'바뀐 게 없어요';await loadAll();
-};
-
-/* 영상앱 동기화: DB 함수 didi_sync_mvmv 호출 */
-$('mvsync').onclick=async()=>{
-  $('mvsync').disabled=true;$('mvmsg').textContent='동기화 중…';
-  const {data,error}=await sb.rpc('didi_sync_mvmv');$('mvsync').disabled=false;
-  if(error){$('mvmsg').textContent='실패: '+error.message;return}
-  $('mvmsg').textContent=data?.changed?`${data.changed}개를 반영했어요`:'바뀐 게 없어요';await loadAll();
-};
 
 /* 앱 설치 안내 + 점검 */
 let dp=null;
