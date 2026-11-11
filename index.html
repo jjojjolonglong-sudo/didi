@@ -421,18 +421,28 @@ $('addf').onsubmit=async e=>{
 /* 캘린더 / 컬렉션 */
 document.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{
   const v=+b.dataset.mv;S.month=v?new Date(S.month.getFullYear(),S.month.getMonth()+v,1):new Date();renderCal();renderDay()});
+/* 캘린더에서만: 같은 날 같은 시리즈 책이 3권 이상이면 '제목 3~14권' 한 칸으로 묶어요(누르면 그 자리에서 펼침). 데이터는 그대로, 보이는 모양만 */
+const CEX=new Set();
+const bkSplit=t=>{const m=/^(.*?)\s*\[([^\]]*)\]\s*$/.exec(t||'');return m?[m[1].trim(),m[2].trim()]:[String(t||'').trim(),'']};
+function volTxt(labels){const n=[],o=[];labels.forEach(x=>{const m=/^(\d+)\s*권?$/.exec(x);m?n.push(+m[1]):x&&o.push(x)});
+  const u=[...new Set(n)].sort((a,b)=>a-b),r=[];for(let i=0;i<u.length;){let j=i;while(j+1<u.length&&u[j+1]===u[j]+1)j++;r.push(i===j?u[i]:u[i]+'~'+u[j]);i=j+1}
+  return [r.length?r.join(', ')+'권':'',...o].filter(Boolean).join(', ')}
+function bookGroups(L,key){const G=new Map();L.forEach(l=>{if(l.category_id!==CAT_BOOK)return;const b=bkSplit(l.text)[0];G.set(b,(G.get(b)||[]).concat(l))});
+  const out=[],seen=new Set();L.forEach(l=>{const b=l.category_id===CAT_BOOK&&bkSplit(l.text)[0],g=b&&G.get(b);
+    if(!g||g.length<3)return out.push(l);if(seen.has(b))return;seen.add(b);out.push({k:key+'|'+b,t:b+' '+volTxt(g.map(x=>bkSplit(x.text)[1])),L:g})});return out}
 function renderCal(){
   const y=S.month.getFullYear(),m=S.month.getMonth(),first=new Date(y,m,1),n=new Date(y,m+1,0).getDate(),t=today();
   document.querySelectorAll('.ml').forEach(e=>e.textContent=y+'년 '+(m+1)+'월');
   let h='일월화수목금토'.split('').map(w=>`<div class="wd">${w}</div>`).join('')+'<div class="cell blank"></div>'.repeat(first.getDay());
   for(let d=1;d<=n;d++){
     const key=y+'-'+z(m+1)+'-'+z(d);
-    const it=ord(S.logs.filter(l=>onDay(l,key,t))).map(l=>`<div class="st ${l.is_checked?'done':''}" data-id="${l.id}" style="background:${col(l)};color:${fg(col(l))}">${esc(l.text)}</div>`).join('');
+    const one=l=>`<div class="st ${l.is_checked?'done':''}" data-id="${l.id}" style="background:${col(l)};color:${fg(col(l))}">${esc(l.text)}</div>`;
+    const it=bookGroups(ord(S.logs.filter(l=>onDay(l,key,t))),key).map(g=>g.L?`<div class="st done cg" data-cg="${esc(g.k)}" title="${esc(g.t)}" style="background:${col(g.L[0])};color:${fg(col(g.L[0]))}">${esc(g.t)}</div>`+(CEX.has(g.k)?g.L.map(one).join(''):''):one(g)).join('');
     h+=`<div class="cell ${key===t?'today':''}" data-d="${key}"><div class="dn">${d}<span class="em">${stampsOn(key).map(x=>`<span data-idx="${x.id}" title="${esc(x.name)}">${esc(x.emoji)}</span>`).join('')}</span></div>${it}</div>`;
   }
   $('cal').innerHTML=h;
 }
-$('cal').onclick=e=>{const m=e.target.closest('[data-idx]');if(m){openIdx(ix(m.dataset.idx),false,m.closest('[data-d]')?.dataset.d);return}const c=e.target.closest('.cell[data-d]');if(!c)return;const st=e.target.closest('.st');openDlg(st?find(st.dataset.id):null,c.dataset.d)};
+$('cal').onclick=e=>{const g=e.target.closest('[data-cg]');if(g){const k=g.dataset.cg;CEX.has(k)?CEX.delete(k):CEX.add(k);renderCal();return}const m=e.target.closest('[data-idx]');if(m){openIdx(ix(m.dataset.idx),false,m.closest('[data-d]')?.dataset.d);return}const c=e.target.closest('.cell[data-d]');if(!c)return;const st=e.target.closest('.st');openDlg(st?find(st.dataset.id):null,c.dataset.d)};
 function tilt(id,max){let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))|0;const a=((h&1023)/1023)*2-1,b=(((h>>>10)&1023)/1023)*2-1;return `rotate(${(a*max).toFixed(2)}deg) translate(${(b*.4).toFixed(2)}px,${(a*.4).toFixed(2)}px)`}
 function mixKey(s){let h=0x811c9dc5;for(const c of String(s))h=Math.imul(h^c.charCodeAt(0),16777619);h^=h>>>15;h=Math.imul(h,0x2c1b3c6d);h^=h>>>12;h=Math.imul(h,0x297a2d39);h^=h>>>15;return h>>>0}   // 글자 하나만 달라도(연속된 날짜) 값이 크게 달라지게 섞음
 const dstAngle=key=>(-(7+mixKey(key)/4294967295*3)).toFixed(2);   // 날짜 도장: 반시계 방향 7~10도, 같은 날짜는 항상 같은 각도
