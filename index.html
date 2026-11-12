@@ -13,9 +13,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="디디">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.26.1/index.js"></script>
 <script src="https://jjojjolonglong-sudo.github.io/mnmn/config.js"></script>
-<script src="https://jjojjolonglong-sudo.github.io/mnmn/media.v2.js"></script>
+<script src="https://jjojjolonglong-sudo.github.io/mnmn/core.v1.js" data-app="didi"></script>
+<script src="https://jjojjolonglong-sudo.github.io/mnmn/media.js"></script>
 <style>
 :root{--ink:#111;--yel:#FFD60A;--pink:#FF4D8D;--blue:#2D6BFF;--gray:#E4E4E4;
 /* 우표 그림자: drop-shadow(가로 세로 번짐 색) 두 겹. 앞=붙어 있는 얇은 그림자, 뒤=살짝 퍼지는 그림자 */
@@ -163,7 +163,7 @@ const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용
   <div style="display:grid;gap:8px">
     <input id="em" type="email" placeholder="이메일" autocomplete="email">
     <input id="pw" type="password" placeholder="비밀번호 (6자 이상)" autocomplete="current-password">
-    <div class="row"><button id="login" style="flex:1">로그인</button><button id="signup" class="plain" style="flex:1">가입</button></div>
+    <div class="row"><button id="login" style="flex:1">로그인</button></div>
   </div>
 </section>
 
@@ -263,7 +263,7 @@ const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용
 <div id="toast" class="hide"></div>
 
 <script>
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,window.Core?{auth:Core.sbAuth}:undefined);
 if(!window.Media)window.Media={init(){},url:()=>'',img:()=>'',newId:()=>crypto.randomUUID(),folder:{supported:false,name:async()=>''},process:async()=>{throw new Error('media.js could not be loaded')},upload:async()=>{throw new Error('media.js could not be loaded')},save:async()=>{throw new Error('media.js could not be loaded')}};
 Media.init({app:'didi',worker:MEDIA_URL,getToken:async()=>(await sb.auth.getSession()).data.session?.access_token});
 /* 독서·영상 분류는 코드에 고정: 삭제 불가, 이 분류의 일기는 독서앱(bkbk)·영화앱(mvmv) 행을 연결해서 표지/포스터를 가져올 수 있어요 */
@@ -287,7 +287,7 @@ document.documentElement.style.setProperty('--stamp',stampPath());
 document.documentElement.style.setProperty('--stampL',stampPath(132,158,10,6,7,9,1.45,1.4));
 document.documentElement.style.setProperty('--stampS',stampPath(95,114,7,4.3,7,9,1.45,1));
 const PALETTE=['#FFD60A','#FF4D8D','#2D6BFF','#19C37D','#FF7A1A','#8B5CF6','#00C2E0'];
-const S={user:null,logs:[],trash:[],cats:[],idxs:[],month:new Date(),edit:null,img:undefined};
+const S={ver:0,full:false,user:null,logs:[],trash:[],cats:[],idxs:[],month:new Date(),edit:null,img:undefined};
 const z=n=>String(n).padStart(2,'0');
 const ymd=d=>d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());
 const today=()=>todayKST();   // 한국 시간 기준 오늘
@@ -316,7 +316,6 @@ async function boot(){
   if(S.user)await loadAll();
 }
 $('login').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});if(!fail(error))boot()};
-$('signup').onclick=async()=>{const {error}=await sb.auth.signUp({email:$('em').value.trim(),password:$('pw').value});if(!fail(error)){toast('가입 완료. 메일 인증을 켰다면 확인하세요');boot()}};
 $('logout').onclick=async()=>{await sb.auth.signOut();boot()};
 const dirLabel=async()=>{try{
   if(!Media.folder.supported){$('dirmsg').textContent='이 브라우저에서는 원본 폴더를 쓸 수 없어요 (PC의 Chrome·Edge에서 가능)';$('dirbtn').classList.add('hide');return}
@@ -328,19 +327,41 @@ $('dirbtn').onclick=async()=>{try{await Media.folder.ensure();dirLabel()}catch(e
 dirLabel();
 
 /* 데이터 */
+/* 처음 열 때는 최근 6개월 기록과 아직 안 끝난 할 일만 먼저 받아서 바로 보여 주고, 나머지(오래된 기록)는 뒤에서 받아 채워요.
+   S.full=전체를 다 받았는지, S.ver=화면에서 기록을 고칠 때마다 +1 (뒤에서 받는 동안 고쳤으면 한 번 더 받음) */
+const logQ=()=>sb.from('didi_log').select('*').is('discarded_at',null).order('created_at').order('seq').limit(3000);
 async function loadAll(){
+  S.ver++;const since=kstDate(Date.now()-183*864e5);
   const [a,b,c,d]=await Promise.all([
     sb.from('didi_category').select('*').eq('is_archived',false).order('sort_order').order('created_at'),
     sb.from('didi_index').select('*').eq('is_archived',false).order('sort_order').order('created_at'),
-    sb.from('didi_log').select('*').is('discarded_at',null).order('created_at').order('seq').limit(3000),
+    S.full?logQ():logQ().or(`is_checked.eq.false,log_date.gte.${since},done_at.gte.${since},created_at.gte.${since}`),
     sb.from('didi_log').select('*').not('discarded_at','is',null).order('discarded_at',{ascending:false}).limit(500)]);
   if(fail(a.error)||fail(b.error)||fail(c.error)||fail(d.error))return;
   S.cats=pinCats(a.data||[]);S.idxs=b.data||[];S.logs=c.data||[];S.trash=d.data||[];
-  renderTodo();renderCal();renderDay();renderMore();
+  renderAll();
+  if(!S.full)loadRest();
 }
+async function loadRest(){
+  if(S.resting)return;S.resting=true;
+  try{for(let k=0;k<3;k++){const v=S.ver,r=await logQ();if(r.error)break;
+    if(v!==S.ver)continue;   // 받는 동안 기록을 고쳤으면 다시
+    S.logs=r.data||[];S.full=true;renderAll();break}
+  }finally{S.resting=false}
+}
+/* 기록 하나만 고쳤을 때: 전체를 다시 받지 않고 그 줄만 바꿔요 */
+const logSort=()=>S.logs.sort((x,y)=>(x.created_at||'').localeCompare(y.created_at||'')||((x.seq||0)-(y.seq||0)));
+function putLog(row){if(!row)return;S.ver++;const i=S.logs.findIndex(l=>l.id===row.id);if(i<0)S.logs.push(row);else S.logs[i]=row;logSort();renderAll()}
+function dropLog(id,toTrash){S.ver++;const l=S.logs.find(x=>x.id===id);S.logs=S.logs.filter(x=>x.id!==id);if(toTrash&&l)S.trash.unshift({...l,discarded_at:toTrash});renderAll()}
+/* 화면 그리기: 지금 보이는 탭만 바로 그리고, 나머지 탭은 그 탭을 열 때 그려요 */
+const TABS=['todo','cal','day','more'],DIRTY=new Set();
+const curTab=()=>TABS.find(t=>!$('tab-'+t).classList.contains('hide'))||'todo';
+function flush(){const t=curTab();if(!DIRTY.has(t))return;DIRTY.delete(t);({todo:renderTodo,cal:renderCal,day:renderDay,more:renderMore})[t]()}
+function renderAll(){TABS.forEach(t=>DIRTY.add(t));flush()}
 document.querySelectorAll('.tabs [data-t]').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.tabs [data-t]').forEach(x=>x.classList.toggle('on',x===b));
   ['todo','cal','day','more'].forEach(t=>$('tab-'+t).classList.toggle('hide',t!==b.dataset.t));
+  flush();if(b.dataset.t==='more')showInst();
 });
 
 /* 이미지: 공용 모듈(media.js). image_url에는 해시 16자만 저장하고, 원본은 폴더가 연결된 PC면 폴더에, 아니면 서버 inbox에 보관 */
@@ -402,7 +423,7 @@ function renderTodo(){
 $('list').addEventListener('change',async e=>{
   const id=e.target.dataset.c;if(!id)return;
   const c=e.target.checked,t=c?new Date().toISOString():null,l=find(id);
-  if(l){l.is_checked=c;l.done_at=t;renderTodo();renderCal();renderDay()}   // 화면 먼저 바꾸고
+  if(l){l.is_checked=c;l.done_at=t;S.ver++;renderAll()}   // 화면 먼저 바꾸고
   const {error}=await sb.from('didi_log').update({is_checked:c,done_at:t}).eq('id',id);   // 저장은 뒤에서
   if(error){fail(error);loadAll();return}
   if(l){if(c)await chainNext(l);else await chainUndo(l)}   // 반복 인덱스: 체크하면 다음 회차 생성, 해제하면 방금 만든 회차 삭제
@@ -413,8 +434,8 @@ $('list').addEventListener('touchstart',e=>{const r=e.target.closest('.todo');if
 ['touchend','touchmove','touchcancel'].forEach(n=>$('list').addEventListener(n,()=>clearTimeout(lp),{passive:true}));
 $('addf').onsubmit=async e=>{
   e.preventDefault();const text=$('nt').value.trim();if(!text)return;
-  const {error}=await sb.from('didi_log').insert({user_id:S.user.id,text,is_checked:false});
-  if(fail(error))return;$('nt').value='';await loadAll();
+  const {data,error}=await sb.from('didi_log').insert({user_id:S.user.id,text,is_checked:false}).select().single();
+  if(fail(error))return;$('nt').value='';putLog(data);
   window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});$('nt').focus();
 };
 
@@ -657,21 +678,21 @@ $('f-ok').onclick=async()=>{
     if(cr&&cr!==kstDate(S.edit.created_at))upd.created_at=noon(cr);
     {const doneD=c?(dn||doneDay(S.edit)||today()):null,early=[base.log_date,doneD].filter(Boolean).sort()[0],crD=cr||kstDate(S.edit.created_at);
      if(early&&crD>early)upd.created_at=noon(early)}   // 입력일이 예정일·완료일보다 늦으면(과거 기록을 나중에 입력) 둘 중 이른 날짜로
-    r=await sb.from('didi_log').update(upd).eq('id',S.edit.id);
+    r=await sb.from('didi_log').update(upd).eq('id',S.edit.id).select().single();
     if(!r.error){const l2={...S.edit,...upd};if(c&&!S.edit.is_checked)await chainNext(l2);else if(!c&&S.edit.is_checked)await chainUndo(l2)}
-  }else{const row={...base,meta,id:S.rid,user_id:S.user.id,is_checked:false};if(base.log_date&&base.log_date<today())row.created_at=noon(base.log_date);r=await sb.from('didi_log').insert(row)}
-  if(!fail(r.error)){$('dlg').close();loadAll()}
+  }else{const row={...base,meta,id:S.rid,user_id:S.user.id,is_checked:false};if(base.log_date&&base.log_date<today())row.created_at=noon(base.log_date);r=await sb.from('didi_log').insert(row).select().single()}
+  if(!fail(r.error)){$('dlg').close();putLog(r.data)}
 };
 $('f-disc').onclick=async()=>{
   const ch=isChain(ix(S.edit.index_id))&&S.edit.is_checked===false;
   if(!confirm('버릴까요? 목록에서는 사라지고 더보기 > 휴지통에 보관돼요.'+(ch?'\n반복 인덱스라서 이번 회차는 건너뛰고 다음 로그가 만들어져요.':'')))return;
   const {error}=await sb.from('didi_log').update({discarded_at:new Date().toISOString()}).eq('id',S.edit.id);
-  if(!fail(error)){if(ch)await chainNext({...S.edit,done_at:new Date().toISOString()});$('dlg').close();loadAll()}
+  if(!fail(error)){const id=S.edit.id;if(ch)await chainNext({...S.edit,done_at:new Date().toISOString()});$('dlg').close();dropLog(id,new Date().toISOString())}
 };
 $('f-del').onclick=async()=>{
   if(!confirm('완전히 삭제할까요? 되돌릴 수 없어요.'))return;
   const {error}=await sb.from('didi_log').delete().eq('id',S.edit.id);
-  if(!fail(error)){$('dlg').close();loadAll()}
+  if(!fail(error)){const id=S.edit.id;$('dlg').close();dropLog(id)}
 };
 
 /* 더보기: 분류/인덱스 관리 + 휴지통 */
@@ -719,8 +740,8 @@ $('tab-more').addEventListener('click',async e=>{
   else if(a==='add'){const d=await newIdx(id);if(d){S.open.add('i:'+d.id);loadAll()}return}
   else if(a==='edit'){openIdx(ix(id),true);return}
   else if(a==='del'){if(locked(id)){toast('독서·영상·집필 분류는 삭제할 수 없어요');return}if(!confirm('분류를 삭제할까요?\n이 분류의 인덱스와 기록은 남고, 분류만 비워져요.'))return;r=await sb.from(tb).delete().eq('id',id)}
-  else if(a==='res')r=await sb.from('didi_log').update({discarded_at:null}).eq('id',id);
-  else if(a==='rm'){if(!confirm('완전히 삭제할까요?'))return;r=await sb.from('didi_log').delete().eq('id',id)}
+  else if(a==='res'){r=await sb.from('didi_log').update({discarded_at:null}).eq('id',id).select().single();if(!fail(r.error)){S.trash=S.trash.filter(x=>x.id!==id);putLog(r.data)}return}
+  else if(a==='rm'){if(!confirm('완전히 삭제할까요?'))return;r=await sb.from('didi_log').delete().eq('id',id);if(!fail(r.error)){S.trash=S.trash.filter(x=>x.id!==id);S.ver++;renderAll()}return}
   if(r&&!fail(r.error))loadAll();
 });
 
@@ -759,7 +780,12 @@ function fillEmo(i){
   $('emo-cnt').textContent=i.id?`기록 ${S.logs.filter(l=>l.index_id===i.id).length}개`:'';
   wkUi();pvUi();skUi();perUi();advUi();$('emo-pkw').classList.add('hide');
 }
-function showEmo(){const ok=!!customElements.get('emoji-picker');$('emo-p').classList.toggle('hide',!ok);$('emo-g').classList.toggle('hide',ok);if(!$('emo').open)$('emo').showModal()}
+/* 이모지 선택기는 무거워서(파일 3개+목록 400KB) 처음 열 때만 불러와요. 불러오는 동안·실패하면 기본 이모지 표를 보여 줘요 */
+let emoLib=null;
+function showEmo(){
+  const paint=()=>{const ok=!!customElements.get('emoji-picker');$('emo-p').classList.toggle('hide',!ok);$('emo-g').classList.toggle('hide',ok)};
+  if(!emoLib)emoLib=import('https://cdn.jsdelivr.net/npm/emoji-picker-element@1.26.1/index.js').then(paint).catch(()=>{emoLib=null});
+  paint();if(!$('emo').open)$('emo').showModal()}
 function openIdx(i,edit,date){
   if(!i)return;S.vn=0;S.emoIdx=i;S.emoDate=date||null;S.emoRes=null;S.emoRid=i.id;S.emoImg=undefined;S.emoW=undefined;
   fillEmo(i);$('emo-vv').innerHTML=viewIdx(i,date);{const w=Math.max(30,(Math.min(innerWidth*.92,420)-38-30)/6),k=w/60;$('emo-vv').style.setProperty('--stampM',stampPath(w,w*1.2,5*k,3*k,7,9,1.45,.7*k))}$('emo-t').textContent=i.name+(edit?' · 수정':'');$('emo-danger').classList.remove('hide');emoMode(!!edit);showEmo();
@@ -781,7 +807,6 @@ $('emo-skl').onclick=e=>{const d=e.target.dataset.sk;if(d)setSkip((S.emoIdx.meta
 
 /* 반복 로그(요일마다/N일마다/매월): 체크하면 다음 회차 로그를 만들어요 */
 const isChain=i=>!!i&&['w','n','m'].includes(i.recur?.t);
-const renderAll=()=>{renderTodo();renderCal();renderDay();renderMore()};
 function nextOn(i,l){
   const r=i.recur,base=[l.log_date,doneDay(l)].filter(Boolean).sort().pop();if(!base)return null;
   const d=new Date(base+'T00:00:00');let nx=null;
@@ -796,10 +821,10 @@ async function chainNext(l){
   if(S.logs.some(x=>x.index_id===i.id&&x.is_checked===false&&x.id!==l.id))return;   // 열려 있는 회차가 있으면 만들지 않아요
   const nx=nextOn(i,l);if(!nx)return;
   const {data,error}=await sb.from('didi_log').insert({user_id:S.user.id,text:l.text,index_id:l.index_id,category_id:l.category_id,log_date:nx,is_checked:false,meta:{from:l.id}}).select().single();
-  if(fail(error))return;S.logs.push(data);renderAll();toast('다음 회차를 만들었어요 ('+nx.slice(5).replace('-','/')+')')}
+  if(fail(error))return;S.ver++;S.logs.push(data);renderAll();toast('다음 회차를 만들었어요 ('+nx.slice(5).replace('-','/')+')')}
 async function chainUndo(l){
   const {error}=await sb.from('didi_log').delete().eq('meta->>from',l.id).eq('is_checked',false);
-  if(!error){S.logs=S.logs.filter(x=>!(x.meta?.from===l.id&&x.is_checked===false));renderAll()}}
+  if(!error){S.ver++;S.logs=S.logs.filter(x=>!(x.meta?.from===l.id&&x.is_checked===false));renderAll()}}
 $('emo-recrop').onclick=()=>recrop(S.emoRid,h=>{S.emoImg=h;pvUi();toast('다시 잘랐어요')});
 $('emo-pick').onclick=async()=>{const f=await pick();if(!f)return;try{const h=await uploadImg(f,S.emoRid);if(!h)return;S.emoImg=h;pvUi();toast('사진을 올렸어요')}catch(e){toast(e.message)}};
 $('emo-rm').onclick=()=>{S.emoImg=null;pvUi()};
@@ -850,7 +875,7 @@ document.querySelectorAll('.jd').forEach(i=>{
     if(i.dataset.t==='m'){S.month=new Date(d.getFullYear(),d.getMonth(),1);renderCal()}else{S.week=sun(d);renderDay()}i.value=''};
 });
 
-document.querySelectorAll('[data-mp]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-mp]').forEach(x=>x.classList.toggle('on',x===b));['tree','trash','app'].forEach(t=>$('mp-'+t).classList.toggle('hide',t!==b.dataset.mp))});
+document.querySelectorAll('[data-mp]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-mp]').forEach(x=>x.classList.toggle('on',x===b));['tree','trash','app'].forEach(t=>$('mp-'+t).classList.toggle('hide',t!==b.dataset.mp));if(b.dataset.mp==='app')showInst()});
 
 /* 앱 설치 안내 + 점검 */
 let dp=null;
@@ -866,6 +891,7 @@ async function pwaCheck(){
   return out;
 }
 async function showInst(){
+  if($('tab-more').classList.contains('hide')||$('mp-app').classList.contains('hide'))return;   // 앱·계정 화면을 볼 때만 점검(파일 4개를 받아요)
   const ua=navigator.userAgent,sa=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
   let h=sa?'<b>설치된 앱으로 실행 중이에요.</b>':dp?'<button id="instbtn">앱 설치</button>':/iphone|ipad|ipod/i.test(ua)?'아이폰: 사파리에서 공유 버튼 → "홈 화면에 추가"':'크롬 메뉴(⋮) → "앱 설치" 또는 "홈 화면에 추가"';
   if(/KAKAOTALK|NAVER|FBAN|FBAV|Instagram|Line\//i.test(ua))h+='<br>⚠️ 앱 안의 브라우저예요. 크롬이나 사파리로 열어 주세요.';
