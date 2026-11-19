@@ -9,6 +9,7 @@
   "display": "standalone",
   "background_color": "#FFF2A8",
   "theme_color": "#FFD60A",
+  "related_applications": [{ "platform": "webapp", "url": "https://jjojjolonglong-sudo.github.io/didi/manifest.webmanifest" }],
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
