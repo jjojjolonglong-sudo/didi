@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>디디 다이어리</title>
 <script src="https://jjojjolonglong-sudo.github.io/mnmn/fonts.v1.js" data-app="didi"></script>
-<link rel="preconnect" href="https://rtvvajhsnwkkrmncyfbs.supabase.co" crossorigin><link rel="preconnect" href="https://media.jjojjolonglong.workers.dev"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://rtvvajhsnwkkrmncyfbs.supabase.co" crossorigin><link rel="preconnect" href="https://media.jjojjolonglong.workers.dev">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#FFD60A">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -13,7 +13,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="디디">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://jjojjolonglong-sudo.github.io/mnmn/config.js"></script>
 <script src="https://jjojjolonglong-sudo.github.io/mnmn/core.v1.js" data-app="didi"></script>
 <script src="https://jjojjolonglong-sudo.github.io/mnmn/media.js"></script>
@@ -75,21 +74,19 @@ button.plain{background:#fff}button.red{background:var(--pink)}
 .col>.sh{filter:drop-shadow(.7px 1.1px 1.2px rgba(90,60,0,.36))}   /* 우표·스티커 같은 그림자 (조금 더 보이게) */
 .col>div{width:var(--cw);height:var(--ch);display:flex;align-items:center;justify-content:center}
 .col .stamp{width:100%;height:100%;clip-path:var(--stampC)}
-.dst{position:relative;display:block;height:var(--ch);aspect-ratio:256/327;color:var(--c);mix-blend-mode:multiply;line-height:1;font-weight:800;-webkit-mask:var(--tex) 0 0/80px;mask:var(--tex) 0 0/80px}   /* 날짜 도장: 사용자가 고른 고무도장 테두리(그림)를 잉크색으로 칠하고, 잉크 얼룩 무늬를 덮어요 */
+.dst{--dh:calc(var(--ch)*.9);position:relative;display:block;height:var(--dh);aspect-ratio:256/327;color:var(--c);mix-blend-mode:multiply;line-height:1;font-weight:800;-webkit-mask:var(--tex) 0 0/80px;mask:var(--tex) 0 0/80px}   /* 날짜 도장: 사용자가 고른 고무도장 테두리(그림)를 잉크색으로 칠하고, 잉크 얼룩 무늬를 덮어요. 칸의 90% 크기 */
 .dst .f{position:absolute;inset:0;background:currentColor;-webkit-mask:var(--frame) center/100% 100% no-repeat;mask:var(--frame) center/100% 100% no-repeat}
 .dst b{position:absolute;left:10%;right:10%;display:flex;align-items:center;justify-content:center;white-space:nowrap;font-weight:800}
-.dst .t{top:7%;height:24.5%;font-size:calc(var(--ch)*.12);letter-spacing:.02em}
-.dst .d{top:32.5%;height:34%;font-size:calc(var(--ch)*.27);letter-spacing:-.03em;font-weight:900}
-.dst .w{top:67.6%;height:26%;font-size:calc(var(--ch)*.14)}
-.dst .bg{display:none;position:absolute;left:8.4%;right:8.4%;top:6.3%;bottom:6.6%;border-radius:12%/9%;background:currentColor}
-.dst.today .bg{display:block}.dst.today b{color:#fff}   /* 오늘: 안을 잉크로 채우고 글자는 종이색(곱하기라 흰색=종이) */
+.dst .t{top:7%;height:24.5%;font-size:calc(var(--dh)*.12);letter-spacing:.02em}
+.dst .d{top:32.5%;height:34%;font-size:calc(var(--dh)*.27);letter-spacing:-.03em;font-weight:900}
+.dst .w{top:67.6%;height:26%;font-size:calc(var(--dh)*.14)}   /* 오늘은 모양은 같고 색만 형광 분홍 */
 .tk{background:#FFFBE6;display:flex}
 .tk .ks{flex:none;width:23%;background:var(--c);color:var(--f);writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cw)*.13);font-weight:700;letter-spacing:1px;overflow:hidden;white-space:nowrap}
 .tk p{margin:0;flex:1;min-width:0;padding:calc(var(--cw)*.1) calc(var(--cw)*.06) calc(var(--cw)*.1) calc(var(--cw)*.07);font-size:calc(var(--cw)*.16);line-height:1.2;word-break:break-all;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5}
 .emo{--o:calc(var(--cw)*.035);position:relative;width:100%;height:100%;clip-path:var(--stampC);background:transparent;cursor:pointer;overflow:hidden}   /* 이모지 스티커: 우표 모양. 톱니 테두리는 흰색, 안쪽 네모에 분류색(반투명) */
-.emo .in{position:absolute;inset:calc(var(--cw)*.11) calc(var(--cw)*.11);box-shadow:0 0 0 calc(var(--cw)*.3) #fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--cw)*.07)}
+.emo .in{position:absolute;inset:calc(var(--cw)*.075);box-shadow:0 0 0 calc(var(--cw)*.3) #fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--cw)*.13)}
 .emo .e{font-size:calc(var(--cw)*.3);line-height:1;text-shadow:calc(var(--o)*1.0) calc(var(--o)*0.0) 0 #fff,calc(var(--o)*0.87) calc(var(--o)*0.5) 0 #fff,calc(var(--o)*0.5) calc(var(--o)*0.87) 0 #fff,calc(var(--o)*0.0) calc(var(--o)*1.0) 0 #fff,calc(var(--o)*-0.5) calc(var(--o)*0.87) 0 #fff,calc(var(--o)*-0.87) calc(var(--o)*0.5) 0 #fff,calc(var(--o)*-1.0) calc(var(--o)*0.0) 0 #fff,calc(var(--o)*-0.87) calc(var(--o)*-0.5) 0 #fff,calc(var(--o)*-0.5) calc(var(--o)*-0.87) 0 #fff,calc(var(--o)*-0.0) calc(var(--o)*-1.0) 0 #fff,calc(var(--o)*0.5) calc(var(--o)*-0.87) 0 #fff,calc(var(--o)*0.87) calc(var(--o)*-0.5) 0 #fff}
-.emo small{font-weight:800;font-size:calc(var(--cw)*.118);letter-spacing:-.05em;line-height:1.15;color:var(--f);text-align:center;white-space:nowrap}   /* 이름: 한 줄 6글자, 2줄까지 */
+.emo small{font-weight:400;font-size:calc(var(--cw)*.135);letter-spacing:-.04em;line-height:1.2;color:var(--f);text-align:center;white-space:nowrap}   /* 이름: 한 줄 6글자, 2줄까지 */
 .cal-head .wl{font-size:13px}
 .em{margin-left:2px;font-size:11px;font-weight:400}
 .em span{cursor:pointer}
@@ -275,7 +272,34 @@ const MEDIA_URL=CFG.MEDIA||'https://media.jjojjolonglong.workers.dev'; // 공용
 <div id="toast" class="hide"></div>
 
 <script>
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,window.Core?{auth:Core.sbAuth}:undefined);
+/* 서버 요청: 무거운 supabase-js 대신 공용 core.v1.js(Core.token·Core.rest)로 같은 모양의 작은 도우미를 만들어 씀 (2026-11-20).
+   sb.from(표).select/insert/update/delete + eq/is/not/or/order/limit + single/maybeSingle → {data,error} */
+const sb=(()=>{
+  const q=v=>v===null?'null':v===true?'true':v===false?'false':encodeURIComponent(v);
+  function B(t){this.t=t;this.p=[];this.o=[];this.m='GET';this.b=undefined;this.ret=false;this.one=0}
+  B.prototype={
+    select(c){this.ret=true;if(this.m==='GET')this.p.push('select='+encodeURIComponent(c||'*'));return this},
+    insert(b){this.m='POST';this.b=b;return this},update(b){this.m='PATCH';this.b=b;return this},delete(){this.m='DELETE';return this},
+    eq(c,v){this.p.push(encodeURIComponent(c)+'=eq.'+q(v));return this},
+    is(c,v){this.p.push(encodeURIComponent(c)+'=is.'+q(v));return this},
+    not(c,op,v){this.p.push(encodeURIComponent(c)+'=not.'+op+'.'+q(v));return this},
+    or(f){this.p.push('or=('+encodeURIComponent(f)+')');return this},
+    order(c,o){this.o.push(c+'.'+(o&&o.ascending===false?'desc':'asc'));return this},
+    limit(n){this.p.push('limit='+n);return this},
+    single(){this.one=1;return this},maybeSingle(){this.one=2;return this},
+    async run(){
+      try{const p=[...this.p];if(this.o.length)p.push('order='+this.o.join(','));
+        const h={};if(this.m!=='GET')h.Prefer=this.ret?'return=representation':'return=minimal';
+        let d=await Core.rest(this.t+(p.length?'?'+p.join('&'):''),{method:this.m,headers:h,body:this.b===undefined?undefined:JSON.stringify(this.b)});
+        if(this.one){d=Array.isArray(d)?d:d?[d]:[];if(this.one===1&&d.length!==1)return {data:null,error:{message:'결과가 '+d.length+'개예요'}};d=d[0]||null}
+        return {data:d,error:null}}catch(e){return {data:null,error:{message:e.message}}}},
+    then(a,b){return this.run().then(a,b)}};
+  const sess=async()=>{let s=Core.ses();if(!s)return null;try{await Core.token();s=Core.ses()}catch(e){if(!Core.ses())return null}return {...s,user:s.user}};
+  return {from:t=>new B(t),auth:{
+    getSession:async()=>({data:{session:await sess()}}),
+    signInWithPassword:async({email,password})=>{try{await Core.login(email,password);return {error:null}}catch(e){return {error:{message:e.message}}}},
+    signOut:async()=>{await Core.logout();return {error:null}}}};
+})();
 if(!window.Media)window.Media={init(){},url:()=>'',img:()=>'',newId:()=>crypto.randomUUID(),folder:{supported:false,name:async()=>''},process:async()=>{throw new Error('media.js could not be loaded')},upload:async()=>{throw new Error('media.js could not be loaded')},save:async()=>{throw new Error('media.js could not be loaded')}};
 Media.init({app:'didi',worker:MEDIA_URL,getToken:async()=>(await sb.auth.getSession()).data.session?.access_token});
 /* 독서·영상 분류는 코드에 고정: 삭제 불가, 이 분류의 일기는 독서앱(bkbk)·영화앱(mvmv) 행을 연결해서 표지/포스터를 가져올 수 있어요 */
@@ -479,7 +503,7 @@ function renderCal(){
 $('cal').onclick=e=>{const g=e.target.closest('[data-cg]');if(g){const k=g.dataset.cg;CEX.has(k)?CEX.delete(k):CEX.add(k);renderCal();return}const m=e.target.closest('[data-idx]');if(m){openIdx(ix(m.dataset.idx),false,m.closest('[data-d]')?.dataset.d);return}const c=e.target.closest('.cell[data-d]');if(!c)return;const st=e.target.closest('.st');openDlg(st?find(st.dataset.id):null,c.dataset.d)};
 function tilt(id,max){let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))|0;const a=((h&1023)/1023)*2-1,b=(((h>>>10)&1023)/1023)*2-1;return `rotate(${(a*max).toFixed(2)}deg) translate(${(b*.4).toFixed(2)}px,${(a*.4).toFixed(2)}px)`}
 function mixKey(s){let h=0x811c9dc5;for(const c of String(s))h=Math.imul(h^c.charCodeAt(0),16777619);h^=h>>>15;h=Math.imul(h,0x2c1b3c6d);h^=h>>>12;h=Math.imul(h,0x297a2d39);h^=h>>>15;return h>>>0}   // 글자 하나만 달라도(연속된 날짜) 값이 크게 달라지게 섞음
-const dstAngle=key=>(-(7+mixKey(key)/4294967295*3)).toFixed(2);   // 날짜 도장: 반시계 방향 7~10도, 같은 날짜는 항상 같은 각도
+const TILT=.9;   // 컬렉션 기울기 범위(±도): 우표·스티커·날짜 도장 모두 같음, 같은 기록·날짜는 항상 같은 각도
 function fitDay(){   // 폰 너비에 맞춰 한 줄 6칸, 우표 톱니 모양도 칸 크기에 맞게 다시 계산
   const g=$('days'),w=Math.min(document.body.clientWidth-24,616),cw=Math.max(30,(w-30)/6),ch=cw*1.2,k=cw/60;
   g.style.setProperty('--cw',cw.toFixed(2)+'px');g.style.setProperty('--ch',ch.toFixed(2)+'px');
@@ -500,16 +524,16 @@ function renderDay(){
     const d=new Date(s0);d.setDate(s0.getDate()+i);const key=ymd(d);
     if(key>t)break;   // 오늘 이후 날짜는 도장을 찍지 않음
     const dc=i===0?'#B8403A':i===6?'#2F4E8F':'#3D3A37';   // 일요일=붉은 인주, 토요일=파란 잉크, 평일=먹색(살짝 밝게)
-    h+=`<div style="transform:rotate(${dstAngle(key)}deg)"><div class="dst ${key===t?'today':''}" style="--c:${dc}"><i class="f"></i><i class="bg"></i><b class="t">${MON[d.getMonth()]} ${d.getFullYear()}</b><b class="d">${d.getDate()}</b><b class="w">${'일월화수목금토'[i]}요일</b></div></div>`;
+    h+=`<div style="transform:${tilt('d'+key,TILT)}"><div class="dst" style="--c:${key===t?'#E0287D':dc}"><i class="f"></i><b class="t">${MON[d.getMonth()]} ${d.getFullYear()}</b><b class="d">${d.getDate()}</b><b class="w">${'일월화수목금토'[i]}요일</b></div></div>`;
     S.logs.filter(l=>l.is_checked&&(doneDay(l)||l.log_date)===key).sort(byDone).forEach(l=>{
-      const c=col(l),tf=`transform:${tilt(l.id,.6)}`;
+      const c=col(l),tf=`transform:${tilt(l.id,TILT)}`;
       if(Media.url(rep(l)))h+=`<div class="sh" style="${tf}"><div class="stamp" data-id="${l.id}" style="background:${c}" title="${esc(l.text)}">${ph(l)}</div></div>`;
       else h+=`<div class="sh" style="${tf}"><div class="stamp tk" data-id="${l.id}" style="--c:${c};--f:${fg(c)}" title="${esc(l.text)}"><span class="ks">${esc(Array.from(cat(l.category_id)?.name||'').slice(0,4).join(''))}</span><p>${esc(l.text||'')}</p></div></div>`;
     });
     stampsOn(key).forEach(x=>{
-      const c=cat(x.category_id)?.color||'#E4E4E4',hx=/^#[0-9a-f]{6}$/i.test(c),bg=hx?c+'80':c,nm=Array.from(x.name||'').slice(0,12),ln=[nm.slice(0,6),nm.slice(6)].filter(a=>a.length).map(a=>esc(a.join('')));
-      const mix=hx?'#'+[1,3,5].map(k=>Math.round((parseInt(c.slice(k,k+2),16)+255)/2).toString(16).padStart(2,'0')).join(''):c;   // 반투명 색이 바탕에 얹혔을 때의 색으로 글자색(검정/흰색)을 정함
-      h+=`<div class="sh" style="transform:${tilt(x.id+key,.6)}"><div class="emo" data-idx="${x.id}" data-d="${key}" style="--f:${fg(mix)}" title="${esc(x.name)}"><div class="in" style="background:${bg}"><span class="e">${esc(x.emoji)}</span><small>${ln.join('<br>')}</small></div></div></div>`;
+      const c=cat(x.category_id)?.color||'#E4E4E4',hx=/^#[0-9a-f]{6}$/i.test(c),bg=hx?c+'B0':c,nm=Array.from(x.name||'').slice(0,12),ln=[nm.slice(0,6),nm.slice(6)].filter(a=>a.length).map(a=>esc(a.join('')));
+      const mix=hx?'#'+[1,3,5].map(k=>Math.round(parseInt(c.slice(k,k+2),16)*.69+255*.31).toString(16).padStart(2,'0')).join(''):c;   // 반투명 색이 바탕에 얹혔을 때의 색으로 글자색(검정/흰색)을 정함
+      h+=`<div class="sh" style="transform:${tilt(x.id+key,TILT)}"><div class="emo" data-idx="${x.id}" data-d="${key}" style="--f:${fg(mix)}" title="${esc(x.name)}"><div class="in" style="background:${bg}"><span class="e">${esc(x.emoji)}</span><small>${ln.join('<br>')}</small></div></div></div>`;
     });
   }
   $('days').innerHTML=h+'</div>';
