@@ -545,10 +545,11 @@ function fillCat(v){$('f-cat').innerHTML='<option value="">분류 없음</option
 function fillIdx(v){const c=$('f-cat').value;$('f-idx').innerHTML='<option value="">인덱스 없음</option>'+S.idxs.filter(i=>(i.category_id||'')===c&&(!i.finished_on||i.id===v)).map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('')+'<option value="__new">+ 새 인덱스</option>';$('f-idx').value=v||'';idxQ()}
 /* 인덱스: 타이핑해서 고르기 — 걸러진 목록(↑↓), 엔터 → 고른 것 / 같은 이름 / 없으면 그 이름으로 새 인덱스를 만들어 바로 넣기 */
 const idxQ=()=>{const x=ix($('f-idx').value);$('f-idxq').value=x?x.name:''};
-function idxList(){
-  const q=$('f-idxq').value.trim().toLowerCase(),c=$('f-cat').value,cur=$('f-idx').value;
-  const L=S.idxs.filter(i=>(!i.finished_on||i.id===cur)&&(!q||i.name.toLowerCase().includes(q))).sort((a,b)=>((b.category_id||'')===c)-((a.category_id||'')===c)||(q?(b.name.toLowerCase()===q)-(a.name.toLowerCase()===q):0)).slice(0,40);
-  const ex=q&&S.idxs.some(i=>i.name.toLowerCase()===q);
+function idxList(all){
+  const q=all?'':$('f-idxq').value.trim().toLowerCase(),c=$('f-cat').value,cur=$('f-idx').value;
+  const inC=i=>(i.category_id||'')===c;   // 고른 분류(폴더)의 인덱스만
+  const L=S.idxs.filter(i=>inC(i)&&(!i.finished_on||i.id===cur)&&(!q||i.name.toLowerCase().includes(q))).sort((a,b)=>q?(b.name.toLowerCase()===q)-(a.name.toLowerCase()===q):0).slice(0,40);
+  const ex=q&&S.idxs.some(i=>inC(i)&&i.name.toLowerCase()===q);
   const H=L.map(i=>`<div data-pid="${i.id}">${esc(i.name)}${(i.category_id||'')!==c?`<small>${esc(cat(i.category_id)?.name||'분류 없음')}</small>`:''}</div>`);
   if(q&&!ex)H.push(`<div data-pid="__new" class="nw">+ 새 인덱스 “${esc($('f-idxq').value.trim())}”</div>`);
   if(!q&&cur)H.unshift('<div data-pid="">인덱스 없음</div>');
@@ -562,10 +563,11 @@ async function idxPick(pid){
   const x=ix(pid);if(x&&(x.category_id||'')!==$('f-cat').value)fillCat(x.category_id);
   fillIdx(pid||'');$('f-idx').dispatchEvent(new Event('change'));
 }
-$('f-idxq').addEventListener('focus',idxList);$('f-idxq').addEventListener('input',idxList);
+$('f-idxq').addEventListener('focus',()=>{$('f-idxq').select();idxList(true)});   // 처음 누르면 그 분류의 인덱스 전체
+$('f-idxq').addEventListener('input',()=>idxList());
 $('f-idxq').addEventListener('keydown',e=>{const l=$('f-idxl'),it=[...l.children],k=it.findIndex(d=>d.classList.contains('on'));
   if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(l.hidden)idxList();const n=it.length;if(!n)return;const m=k<0?(e.key==='ArrowDown'?0:n-1):(k+(e.key==='ArrowDown'?1:n-1))%n;it.forEach((d,i)=>d.classList.toggle('on',i===m));it[m].scrollIntoView({block:'nearest'})}
-  else if(e.key==='Enter'){e.preventDefault();const q=$('f-idxq').value.trim();if(!q){idxPick('');return}const on=it[k];const same=S.idxs.find(i=>i.name.toLowerCase()===q.toLowerCase());idxPick(on?on.dataset.pid:same?same.id:'__new')}
+  else if(e.key==='Enter'){e.preventDefault();const q=$('f-idxq').value.trim();if(!q){idxPick('');return}const on=it[k];const c=$('f-cat').value,same=S.idxs.find(i=>(i.category_id||'')===c&&i.name.toLowerCase()===q.toLowerCase());idxPick(on?on.dataset.pid:same?same.id:'__new')}
   else if(e.key==='Escape'&&!l.hidden){e.preventDefault();e.stopPropagation();l.hidden=true;idxQ()}});
 $('f-idxl').addEventListener('mousedown',e=>{const d=e.target.closest('[data-pid]');if(!d)return;e.preventDefault();idxPick(d.dataset.pid)});
 $('f-idxq').addEventListener('blur',()=>setTimeout(()=>{$('f-idxl').hidden=true;if(!$('f-idxq').value.trim()&&$('f-idx').value){fillIdx('');$('f-idx').dispatchEvent(new Event('change'))}else idxQ()},120));
