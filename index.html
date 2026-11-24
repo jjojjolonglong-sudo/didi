@@ -51,10 +51,10 @@ button.plain{background:#fff}button.red{background:var(--pink)}
 .tabs button.on{background:var(--blue);color:#fff}
 .todo{display:flex;gap:10px;align-items:center;padding:2px 0;line-height:1.2;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .todo input{width:18px;height:18px;flex:none;accent-color:var(--blue)}
-.todo .pin{flex:none;width:22px;height:22px;margin:0 -4px 0 -5px;padding:0;border:0;background:none;cursor:pointer;position:relative}   /* 수정 핀: 분류색 동그라미 */
-.todo .pin::after{content:'';position:absolute;left:5px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--pc);box-shadow:inset 0 0 0 1px rgba(0,0,0,.18),inset -2px -2px 0 rgba(0,0,0,.12)}
+.todo .pin{flex:none;width:22px;height:22px;margin:0 -4px 0 -5px;padding:0;border:0;background:none;cursor:pointer;position:relative;color:var(--ink)}   /* 수정 핀: 글씨와 같은 색 동그라미 */
+.todo .pin::after{content:'';position:absolute;left:5px;top:5px;width:12px;height:12px;border-radius:50%;background:currentColor}
 .todo .pin:hover::after{transform:scale(1.15)}
-.todo.done .pin::after{opacity:.45}
+.todo.soon .pin{color:#E5252A}.todo.done .pin{color:#888}
 .todo .t{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .todo.done .t{text-decoration:line-through;color:#888}
 .dt{font-size:13px;flex:0 1 auto;min-width:0;max-width:40%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#555}.todo.soon .t,.todo.soon .dt{color:#E5252A}
@@ -459,7 +459,7 @@ function renderTodo(){
   const rows=S.logs.filter(l=>l.category_id!==CAT_BOOK&&(l.is_checked===false||(l.is_checked===true&&(doneDay(l)||l.log_date||t)>=t)));
   $('list').innerHTML=rows.length?rows.map(l=>{
     const lim=kstDate(Date.now()+3*864e5),soon=!l.is_checked&&l.log_date&&l.log_date<=lim;
-    return `<div class="todo ${l.is_checked?'done':soon?'soon':''}" data-id="${l.id}"><button class="pin" data-e="${l.id}" style="--pc:${cat(l.category_id)?.color||'#C9C9C9'}" aria-label="수정" title="수정"></button><span class="t">${esc(l.text)}</span><span class="dt">${dd(l.log_date)}</span><input type="checkbox" data-c="${l.id}" ${l.is_checked?'checked':''} aria-label="완료"></div>`}).join(''):'<div class="empty">할 일이 없어요.</div>';
+    return `<div class="todo ${l.is_checked?'done':soon?'soon':''}" data-id="${l.id}"><button class="pin" data-e="${l.id}" aria-label="수정" title="수정"></button><span class="t">${esc(l.text)}</span><span class="dt">${dd(l.log_date)}</span><input type="checkbox" data-c="${l.id}" ${l.is_checked?'checked':''} aria-label="완료"></div>`}).join(''):'<div class="empty">할 일이 없어요.</div>';
 }
 $('list').addEventListener('change',async e=>{
   const id=e.target.dataset.c;if(!id)return;
